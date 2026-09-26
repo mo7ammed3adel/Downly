@@ -163,11 +163,15 @@ const PROGRESS_PREFIX = 'SGPROG '
 /** Escape user text for use inside a yt-dlp output template */
 const tpl = (s: string) => s.replace(/%/g, '%%')
 
+/** Which subtitles to embed: written and automatic, only written ones, or none (fallbacks) */
+export type SubtitleSource = 'all' | 'written' | 'none'
+
 export function buildDownloadArgs(
   item: DownloadItem,
   env: YtdlpEnv,
   rateLimitKBps: number,
-  pathFile: string
+  pathFile: string,
+  subs: SubtitleSource = 'all'
 ): string[] {
   const m = item.media!
   const s = env.settings.media
@@ -217,7 +221,10 @@ export function buildDownloadArgs(
       args.push('-S', sort.join(','))
     }
     args.push('--merge-output-format', m.container, '--remux-video', m.container)
-    if (m.subtitles) args.push('--write-subs', '--sub-langs', m.subtitleLangs || 'en.*,ar.*', '--embed-subs')
+    // Auto captions fill in where nobody wrote subtitles (most YouTube videos, incl. auto-translated Arabic)
+    if (m.subtitles && subs !== 'none') {
+      args.push('--write-subs', ...(subs === 'all' ? ['--write-auto-subs'] : []), '--sub-langs', m.subtitleLangs || 'ar.*,en.*', '--embed-subs')
+    }
   }
 
   const canEmbedThumb = m.mode === 'video' ? m.container !== 'webm' : ['mp3', 'm4a', 'flac', 'opus', 'best'].includes(m.audioFormat)
@@ -258,7 +265,6 @@ export class YtdlpDownload {
     const item = this.item
     const pathFile = join(tmpdir(), `sg-${item.id}.path`)
     await rm(pathFile, { force: true })
-    const args = buildDownloadArgs(item, this.env, this.opts.rateLimitKBps, pathFile)
     let base = 0
     let lastTotal = 0
     let lastDone = 0
@@ -268,7 +274,9 @@ export class YtdlpDownload {
     const sideMode = isSideFileMode(item.media!.mode)
     const before = sideMode ? new Set(await readdir(item.directory).catch(() => [] as string[])) : null
 
-    await new Promise<void>((resolve, reject) => {
+    const run = (args: string[]) => new Promise<void>((resolve, reject) => {
+      base = lastTotal = lastDone = 0
+      stderrTail = ''
       const proc = spawn(this.env.ytdlpPath, args, { env: childEnv(), windowsHide: true })
       this.proc = proc
       let buf = ''
@@ -316,6 +324,20 @@ export class YtdlpDownload {
         reject(new Error(cleanError(stderrTail) || `yt-dlp exited with code ${code}`))
       })
     })
+
+    // yt-dlp fails the whole video when a subtitle can't be fetched, and YouTube often refuses its
+    // auto-translated captions (HTTP 429). The video matters more: drop the automatic subtitles,
+    // then all subtitles, rather than the download.
+    const attempts: SubtitleSource[] = item.media?.subtitles ? ['all', 'written', 'none'] : ['all']
+    for (const [i, subs] of attempts.entries()) {
+      try {
+        await run(buildDownloadArgs(item, this.env, this.opts.rateLimitKBps, pathFile, subs))
+        break
+      } catch (err) {
+        const last = i === attempts.length - 1
+        if (last || this.stopped || !/subtitle/i.test(String(err))) throw err
+      }
+    }
 
     const printed = await readFile(pathFile, 'utf8').catch(() => '')
     await rm(pathFile, { force: true })

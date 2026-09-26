@@ -211,8 +211,8 @@ function handleExternal(req: ExternalAddRequest): void {
     container: m.defaultContainer,
     audioFormat: m.defaultAudioFormat,
     audioBitrate: 0,
-    subtitles: false,
-    subtitleLangs: 'en.*,ar.*',
+    subtitles: mode === 'video' && m.subtitles,
+    subtitleLangs: m.subtitleLangs,
     embedThumbnail: m.embedThumbnail
   })
   // Songs read off a music site: the click already chose them, download the audio right away

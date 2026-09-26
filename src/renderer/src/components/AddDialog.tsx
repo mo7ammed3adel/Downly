@@ -15,6 +15,7 @@ import type {
 } from '@shared/types'
 import { categorize, expandBatchPattern, mediaCategory, formatBytes, formatDuration, isHttpUrl, isKnownMediaSite, parseSpotifyUrl } from '@shared/util'
 import { useStore } from '../store'
+import { SubtitleLangs } from './SubtitleLangs'
 import { Field, Modal, Segmented, Toggle, closeDialog } from './ui'
 
 const QUALITIES = [4320, 2160, 1440, 1080, 720, 480, 360, 240, 144]
@@ -58,8 +59,8 @@ export function AddDialog({ initial, urls }: { initial?: ExternalAddRequest; url
     container: settings.media.defaultContainer,
     audioFormat: settings.media.defaultAudioFormat,
     audioBitrate: 0,
-    subtitles: false,
-    subtitleLangs: 'en.*,ar.*',
+    subtitles: settings.media.subtitles,
+    subtitleLangs: settings.media.subtitleLangs,
     embedThumbnail: settings.media.embedThumbnail
   }))
   const patchMedia = (p: Partial<MediaOptions>) => setMedia((m) => ({ ...m, ...p }))
@@ -482,7 +483,7 @@ function MediaOptionsForm(props: {
         </div>
       ) : mode === 'subtitles' ? (
         <Field label={t('add.subtitleLangs')} hint={t('add.subtitlesHint')}>
-          <input className="input" dir="ltr" value={media.subtitleLangs} onChange={(e) => onChange({ subtitleLangs: e.target.value })} />
+          <SubtitleLangs value={media.subtitleLangs} onChange={(v) => onChange({ subtitleLangs: v })} />
         </Field>
       ) : mode === 'video' ? (
         <div className="grid-3">
@@ -506,12 +507,7 @@ function MediaOptionsForm(props: {
             </select>
           </Field>
           <Field label={t('add.subtitleLangs')}>
-            <input
-              className="input"
-              value={media.subtitleLangs}
-              disabled={!media.subtitles}
-              onChange={(e) => onChange({ subtitleLangs: e.target.value })}
-            />
+            <SubtitleLangs value={media.subtitleLangs} disabled={!media.subtitles} onChange={(v) => onChange({ subtitleLangs: v })} />
           </Field>
         </div>
       ) : (

@@ -158,6 +158,10 @@ export interface Settings {
     concurrentFragments: number
     embedMetadata: boolean
     embedThumbnail: boolean
+    /** Add subtitles to downloaded videos by default */
+    subtitles: boolean
+    /** yt-dlp --sub-langs value, e.g. 'ar.*,en.*' */
+    subtitleLangs: string
   }
   spotify: { clientId: string; clientSecret: string }
   scheduler: SchedulerSettings

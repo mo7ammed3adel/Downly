@@ -8,6 +8,7 @@ import { Field, Modal, Toggle, closeDialog } from './ui'
 import logo from '../assets/logo.png'
 import { SocialLinks } from './SocialLinks'
 import { useUpdateState } from './UpdateBanner'
+import { SubtitleLangs } from './SubtitleLangs'
 
 type Tab = 'general' | 'downloads' | 'connection' | 'browser' | 'media' | 'about'
 
@@ -318,6 +319,10 @@ export function SettingsDialog({ initialTab }: { initialTab?: string }) {
             </div>
             <Toggle label={t('settings.embedMetadata')} checked={s.media.embedMetadata} onChange={(v) => sub('media', { embedMetadata: v })} />
             <Toggle label={t('settings.embedThumbnail')} checked={s.media.embedThumbnail} onChange={(v) => sub('media', { embedThumbnail: v })} />
+            <Toggle label={t('settings.subtitles')} checked={s.media.subtitles} onChange={(v) => sub('media', { subtitles: v })} />
+            <Field label={t('add.subtitleLangs')}>
+              <SubtitleLangs value={s.media.subtitleLangs} disabled={!s.media.subtitles} onChange={(v) => sub('media', { subtitleLangs: v })} />
+            </Field>
             <div className="section" style={{ marginTop: 14 }}>
               <div className="field-label" style={{ marginBottom: 8 }}>
                 {t('settings.spotify')}

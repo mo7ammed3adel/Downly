@@ -80,7 +80,9 @@ export function createDefaultSettings(downloadDir: string, language: string): Se
       cookiesFromBrowser: '',
       concurrentFragments: 4,
       embedMetadata: true,
-      embedThumbnail: true
+      embedThumbnail: true,
+      subtitles: false,
+      subtitleLangs: language === 'ar' ? 'ar.*,en.*' : 'en.*,ar.*'
     },
     spotify: { clientId: '', clientSecret: '' },
     scheduler: { enabled: false, startTime: '02:00', stopTime: '', days: [0, 1, 2, 3, 4, 5, 6], afterDone: 'none' },
