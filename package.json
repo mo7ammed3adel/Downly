@@ -92,6 +92,8 @@
         "dmg"
       ],
       "category": "public.app-category.utilities",
+      "identity": "-",
+      "hardenedRuntime": false,
       "icon": "resources/icon.png",
       "artifactName": "Downly-mac-${arch}.${ext}"
     },

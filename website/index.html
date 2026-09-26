@@ -236,7 +236,8 @@
           <details><summary data-i18n="q2">Is it safe?</summary><p data-i18n="a2">Downly doesn’t collect your data or show ads. The browser extension only talks to the app on your own computer.</p></details>
           <details><summary data-i18n="q3">How does Spotify work?</summary><p data-i18n="a3">Downly reads the song details from Spotify, finds the same song on YouTube and saves it with Spotify’s title, artist and cover.</p></details>
           <details><summary data-i18n="q6">Does it work on Windows 7?</summary><p data-i18n="a6">Yes. There’s a special build for Windows 7, 8 and 8.1 (32-bit and 64-bit) — the download button picks it automatically.</p></details>
-          <details><summary data-i18n="q4">Windows says the app is unrecognized</summary><p data-i18n="a4">New apps show this until they build reputation. Click “More info” → “Run anyway”.</p></details>
+          <details><summary data-i18n="q4">Windows says the app is unrecognized</summary><p><span data-i18n="a4">New apps show this until they build reputation. Click “More info” → “Run anyway”.</span> <button class="btn dark small" data-guide="win" data-i18n="showMe">Show me with pictures</button></p></details>
+          <details><summary data-i18n="q7">Mac says Downly can't be opened</summary><p><span data-i18n="a7">macOS does this for apps from outside the App Store. Open System Settings → Privacy &amp; Security and click “Open Anyway”.</span> <button class="btn dark small" data-guide="mac" data-i18n="showMe">Show me with pictures</button></p></details>
           <details><summary data-i18n="q5">Can I download anything?</summary><p data-i18n="a5">Please only download content you have the right to download, and respect each site’s terms and copyright.</p></details>
         </div>
       </section>
@@ -267,6 +268,119 @@
         </div>
       </div>
     </footer>
+
+    <!-- ============================== install guide (opens with every download) -->
+    <dialog id="guide" class="guide" aria-labelledby="guideTitle">
+      <div class="guide-body">
+      <div class="guide-head">
+        <div>
+          <p class="eyebrow" data-i18n="guide.eyebrow">Your download has started</p>
+          <h2 id="guideTitle" data-i18n="guide.title">Install Downly in a few clicks</h2>
+        </div>
+        <button class="btn ghost small" id="guideClose" aria-label="Close">✕</button>
+      </div>
+      <div class="guide-tabs" role="tablist">
+        <button role="tab" data-tab="win">Windows</button>
+        <button role="tab" data-tab="mac">macOS</button>
+        <button role="tab" data-tab="linux">Linux</button>
+      </div>
+
+      <ol class="guide-steps" data-panel="win">
+        <li>
+          <p><b data-i18n="gw1">Open the file you downloaded</b><span data-i18n="gw1d">Click it in your browser's downloads, or find it in the Downloads folder.</span></p>
+          <div class="art" dir="ltr" aria-hidden="true">
+            <div class="art-downloads">
+              <span class="art-caption">Downloads</span>
+              <span class="art-target art-file"><span class="art-exe"></span><span><b>Downly-Setup.exe</b><small>115 MB · Done</small></span></span>
+            </div>
+          </div>
+        </li>
+        <li>
+          <p><b data-i18n="gw2">Blue screen? Click “More info”</b><span data-i18n="gw2d">Windows shows this for every new app. Downly is safe.</span></p>
+          <div class="art" dir="ltr" aria-hidden="true">
+            <div class="art-smartscreen">
+              <strong>Windows protected your PC</strong>
+              <span>Microsoft Defender SmartScreen prevented an unrecognized app from starting. Running this app might put your PC at risk.</span>
+              <span class="art-target art-link">More info</span>
+              <span class="art-ss-buttons"><span class="art-ss-btn">Don't run</span></span>
+            </div>
+          </div>
+        </li>
+        <li>
+          <p><b data-i18n="gw3">Then click “Run anyway”</b><span data-i18n="gw3d">On Windows 7 you'll see “The publisher could not be verified” instead: click Run.</span></p>
+          <div class="art" dir="ltr" aria-hidden="true">
+            <div class="art-smartscreen">
+              <strong>Windows protected your PC</strong>
+              <span>App: Downly-Setup.exe<br />Publisher: Unknown publisher</span>
+              <span class="art-ss-buttons"><span class="art-target art-ss-btn">Run anyway</span><span class="art-ss-btn">Don't run</span></span>
+            </div>
+          </div>
+        </li>
+        <li>
+          <p><b data-i18n="gw4">Click “Install”, and you're done</b><span data-i18n="gw4d">Downly opens by itself when the setup finishes.</span></p>
+          <div class="art" dir="ltr" aria-hidden="true">
+            <div class="art-window">
+              <span class="art-titlebar"><img src="/assets/icon.png" alt="" width="14" height="14" /> Downly Setup</span>
+              <span class="art-lines"><i></i><i class="short"></i></span>
+              <span class="art-buttons"><span class="art-btn">&lt; Back</span><span class="art-target art-btn primary">Install</span><span class="art-btn">Cancel</span></span>
+            </div>
+          </div>
+        </li>
+      </ol>
+
+      <ol class="guide-steps" data-panel="mac" hidden>
+        <li>
+          <p><b data-i18n="gm1">Drag Downly into Applications</b><span data-i18n="gm1d">Open the downloaded .dmg file, then drag the Downly icon onto the Applications folder.</span></p>
+          <div class="art" dir="ltr" aria-hidden="true">
+            <div class="art-dmg">
+              <span class="art-target art-app"><img src="/assets/icon.png" alt="" width="48" height="48" />Downly</span>
+              <span class="art-arrow">→</span>
+              <span class="art-app"><span class="art-folder"></span>Applications</span>
+            </div>
+          </div>
+        </li>
+        <li>
+          <p><b data-i18n="gm2">Open Downly. If macOS stops it, click “Done”</b><span data-i18n="gm2d">macOS shows this for apps from outside the App Store. Downly is safe.</span></p>
+          <div class="art" dir="ltr" aria-hidden="true">
+            <div class="art-alert">
+              <img src="/assets/icon.png" alt="" width="40" height="40" />
+              <strong>“Downly” Not Opened</strong>
+              <span>Apple could not verify “Downly” is free of malware that may harm your Mac or compromise your privacy.</span>
+              <span class="art-alert-buttons"><span class="art-btn">Move to Trash</span><span class="art-target art-btn primary">Done</span></span>
+            </div>
+          </div>
+        </li>
+        <li>
+          <p><b data-i18n="gm3">Open System Settings → Privacy &amp; Security, then click “Open Anyway”</b><span data-i18n="gm3d">Scroll down to the Security part. The button is next to the message about Downly.</span></p>
+          <div class="art" dir="ltr" aria-hidden="true">
+            <div class="art-settings">
+              <span class="art-side"><i>Wi-Fi</i><i>General</i><i class="on">Privacy &amp; Security</i><i>Desktop &amp; Dock</i></span>
+              <span class="art-pane">
+                <b>Security</b>
+                <span class="art-row">“Downly” was blocked to protect your Mac.<span class="art-target art-btn">Open Anyway</span></span>
+              </span>
+            </div>
+          </div>
+        </li>
+        <li>
+          <p><b data-i18n="gm4">Click “Open Anyway” once more and enter your Mac password</b><span data-i18n="gm4d">You only need to do this the first time.</span></p>
+          <div class="art" dir="ltr" aria-hidden="true">
+            <div class="art-alert">
+              <img src="/assets/icon.png" alt="" width="40" height="40" />
+              <strong>Open “Downly”?</strong>
+              <span class="art-alert-buttons"><span class="art-target art-btn primary">Open Anyway</span><span class="art-btn">Cancel</span></span>
+            </div>
+          </div>
+        </li>
+        <li class="guide-note"><p><span data-i18n="gmOld">On macOS 14 or older: right-click Downly in Applications, choose Open, then Open again.</span></p></li>
+      </ol>
+
+      <ol class="guide-steps" data-panel="linux" hidden>
+        <li><p><b data-i18n="gl1">.deb (Ubuntu, Debian, Mint)</b><span data-i18n="gl1d">Double-click the file to open it in Software Install, or run:</span><code dir="ltr">sudo apt install ./Downly-linux.deb</code></p></li>
+        <li><p><b data-i18n="gl2">AppImage (any distro)</b><span data-i18n="gl2d">Right-click the file → Properties → allow running as a program, then double-click it. Or run:</span><code dir="ltr">chmod +x Downly-linux.AppImage &amp;&amp; ./Downly-linux.AppImage</code></p></li>
+      </ol>
+      </div>
+    </dialog>
 
     <div id="toast" class="toast" role="status"></div>
     <script src="/app.js"></script>

@@ -104,7 +104,33 @@ const AR = {
   'dl.linux': 'تحميل للينكس',
   'dl.win7': 'تحميل لويندوز 7 / 8',
   'dl.win7x86': 'تحميل لويندوز 7 / 8 (32 بت)',
-  soon: 'قريبًا على المتجر'
+  soon: 'قريبًا على المتجر',
+  'guide.eyebrow': 'التحميل بدأ',
+  'guide.title': 'ثبّت Downly في كام ضغطة',
+  gw1: 'افتح الملف اللي نزل',
+  gw1d: 'دوس عليه من تحميلات المتصفح، أو هتلاقيه في فولدر Downloads على جهازك.',
+  gw2: 'ظهرتلك شاشة زرقا؟ دوس «More info»',
+  gw2d: 'Downly آمن، وويندوز بيطلّع الشاشة دي لأي برنامج جديد.',
+  gw3: 'وبعدين دوس «Run anyway»',
+  gw3d: 'في ويندوز 7 هتظهرلك رسالة تانية بدالها، دوس فيها على زرار Run علطول.',
+  gw4: 'دوس «Install» وخلاص كده',
+  gw4d: 'Downly هيفتح لوحده أول ما التسطيب يخلص.',
+  gm1: 'اسحب Downly جوه Applications',
+  gm1d: 'افتح الملف اللي نزل، واسحب أيقونة Downly على فولدر Applications اللي جنبها.',
+  gm2: 'افتح Downly. لو الماك وقّفه، دوس «Done»',
+  gm2d: 'Downly آمن، والماك بيعمل كده مع أي برنامج مش من متجر أبل.',
+  gm3: 'افتح System Settings ← Privacy & Security، ودوس «Open Anyway»',
+  gm3d: 'انزل لتحت لحد جزء Security، هتلاقي الزرار جنب رسالة Downly.',
+  gm4: 'دوس «Open Anyway» تاني واكتب باسورد الماك',
+  gm4d: 'ده بيحصل أول مرة بس.',
+  gmOld: 'لو الماك نسخة 14 أو أقدم: دوس كليك يمين على Downly في Applications، واختار Open، وبعدين Open تاني.',
+  gl1: '‎.deb‎ (أوبونتو، ديبيان، مينت)',
+  gl1d: 'دوس دبل كليك على الملف علشان يفتح في Software Install، أو اكتب:',
+  gl2: 'AppImage (أي توزيعة)',
+  gl2d: 'كليك يمين على الملف ← Properties ← اسمح بتشغيله كبرنامج، وبعدين دبل كليك. أو اكتب:',
+  showMe: 'وريني بالصور',
+  q7: 'الماك بيقول إن Downly مينفعش يتفتح',
+  a7: 'الماك بيعمل كده مع البرامج اللي مش من متجر أبل. افتح System Settings ← Privacy & Security ودوس «Open Anyway» علشان يفتح.'
 }
 const EN_EXTRA = {
   copied: 'Copied ✓',
@@ -171,6 +197,29 @@ function applyOs() {
   for (const a of document.querySelectorAll('.os-link')) a.href = FILES[a.dataset.os]
   for (const a of document.querySelectorAll('.download-link')) a.href = FILES[os]
 }
+
+// ---------------------------------------------------------------- install guide
+// Opens next to every download (the download itself still starts) and from the FAQ
+const guide = document.getElementById('guide')
+const GUIDE_TAB = { win: 'win', win7: 'win', win7x86: 'win', mac: 'mac', macIntel: 'mac', linux: 'linux', linuxDeb: 'linux' }
+
+function showGuideTab(tab) {
+  for (const b of guide.querySelectorAll('[data-tab]')) b.setAttribute('aria-selected', b.dataset.tab === tab)
+  for (const panel of guide.querySelectorAll('[data-panel]')) panel.hidden = panel.dataset.panel !== tab
+}
+function openGuide(tab) {
+  showGuideTab(tab)
+  if (!guide.open) guide.showModal()
+}
+
+for (const a of document.querySelectorAll('#mainDownload, .os-link, .download-link')) {
+  a.addEventListener('click', () => openGuide(GUIDE_TAB[a.dataset.os ?? os]))
+}
+for (const b of document.querySelectorAll('[data-guide]')) b.addEventListener('click', () => openGuide(b.dataset.guide))
+for (const b of guide.querySelectorAll('[data-tab]')) b.addEventListener('click', () => showGuideTab(b.dataset.tab))
+document.getElementById('guideClose').addEventListener('click', () => guide.close())
+// Click on the backdrop closes it
+guide.addEventListener('click', (e) => e.target === guide && guide.close())
 
 document.getElementById('lang').addEventListener('click', () => {
   lang = lang === 'ar' ? 'en' : 'ar'
