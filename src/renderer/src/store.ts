@@ -16,6 +16,7 @@ export type Dialog =
   | { type: 'extension' }
   | { type: 'idm' }
   | { type: 'report' }
+  | { type: 'subscriptions' }
   | { type: 'delete'; ids: string[] }
   | { type: 'refresh'; id: string }
 

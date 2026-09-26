@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { CalendarClock, Heart, Moon, Pause, Play, Plus, Search, Settings, Sun, Trash2, ListChecks, CircleStop } from 'lucide-react'
+import { CalendarClock, Heart, Moon, Pause, Play, Plus, Rss, Search, Settings, Sun, Trash2, ListChecks, CircleStop } from 'lucide-react'
 import { useStore } from '../store'
 import logo from '../assets/logo.png'
 
@@ -47,6 +47,9 @@ export function Toolbar() {
       <button className="btn ghost" onClick={() => window.api.pauseAll()} title={t('toolbar.pauseAll')}>
         <CircleStop size={16} />
         <span className="label">{t('toolbar.pauseAll')}</span>
+      </button>
+      <button className="btn ghost icon" title={t('subs.title')} onClick={() => openDialog({ type: 'subscriptions' })}>
+        <Rss size={16} />
       </button>
       <button className="btn ghost" onClick={() => openDialog({ type: 'scheduler' })}>
         <CalendarClock size={16} />

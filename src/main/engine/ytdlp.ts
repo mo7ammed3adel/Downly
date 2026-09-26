@@ -78,8 +78,14 @@ interface RawInfo {
   ie_key?: string
 }
 
-export function analyze(url: string, env: YtdlpEnv, signal?: AbortSignal, ctx: RequestContext = {}): Promise<MediaInfo | PlaylistInfo> {
-  const args = [...baseArgs(env), ...requestArgs(ctx), '-J', '--flat-playlist', url]
+export function analyze(
+  url: string,
+  env: YtdlpEnv,
+  signal?: AbortSignal,
+  ctx: RequestContext = {},
+  extra: string[] = []
+): Promise<MediaInfo | PlaylistInfo> {
+  const args = [...baseArgs(env), ...requestArgs(ctx), '-J', '--flat-playlist', ...extra, url]
   return new Promise((resolve, reject) => {
     execFile(
       env.ytdlpPath,

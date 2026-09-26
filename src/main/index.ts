@@ -7,11 +7,12 @@ import { parseSpotifyUrl } from '@shared/util'
 import { SUPPORT_PROMPT_AFTER } from '@shared/support'
 import { DownloadManager } from './engine/DownloadManager'
 import { createFetcher } from './engine/http'
-import type { YtdlpEnv } from './engine/ytdlp'
+import { analyze, type YtdlpEnv } from './engine/ytdlp'
 import { BrowserBridge } from './services/bridge'
 import { Binaries } from './services/binaries'
 import { refreshExtensionFolder } from './services/browsers'
 import { installerFor, Updater } from './services/updater'
+import { Subscriptions } from './services/subscriptions'
 import { startLog } from './services/log'
 import { ClipboardMonitor } from './services/clipboard'
 import { createProxyResolver, proxyFor } from './services/network'
@@ -46,6 +47,16 @@ const updater = new Updater({
   }
 })
 const UPDATE_CHECK_EVERY_MS = 6 * 60 * 60 * 1000
+const subscriptions = new Subscriptions({
+  file: join(app.getPath('userData'), 'subscriptions.json'),
+  list: async (url, extraArgs) => analyze(url, await ytdlpEnv(url), undefined, {}, extraArgs),
+  download: async (sub, entries) => {
+    await manager.add(
+      entries.map((e) => ({ url: e.url, kind: 'media' as const, title: e.title, thumbnail: e.thumbnail, playlistTitle: sub.title, media: defaultMediaOptions(sub.mode) }))
+    )
+  }
+})
+const SUBSCRIPTION_CHECK_EVERY_MS = 3 * 60 * 60 * 1000
 /** yt-dlp needs Node 20+ as a JS runtime; the Windows 7 build (Electron 22) ships Node 16 */
 const nodeRuntimeOk = Number(process.versions.node.split('.')[0]) >= 20
 
@@ -200,12 +211,10 @@ function buildTray(): void {
   tray.on('click', showWindow)
 }
 
-/** Browser handed us a link: show the dialog (IDM style) or start straight away */
-function handleExternal(req: ExternalAddRequest): void {
-  const s = settings.get()
-  console.log(`[bridge] ${req.media ? 'media' : 'file'}${req.quick ? ' (quick)' : ''} ${req.url}`)
-  const m = s.media
-  const defaults = (mode: 'video' | 'audio'): MediaOptions => ({
+/** The media options a download gets without the add dialog (quick mode, songs, subscriptions) */
+function defaultMediaOptions(mode: 'video' | 'audio'): MediaOptions {
+  const m = settings.get().media
+  return {
     mode,
     quality: m.defaultQuality,
     container: m.defaultContainer,
@@ -214,7 +223,15 @@ function handleExternal(req: ExternalAddRequest): void {
     subtitles: mode === 'video' && m.subtitles,
     subtitleLangs: m.subtitleLangs,
     embedThumbnail: m.embedThumbnail
-  })
+  }
+}
+
+/** Browser handed us a link: show the dialog (IDM style) or start straight away */
+function handleExternal(req: ExternalAddRequest): void {
+  const s = settings.get()
+  console.log(`[bridge] ${req.media ? 'media' : 'file'}${req.quick ? ' (quick)' : ''} ${req.url}`)
+  const m = s.media
+  const defaults = defaultMediaOptions
   // Songs read off a music site: the click already chose them, download the audio right away
   if (req.tracks?.length) {
     const many = req.tracks.length > 1
@@ -319,6 +336,7 @@ app.on('activate', showWindow)
 app.whenReady().then(async () => {
   Menu.setApplicationMenu(null)
   await manager.load()
+  await subscriptions.load()
 
   settings.on('changed', (s) => {
     applySystemSettings()
@@ -326,6 +344,11 @@ app.whenReady().then(async () => {
   })
   binaries.on('state', (state) => send('components:changed', state))
   updater.on('state', (state) => send('update:state', state))
+  subscriptions.on('changed', (subs) => send('subs:changed', subs))
+  subscriptions.on('downloaded', ({ sub, count }) => notify(t('notify.subscription', { count, title: sub.title }), sub.title, showWindow))
+  // New videos on followed channels/playlists: shortly after start, then every few hours
+  setTimeout(() => void subscriptions.checkAll(), 60_000)
+  setInterval(() => void subscriptions.checkAll(), SUBSCRIPTION_CHECK_EVERY_MS)
   // Only installed copies update themselves (a dev run has nothing to replace)
   const checkForUpdate = () => app.isPackaged && settings.get().autoUpdateCheck && void updater.check()
   setTimeout(checkForUpdate, 15_000)
@@ -359,7 +382,7 @@ ${err}`))
     })
   )
 
-  registerIpc({ manager, settings, binaries, bridge, updater, proxyFor: proxyResolver, ytdlpEnv, getState, getWindow: () => win })
+  registerIpc({ manager, settings, binaries, bridge, updater, subscriptions, proxyFor: proxyResolver, ytdlpEnv, getState, getWindow: () => win })
   createWindow()
   applySystemSettings()
   scheduler.run()

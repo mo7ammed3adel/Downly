@@ -233,7 +233,8 @@
     "failed": "Download failed",
     "clipboard": "Link copied — download it?",
     "allDone": "All downloads finished",
-    "quickAdded": "Download started"
+    "quickAdded": "Download started",
+    "subscription": "New videos: {{count}}"
   },
   "tray": {
     "show": "Show Downly",
@@ -322,5 +323,16 @@
     "create": "Create report and open WhatsApp",
     "done": "The report is on your desktop: {{name}}. Attach it in the WhatsApp chat that just opened.",
     "failed": "Couldn't create the report: {{error}}"
+  },
+  "subs": {
+    "title": "Follow channels",
+    "intro": "Add a YouTube channel, a playlist, or any channel link. Downly remembers what's already there and downloads new videos by itself (it checks every few hours while it's open).",
+    "add": "Follow",
+    "adding": "Reading the channel… this can take a moment.",
+    "empty": "You don't follow anything yet.",
+    "checkNow": "Check now",
+    "checked": "Last checked: {{when}}",
+    "failed": "Last check failed: {{error}}",
+    "remove": "Stop following"
   }
 }

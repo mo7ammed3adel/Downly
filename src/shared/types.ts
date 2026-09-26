@@ -247,6 +247,20 @@ export type UpdateState =
   | { status: 'installing'; version: string }
   | { status: 'error'; error: string }
 
+/** A channel or playlist whose new videos download by themselves */
+export interface Subscription {
+  id: string
+  url: string
+  title: string
+  mode: 'video' | 'audio'
+  /** Videos already there (or already downloaded): never downloaded again */
+  seen: string[]
+  addedAt: number
+  lastChecked?: number
+  /** Last check's error, if it failed */
+  error?: string
+}
+
 export type BrowserId = 'chrome' | 'edge' | 'brave' | 'opera' | 'vivaldi' | 'firefox'
 
 export interface BrowserInfo {

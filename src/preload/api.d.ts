@@ -10,6 +10,7 @@ import type {
   ProbeResult,
   Settings,
   SettingsPatch,
+  Subscription,
   UpdateState
 } from '../shared/types'
 
@@ -47,6 +48,12 @@ export interface Api {
   isIdmRunning(): Promise<boolean>
   /** Saves a problem report on the desktop and opens the WhatsApp chat; returns the file path */
   createReport(note: string): Promise<string>
+  listSubscriptions(): Promise<Subscription[]>
+  /** Follows a channel/playlist: what's there now is remembered, only new videos download */
+  addSubscription(url: string, mode: 'video' | 'audio'): Promise<Subscription>
+  removeSubscription(id: string): Promise<void>
+  checkSubscriptions(): Promise<void>
+  onSubscriptionsChanged(cb: (subs: Subscription[]) => void): Unsubscribe
   getUpdateState(): Promise<UpdateState>
   checkForUpdate(): Promise<UpdateState>
   /** Windows: download + install (the app restarts); elsewhere opens the download page */

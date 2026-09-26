@@ -11,6 +11,7 @@ import { partPath } from './engine/HttpDownload'
 import type { Binaries } from './services/binaries'
 import type { SettingsStore } from './services/settings'
 import { DOWNLOAD_PAGE, type Updater } from './services/updater'
+import type { Subscriptions } from './services/subscriptions'
 import { recentLog } from './services/log'
 import { buildReport, saveReport } from './services/report'
 import { SOCIAL } from '@shared/support'
@@ -23,6 +24,7 @@ interface Deps {
   binaries: Binaries
   bridge: BrowserBridge
   updater: Updater
+  subscriptions: Subscriptions
   proxyFor: ProxyResolver
   ytdlpEnv(url: string): Promise<YtdlpEnv>
   getState(): AppState
@@ -140,6 +142,10 @@ export function registerIpc(d: Deps): void {
     void shell.openExternal(`${SOCIAL.whatsapp}?text=${encodeURIComponent('Downly problem report (file attached)')}`)
     return path
   })
+  ipcMain.handle('subs:list', () => d.subscriptions.list())
+  ipcMain.handle('subs:add', (_e, url: string, mode: 'video' | 'audio') => d.subscriptions.add(url, mode === 'audio' ? 'audio' : 'video'))
+  ipcMain.handle('subs:remove', (_e, id: string) => d.subscriptions.remove(id))
+  ipcMain.handle('subs:check', () => d.subscriptions.checkAll())
   ipcMain.handle('update:state', () => d.updater.state)
   ipcMain.handle('update:check', () => d.updater.check())
   ipcMain.handle('update:install', () => {
