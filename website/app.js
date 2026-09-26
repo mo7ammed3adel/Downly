@@ -129,6 +129,7 @@ const AR = {
   gl2: 'AppImage (أي توزيعة)',
   gl2d: 'كليك يمين على الملف ← Properties ← اسمح بتشغيله كبرنامج، وبعدين دبل كليك. أو اكتب:',
   showMe: 'وريني بالصور',
+  'stat.downloads': 'مرة اتحمّل لحد دلوقتي',
   q7: 'الماك بيقول إن Downly مينفعش يتفتح',
   a7: 'الماك بيعمل كده مع البرامج اللي مش من متجر أبل. افتح System Settings ← Privacy & Security ودوس «Open Anyway» علشان يفتح.'
 }
@@ -174,6 +175,7 @@ function applyLang() {
   for (const el of document.querySelectorAll('[data-i18n]')) el.textContent = t(el.dataset.i18n)
   document.getElementById('lang').textContent = lang === 'ar' ? 'English' : 'عربي'
   applyOs()
+  applyStats()
 }
 
 // ---------------------------------------------------------------- download button
@@ -197,6 +199,51 @@ function applyOs() {
   for (const a of document.querySelectorAll('.os-link')) a.href = FILES[a.dataset.os]
   for (const a of document.querySelectorAll('.download-link')) a.href = FILES[os]
 }
+
+// ---------------------------------------------------------------- live release numbers
+// Total downloads, latest version and file sizes, straight from the public releases repo.
+// GitHub allows 60 anonymous requests an hour per visitor, so the answer is cached for 10 minutes.
+const INSTALLERS = new Set(Object.values(FILES).map((url) => url.split('/').pop()))
+let stats = null
+
+async function loadStats() {
+  const cached = JSON.parse(store.get('stats') || 'null')
+  if (cached && Date.now() - cached.at < 10 * 60 * 1000) return cached
+  const res = await fetch(`https://api.github.com/repos/${SITE.releasesRepo}/releases?per_page=100`)
+  if (!res.ok) return cached
+  const releases = await res.json()
+  const latest = releases.find((r) => !r.draft && !r.prerelease)
+  const fresh = {
+    at: Date.now(),
+    downloads: releases.flatMap((r) => r.assets).reduce((n, a) => n + (INSTALLERS.has(a.name) ? a.download_count : 0), 0),
+    version: latest?.tag_name,
+    sizes: Object.fromEntries((latest?.assets ?? []).map((a) => [a.name, a.size]))
+  }
+  store.set('stats', JSON.stringify(fresh))
+  return fresh
+}
+
+function applyStats() {
+  if (!stats) return
+  const num = new Intl.NumberFormat(lang === 'ar' ? 'ar-EG' : 'en')
+  if (stats.downloads > 0) {
+    document.getElementById('dlCount').textContent = num.format(stats.downloads)
+    document.getElementById('dlStat').hidden = false
+  }
+  if (stats.version) for (const el of document.querySelectorAll('.version')) el.textContent = stats.version
+  const size = stats.sizes[FILES[os].split('/').pop()]
+  // Latin digits like the rest of the version line
+  document.getElementById('dlSize').textContent = size ? ` · ${Math.round(size / 1048576)} MB` : ''
+}
+
+loadStats()
+  .then((s) => {
+    stats = s
+    applyStats()
+  })
+  .catch(() => {
+    /* offline or rate-limited: the page works without the numbers */
+  })
 
 // ---------------------------------------------------------------- install guide
 // Opens next to every download (the download itself still starts) and from the FAQ

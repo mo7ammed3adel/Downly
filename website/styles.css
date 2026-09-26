@@ -138,6 +138,27 @@ h3 {
   letter-spacing: 0.017em;
   margin: 16px 0 0;
 }
+.stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 20px 0 0;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--pulse-hush);
+  color: var(--ash);
+  font-size: 14px;
+}
+.stat[hidden] {
+  display: none;
+}
+.stat b {
+  color: var(--white);
+  font-weight: 600;
+}
+.stat .ico {
+  color: var(--pulse);
+}
 .meta.start {
   text-align: start;
 }
