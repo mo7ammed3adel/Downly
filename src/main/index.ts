@@ -1,6 +1,6 @@
 import { app, BrowserWindow, clipboard, Menu, nativeImage, nativeTheme, Notification, shell, Tray } from 'electron'
 import { join } from 'node:path'
-import type { AppState, ExternalAddRequest, NewDownloadRequest } from '@shared/types'
+import type { AppState, ExternalAddRequest, MediaOptions, NewDownloadRequest } from '@shared/types'
 import { translate } from '@shared/i18n'
 import { parseSpotifyUrl } from '@shared/util'
 import { SUPPORT_PROMPT_AFTER } from '@shared/support'
@@ -187,11 +187,39 @@ function buildTray(): void {
 function handleExternal(req: ExternalAddRequest): void {
   const s = settings.get()
   console.log(`[bridge] ${req.media ? 'media' : 'file'}${req.quick ? ' (quick)' : ''} ${req.url}`)
+  const m = s.media
+  const defaults = (mode: 'video' | 'audio'): MediaOptions => ({
+    mode,
+    quality: m.defaultQuality,
+    container: m.defaultContainer,
+    audioFormat: m.defaultAudioFormat,
+    audioBitrate: 0,
+    subtitles: false,
+    subtitleLangs: 'en.*,ar.*',
+    embedThumbnail: m.embedThumbnail
+  })
+  // Songs read off a music site: the click already chose them, download the audio right away
+  if (req.tracks?.length) {
+    const many = req.tracks.length > 1
+    void manager
+      .add(
+        req.tracks.map((track) => ({
+          url: req.pageUrl ?? req.url,
+          kind: 'spotify' as const,
+          title: `${track.artist} - ${track.title}`,
+          thumbnail: track.cover,
+          track,
+          playlistTitle: many ? req.collection : undefined,
+          media: defaults('audio')
+        }))
+      )
+      .then((added) => notify(t('notify.quickAdded'), added.map((i) => i.title).slice(0, 3).join('\n'), showWindow))
+    return
+  }
   // Quick mode: one click on a video starts it with the default quality. Spotify links and
   // playlist pages still need the dialog to pick tracks/items.
   const needsDialog = parseSpotifyUrl(req.url) || /[?&]list=|\/playlist\b/.test(req.url)
   if (req.quick && req.media && !needsDialog) {
-    const m = s.media
     void manager
       .add([
         {
@@ -201,16 +229,7 @@ function handleExternal(req: ExternalAddRequest): void {
           cookies: req.cookies,
           referrer: req.referrer,
           headers: { ...req.headers, ...(req.userAgent ? { 'user-agent': req.userAgent } : {}) },
-          media: {
-            mode: req.mode ?? m.defaultMode,
-            quality: m.defaultQuality,
-            container: m.defaultContainer,
-            audioFormat: m.defaultAudioFormat,
-            audioBitrate: 0,
-            subtitles: false,
-            subtitleLangs: 'en.*,ar.*',
-            embedThumbnail: m.embedThumbnail
-          }
+          media: defaults(req.mode ?? m.defaultMode)
         }
       ])
       .then(() => notify(t('notify.quickAdded'), req.url, showWindow))

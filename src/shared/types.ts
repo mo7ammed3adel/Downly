@@ -270,4 +270,10 @@ export interface ExternalAddRequest extends RequestContext {
   mode?: 'video' | 'audio'
   /** Extension quick mode: start right away with default options, no dialog */
   quick?: boolean
+  /**
+   * Songs read off a music site's page (Spotify rows, the song playing on Anghami…): each is
+   * downloaded as the matching audio, like a Spotify track. `collection` names an album/playlist.
+   */
+  tracks?: TrackMeta[]
+  collection?: string
 }

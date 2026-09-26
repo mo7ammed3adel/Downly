@@ -134,3 +134,73 @@
 #downly-playlist.failed {
   background: #e0433a;
 }
+
+/* Music sites (music.js) */
+#downly-song,
+#downly-spotify-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #3d63f5, #8b5cf6);
+  color: #fff;
+  font: 600 13px/1 system-ui, 'Segoe UI', Tahoma, sans-serif;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+#downly-song {
+  position: fixed;
+  right: 20px;
+  bottom: 104px;
+  z-index: 2147483647;
+  max-width: min(420px, calc(100vw - 40px));
+  padding: 10px 16px;
+}
+#downly-song span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#downly-spotify-all {
+  margin-inline-start: 16px;
+  padding: 9px 16px;
+  font-size: 14px;
+}
+.downly-row {
+  /* Spotify lays a hover layer over its rows: stay above it */
+  position: relative;
+  z-index: 2;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 26px;
+  height: 26px;
+  margin-inline-start: 8px;
+  border: 0;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3d63f5, #8b5cf6);
+  color: #fff;
+  cursor: pointer;
+  opacity: 0.55;
+  vertical-align: middle;
+}
+[data-downly]:hover .downly-row,
+.downly-row:focus-visible {
+  opacity: 1;
+}
+#downly-song:hover,
+#downly-spotify-all:hover,
+.downly-row:hover {
+  filter: brightness(1.12);
+}
+#downly-song.sent,
+#downly-spotify-all.sent,
+.downly-row.sent {
+  background: #17a466;
+}
+#downly-song.failed,
+#downly-spotify-all.failed,
+.downly-row.failed {
+  background: #e0433a;
+}

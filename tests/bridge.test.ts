@@ -75,3 +75,29 @@ describe('BrowserBridge upload', () => {
     bridge.stop()
   })
 })
+
+describe('BrowserBridge songs', () => {
+  it('passes songs read off a music page and drops incomplete ones', async () => {
+    const port = BASE + 30
+    const bridge = new BrowserBridge(settingsOn(port), '1.0.0')
+    bridge.apply()
+    await waitForPort(bridge)
+    const got = new Promise<{ tracks?: unknown[]; collection?: string }>((r) => bridge.once('add', r))
+    await fetch(`http://127.0.0.1:${port}/media`, {
+      method: 'POST',
+      headers: { 'x-downly': '1', 'content-type': 'application/json' },
+      body: JSON.stringify({
+        url: 'https://play.anghami.com/album/1',
+        collection: 'Album',
+        tracks: [
+          { title: 'Song', artist: 'Singer', durationMs: 200000, cover: 'javascript:alert(1)' },
+          { title: 'No artist' }
+        ]
+      })
+    })
+    const req = await got
+    expect(req.collection).toBe('Album')
+    expect(req.tracks).toEqual([{ title: 'Song', artist: 'Singer', album: undefined, cover: undefined, durationMs: 200000 }])
+    bridge.stop()
+  })
+})

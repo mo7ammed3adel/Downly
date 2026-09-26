@@ -38,7 +38,7 @@
   "content_scripts": [
     {
       "matches": ["http://*/*", "https://*/*"],
-      "js": ["i18n.js", "content.js"],
+      "js": ["i18n.js", "content.js", "music.js"],
       "css": ["content.css"],
       "run_at": "document_idle",
       "all_frames": true

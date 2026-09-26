@@ -5,7 +5,7 @@ import { mkdir, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { pipeline } from 'node:stream/promises'
-import type { ExternalAddRequest, Settings } from '@shared/types'
+import type { ExternalAddRequest, Settings, TrackMeta } from '@shared/types'
 import { isHttpUrl } from '@shared/util'
 import { BRIDGE_PORT_COUNT } from '@shared/defaults'
 
@@ -114,6 +114,8 @@ export class BrowserBridge extends EventEmitter {
         cookies: str(body.cookies),
         userAgent: str(body.userAgent),
         headers: forwardHeaders(body.headers),
+        tracks: tracksFrom(body.tracks),
+        collection: str(body.collection),
         media: url.pathname === '/media',
         mode: body.mode === 'audio' || body.mode === 'video' ? body.mode : undefined,
         quick: body.quick === true
@@ -187,6 +189,28 @@ function forwardHeaders(v: unknown): Record<string, string> | undefined {
     .filter(([name, value]) => FORWARDED.test(name) && safe(value))
     .slice(0, 20) as [string, string][]
   return picked.length ? Object.fromEntries(picked) : undefined
+}
+
+/** Songs the extension read off a music page: title and artist required, a few hundred at most */
+function tracksFrom(v: unknown): TrackMeta[] | undefined {
+  if (!Array.isArray(v)) return undefined
+  const text = (x: unknown, max = 300) => (typeof x === 'string' && x.trim() ? x.trim().slice(0, max) : undefined)
+  const tracks = v.slice(0, 500).flatMap((t: Record<string, unknown>): TrackMeta[] => {
+    const title = text(t?.title)
+    const artist = text(t?.artist)
+    if (!title || !artist) return []
+    const cover = text(t.cover, 2000)
+    return [
+      {
+        title,
+        artist,
+        album: text(t.album),
+        cover: cover && isHttpUrl(cover) ? cover : undefined,
+        durationMs: typeof t.durationMs === 'number' && t.durationMs > 0 ? t.durationMs : undefined
+      }
+    ]
+  })
+  return tracks.length ? tracks : undefined
 }
 
 const str = (v: unknown) => (typeof v === 'string' && v ? v : undefined)

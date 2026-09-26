@@ -39,6 +39,10 @@
       audio: 'Audio',
       stream: 'Stream',
       playlistBtn: 'Download playlist',
+      songBtn: 'Download song',
+      songBtnTitle: 'Download the song that is playing with Downly',
+      rowBtn: 'Download this song',
+      allSongsBtn: 'Download all songs',
       quickMode: 'Quick download (no dialog)',
       quickHint: 'Clicking Download or ♪ starts right away with your default quality from the app settings.'
     },
@@ -79,6 +83,10 @@
       audio: 'صوت',
       stream: 'بث',
       playlistBtn: 'تحميل قائمة التشغيل',
+      songBtn: 'تحميل الأغنية',
+      songBtnTitle: 'حمّل الأغنية اللي شغالة دلوقتي بـ Downly',
+      rowBtn: 'حمّل الأغنية دي',
+      allSongsBtn: 'تحميل كل الأغاني',
       quickMode: 'تحميل سريع (من غير نافذة)',
       quickHint: 'الضغط على تحميل أو ♪ بيبدأ التحميل على طول بالجودة الافتراضية من إعدادات البرنامج.'
     }

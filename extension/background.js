@@ -208,12 +208,14 @@ async function takeOver(item) {
     /* already finished */
   }
   const name = (item.filename || '').split(/[\\/]/).pop()
+  const request = requestContext(sentByUrl.get(url) ?? sentByUrl.get(item.url))
   try {
     await send('/download', {
       url,
       fileName: name || undefined,
       size: item.fileSize > 0 ? item.fileSize : undefined,
-      referrer: item.referrer || undefined
+      ...request,
+      referrer: item.referrer || request.referrer
     })
   } catch {
     // App went away between ping and send — give the download back to the browser
@@ -301,7 +303,20 @@ function mediaId(url) {
   }
 }
 
-async function addMedia(tabId, entry) {
+/**
+ * A tab's list is read and rewritten by several events at once (files arriving, the page
+ * navigating); running them one after another keeps one from overwriting the other.
+ */
+const tabQueues = new Map()
+function inOrder(tabId, job) {
+  const next = (tabQueues.get(tabId) ?? Promise.resolve()).then(job, job)
+  tabQueues.set(tabId, next.catch(() => {}))
+  return next
+}
+
+const addMedia = (tabId, entry) => inOrder(tabId, () => recordMedia(tabId, entry))
+
+async function recordMedia(tabId, entry) {
   const { store, key, list } = await mediaFor(tabId)
   const id = mediaId(entry.url)
   if (list.some((m) => m.id === id)) return
@@ -309,6 +324,7 @@ async function addMedia(tabId, entry) {
   entry.part = /[?&](bytestart|byteend|range)=/i.test(entry.url)
   entry.id = id
   entry.kind = /^audio\//.test(entry.type) ? 'audio' : 'video'
+  entry.at = Date.now()
   try {
     entry.title = (await ext.tabs.get(tabId)).title
   } catch {
@@ -323,6 +339,7 @@ async function addMedia(tabId, entry) {
 // How the page asked for each file: guarded sites (hotlink checks, session cookies, token
 // headers) only answer the app if it asks the same way, which is what makes those sites work.
 const requestHeaders = new Map()
+const sentByUrl = new Map()
 const EXTRA_HEADERS = ext.webRequest.OnSendHeadersOptions?.EXTRA_HEADERS // Chrome: needed to see Cookie/Referer
 const KEPT_HEADERS = /^(referer|cookie|origin|authorization|x-[\w-]+)$/i
 
@@ -331,11 +348,19 @@ ext.webRequest.onSendHeaders.addListener(
     if (details.tabId < 0) return
     const kept = {}
     for (const h of details.requestHeaders || []) if (KEPT_HEADERS.test(h.name) && h.value) kept[h.name.toLowerCase()] = h.value
+    // Downloads start as page/frame navigations (or 'other' for <a download>): remember them by
+    // URL, so a download Downly takes over is requested exactly like the browser did after the
+    // site's scripts (countdowns, generated links) ran
+    if (details.type !== 'media' && details.type !== 'xmlhttprequest' && details.type !== 'object') {
+      sentByUrl.set(details.url, kept)
+      if (sentByUrl.size > 100) sentByUrl.delete(sentByUrl.keys().next().value)
+    }
+    if (details.type === 'main_frame' || details.type === 'sub_frame') return
     requestHeaders.set(details.requestId, kept)
     // Requests whose response never comes would pile up
     if (requestHeaders.size > 500) requestHeaders.delete(requestHeaders.keys().next().value)
   },
-  { urls: ['<all_urls>'], types: ['media', 'xmlhttprequest', 'other', 'object'] },
+  { urls: ['<all_urls>'], types: ['main_frame', 'sub_frame', 'media', 'xmlhttprequest', 'other', 'object'] },
   EXTRA_HEADERS ? ['requestHeaders', EXTRA_HEADERS] : ['requestHeaders']
 )
 ext.webRequest.onErrorOccurred.addListener((details) => requestHeaders.delete(details.requestId), { urls: ['<all_urls>'] })
@@ -375,17 +400,24 @@ async function playingStream(tabId) {
   return list.find((m) => m.stream && !m.part) ?? list.find((m) => !m.part && m.kind === 'video') ?? null
 }
 
-ext.tabs.onUpdated.addListener(async (tabId, info) => {
-  if (info.status === 'loading' && info.url) {
+ext.tabs.onUpdated.addListener((tabId, info) => {
+  if (info.status !== 'loading' || !info.url) return
+  // The new page's first files can be reported just before this event: keep the last moment's
+  const since = Date.now() - 500
+  inOrder(tabId, async () => {
+    const { store, key, list } = await mediaFor(tabId)
+    const kept = list.filter((m) => m.at >= since)
+    await (kept.length ? store.set({ [key]: kept }) : store.remove(key))
+    ext.action.setBadgeText({ tabId, text: kept.length ? String(kept.length) : '' })
+  })
+})
+ext.tabs.onRemoved.addListener((tabId) =>
+  inOrder(tabId, async () => {
     const { store, key } = await mediaFor(tabId)
     await store.remove(key)
-    ext.action.setBadgeText({ tabId, text: '' })
-  }
-})
-ext.tabs.onRemoved.addListener(async (tabId) => {
-  const { store, key } = await mediaFor(tabId)
-  store.remove(key)
-})
+    tabQueues.delete(tabId)
+  })
+)
 
 // ------------------------------------------------------------ context menus
 
@@ -493,6 +525,10 @@ ext.runtime.onMessage.addListener((msg, sender, reply) => {
         return uploadChunk(msg.id, msg.offset, msg.data)
       case 'upload:done':
         return api('/upload/done', { id: msg.id, fileName: msg.fileName, pageUrl: msg.pageUrl })
+      case 'tracks':
+        // Songs read off a music site: the app downloads the matching audio for each
+        await api('/media', { url: msg.pageUrl || sender.tab?.url, tracks: msg.tracks, collection: msg.collection })
+        return { ok: true }
       case 'links':
         return api('/links', { urls: await collectLinks(msg.tabId), pageUrl: msg.pageUrl })
       default:
