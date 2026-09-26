@@ -15,12 +15,29 @@
 .downly-wrap.sg-top-right { top: 12px; right: 12px; }
 .downly-wrap.sg-bottom-left { bottom: 64px; left: 12px; }
 .downly-wrap.sg-bottom-right { bottom: 64px; right: 12px; }
+/* Layer above the page for every site but YouTube: buttons follow their video from JS */
+#downly-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  pointer-events: none;
+  overflow: hidden;
+}
+#downly-layer > .downly-wrap {
+  position: fixed;
+  right: auto;
+  bottom: auto;
+}
+#downly-layer > .downly-wrap.sg-off {
+  display: none;
+}
 .downly-wrap.sg-custom {
   left: calc((100% - var(--sg-w, 120px)) * var(--sg-x, 1));
   top: calc((100% - var(--sg-h, 32px)) * var(--sg-y, 0));
 }
 
-*:hover > .downly-wrap,
+*:hover > .downly-wrap:not(.sg-layer),
+.downly-wrap.sg-show,
 #movie_player > .downly-wrap,
 .downly-wrap.sg-dragging {
   opacity: 0.95;

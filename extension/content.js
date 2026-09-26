@@ -1,8 +1,12 @@
 /*
  * Floating download buttons on videos (IDM-style): YouTube, social media (Instagram, Facebook,
- * TikTok, X, Reels/Shorts…) and any page with a <video>. "Download" opens Downly with video
- * selected, ♪ opens it with audio-only selected. The button can be dragged (position saved per
- * site), hidden for the current video with ×, and configured from the popup.
+ * TikTok, X, Reels/Shorts…) and any page with a <video>; on story/status pages and WhatsApp Web
+ * photos get one too. "Download" opens Downly with video selected, ♪ opens it with audio-only
+ * selected. The button can be dragged (position saved per site), hidden for the current video
+ * with ×, and configured from the popup.
+ *
+ * Outside YouTube the buttons live in one layer above the whole page and follow their video on
+ * screen, because sites like Instagram cover the video with their own transparent layer.
  */
 ;(() => {
   const ext = globalThis.browser ?? globalThis.chrome
@@ -17,6 +21,7 @@
   const DEFAULTS = { overlay: { enabled: true, corner: 'top-right' }, overlayHidden: [], overlayPos: {} }
   const host = location.hostname.replace(/^www\.|^m\./, '')
   const isYouTube = /(^|\.)youtube\.com$/.test(location.hostname)
+  const isWhatsApp = location.hostname === 'web.whatsapp.com'
 
   let cfg = DEFAULTS
   /** Videos the user dismissed with × (until the page is reloaded) */
@@ -51,9 +56,9 @@
    * On feeds the page URL is the whole timeline, so walk up from the video to the
    * enclosing post and take its permalink. Falls back to the page URL.
    */
-  function postUrlFor(video) {
+  function postUrlFor(media) {
     if (isPostUrl(location.href)) return location.href
-    let node = video
+    let node = media
     for (let depth = 0; node && depth < 25; depth++, node = node.parentElement) {
       for (const a of node.querySelectorAll?.('a[href]') ?? []) {
         if (isPostUrl(a.href)) return new URL(a.href, location.href).href.split('#')[0]
@@ -63,17 +68,19 @@
     return location.href
   }
 
-  function videoKey(video) {
-    if (isYouTube) {
+  function mediaKey(media) {
+    if (isYouTube && !media) {
       const id = new URLSearchParams(location.search).get('v') || location.pathname.split('/shorts/')[1]
       return `yt:${id}`
     }
-    return `${postUrlFor(video)}|${video?.currentSrc || video?.src || ''}`
+    return `${postUrlFor(media)}|${media.currentSrc || media.src || ''}`
   }
 
   // ------------------------------------------------------------ button
 
+  /** Corner / dragged position, for buttons inside the YouTube player (CSS does the maths) */
   function place(wrap) {
+    if (wrap.classList.contains('sg-layer')) return
     const pos = cfg.overlayPos[host]
     wrap.style.setProperty('--sg-w', `${wrap.offsetWidth}px`)
     wrap.style.setProperty('--sg-h', `${wrap.offsetHeight}px`)
@@ -112,13 +119,14 @@
 
   /**
    * `send(mode)` delivers the video to the app with 'video' or 'audio' preselected.
-   * `playlist` (optional) adds a button that sends the whole playlist.
+   * Options: `playlist` adds a button that sends the whole playlist; `audio: false` drops ♪
+   * (photos, WhatsApp files); `box()` is the rectangle the button is dragged within.
    */
-  function makeButton(key, send, playlist) {
+  function makeButton(key, send, { playlist = null, audio: withAudio = true, box } = {}) {
     const wrap = document.createElement('div')
     wrap.className = 'downly-wrap'
     const main = button('downly-btn', t('video'), ICON, t('overlay'))
-    const audio = button('downly-audio', t('audio'), NOTE)
+    const audio = withAudio ? button('downly-audio', t('audio'), NOTE) : null
     const list = playlist ? button('downly-audio sg-playlist', t('playlistBtn'), LIST) : null
     const close = button('downly-x', t('hideHere'))
     close.textContent = '×'
@@ -135,15 +143,15 @@
       dismissed.add(key)
       remove(wrap)
     })
-    audio.addEventListener('click', () => feedback(audio, send('audio')))
+    audio?.addEventListener('click', () => feedback(audio, send('audio')))
 
     let drag = null
     main.addEventListener('pointerdown', (e) => {
       e.stopPropagation()
       if (e.button !== 0) return
-      const box = wrap.parentElement.getBoundingClientRect()
+      const area = box ? box() : wrap.parentElement.getBoundingClientRect()
       const r = wrap.getBoundingClientRect()
-      drag = { sx: e.clientX, sy: e.clientY, ox: r.left - box.left, oy: r.top - box.top, box, moved: false }
+      drag = { sx: e.clientX, sy: e.clientY, ox: r.left - area.left, oy: r.top - area.top, area, moved: false }
       main.setPointerCapture(e.pointerId)
     })
     main.addEventListener('pointermove', (e) => {
@@ -153,12 +161,14 @@
       if (!drag.moved && Math.hypot(dx, dy) < 5) return
       drag.moved = true
       wrap.classList.add('sg-dragging')
-      const maxX = Math.max(1, drag.box.width - wrap.offsetWidth)
-      const maxY = Math.max(1, drag.box.height - wrap.offsetHeight)
+      const maxX = Math.max(1, drag.area.width - wrap.offsetWidth)
+      const maxY = Math.max(1, drag.area.height - wrap.offsetHeight)
       drag.x = Math.min(1, Math.max(0, (drag.ox + dx) / maxX))
       drag.y = Math.min(1, Math.max(0, (drag.oy + dy) / maxY))
+      // Layer buttons read this on the next frame; player buttons use the CSS variables
+      wrap.sgPos = { x: drag.x, y: drag.y }
       wrap.classList.remove('sg-top-left', 'sg-top-right', 'sg-bottom-left', 'sg-bottom-right')
-      wrap.classList.add('sg-custom')
+      if (!wrap.classList.contains('sg-layer')) wrap.classList.add('sg-custom')
       wrap.style.setProperty('--sg-x', drag.x)
       wrap.style.setProperty('--sg-y', drag.y)
     })
@@ -187,6 +197,51 @@
   }
 
   const sendMedia = (url, mode) => ext.runtime.sendMessage({ type: 'media', url, mode })
+  const sendFile = (url) => ext.runtime.sendMessage({ type: 'file', url, referrer: location.href })
+
+  // ------------------------------------------------------------ media that only exists in the page
+
+  const CHUNK = 4 * 1024 * 1024
+  // Firefox content scripts fetch as the extension; content.fetch reads the page's blob: URLs
+  const pageFetch = typeof content !== 'undefined' && content?.fetch ? content.fetch.bind(content) : fetch
+
+  const base64 = (blob) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => resolve(String(reader.result).split(',')[1] ?? '')
+      reader.onerror = () => reject(reader.error)
+      reader.readAsDataURL(blob)
+    })
+
+  function fileNameFor(media, blob) {
+    const type = (blob.type.split('/')[1] || '').split(';')[0]
+    const extension = { jpeg: 'jpg', quicktime: 'mov', 'x-matroska': 'mkv' }[type] ?? (type || (media.tagName === 'IMG' ? 'jpg' : 'mp4'))
+    const site = isWhatsApp ? 'WhatsApp' : host.split('.')[0]
+    const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')
+    return `${site}-${stamp}.${extension}`
+  }
+
+  /**
+   * blob: media (WhatsApp decrypts its files inside the page) can't be fetched by the app, so
+   * read it here and pass it over in pieces. Streaming players' blob: URLs can't be read at all:
+   * returns null for those so the caller falls back to the post URL.
+   */
+  async function sendBlob(media, src) {
+    let blob
+    try {
+      blob = await (await pageFetch(src)).blob()
+    } catch {
+      return null
+    }
+    if (!blob.size) return null
+    const id = crypto.randomUUID()
+    for (let offset = 0; offset < blob.size; offset += CHUNK) {
+      const data = await base64(blob.slice(offset, offset + CHUNK))
+      const res = await ext.runtime.sendMessage({ type: 'upload:chunk', id, offset, data })
+      if (!res?.ok) return { ok: false }
+    }
+    return ext.runtime.sendMessage({ type: 'upload:done', id, fileName: fileNameFor(media, blob), pageUrl: location.href })
+  }
 
   // ------------------------------------------------------------ placement per site
 
@@ -201,7 +256,7 @@
     const onWatch = location.pathname === '/watch' || location.pathname.startsWith('/shorts/')
     const existing = player?.querySelector(':scope > .downly-wrap')
     // Include the playlist in the key so the ☰ button appears/disappears with it
-    const key = `${videoKey()}|${playlistId() ?? ''}`
+    const key = `${mediaKey()}|${playlistId() ?? ''}`
     if (existing && (existing.dataset.key !== key || !onWatch)) remove(existing)
     if (!player || !onWatch || dismissed.has(key) || player.querySelector(':scope > .downly-wrap')) return
     // Send the plain video URL: with &list= yt-dlp would treat it as the playlist
@@ -211,7 +266,7 @@
       u.searchParams.delete('index')
       return u.href
     }
-    const wrap = makeButton(key, (mode) => sendMedia(videoUrl(), mode), playlistId() ? sendPlaylist : null)
+    const wrap = makeButton(key, (mode) => sendMedia(videoUrl(), mode), { playlist: playlistId() ? sendPlaylist : null })
     wrap.dataset.key = key
     player.appendChild(wrap)
   }
@@ -228,47 +283,142 @@
     document.body.appendChild(btn)
   }
 
-  const tagged = new WeakMap()
-  function tagVideos() {
-    for (const video of document.querySelectorAll('video')) {
-      const r = video.getBoundingClientRect()
-      // Reels/Stories are tall and narrow, so only require a reasonable area
-      if (r.width < 160 || r.height < 120) continue
-      const key = videoKey(video)
-      const old = tagged.get(video)
+  /** Story/status pages, where photos get a button too, not only videos */
+  const photoPage = () => isWhatsApp || /(^|\.)snapchat\.com$/.test(location.hostname) || /\/stories\//.test(location.pathname)
+  const MIN_SIZE = { VIDEO: [160, 120], IMG: [200, 140] }
+
+  /** WhatsApp shows a chat video as a picture with a play icon: that picture isn't the video */
+  function isVideoPreview(img) {
+    let node = img
+    for (let depth = 0; node && depth < 6; depth++, node = node.parentElement) {
+      if (node.querySelector?.('[data-icon*="play"], [data-icon*="gif"]')) return true
+    }
+    return false
+  }
+
+  function wanted(media) {
+    const [w, h] = MIN_SIZE[media.tagName]
+    const r = media.getBoundingClientRect()
+    if (r.width < w || r.height < h) return false
+    if (media.tagName === 'IMG') return !!media.currentSrc && !(isWhatsApp && isVideoPreview(media))
+    return true
+  }
+
+  async function download(media, mode) {
+    const src = media.currentSrc || media.src || ''
+    const post = postUrlFor(media)
+    if (src.startsWith('blob:')) return (await sendBlob(media, src)) ?? sendMedia(post, mode)
+    if (media.tagName === 'IMG') return sendFile(src)
+    // A plain file goes straight to the fast engine: on normal sites, and on story pages where
+    // the file is exactly the story on screen. Feeds/streams need the post URL (yt-dlp).
+    const plainFile = /^https?:/i.test(src) && !/\.m3u8|\.mpd/i.test(src)
+    if (mode === 'video' && plainFile && (photoPage() || (post === location.href && !isPostUrl(post)))) return sendFile(src)
+    return sendMedia(post, mode)
+  }
+
+  // Every other site: one layer above the page, each button following its video
+  let layer = null
+  function layerRoot() {
+    layer ??= Object.assign(document.createElement('div'), { id: 'downly-layer' })
+    // In fullscreen only the fullscreen element is drawn, so the layer moves inside it
+    const full = document.fullscreenElement
+    const parent = full && full.tagName !== 'VIDEO' ? full : document.documentElement
+    if (layer.parentNode !== parent) parent.appendChild(layer)
+    return layer
+  }
+
+  /** media element → { key, wrap } */
+  const tracked = new Map()
+  let pointer = { x: -1, y: -1 }
+  addEventListener('pointermove', (e) => (pointer = { x: e.clientX, y: e.clientY }), { capture: true, passive: true })
+
+  const clamp = (v, lo, hi) => Math.min(Math.max(v, lo), Math.max(lo, hi))
+
+  function follow(wrap, media) {
+    const r = media.getBoundingClientRect()
+    const onScreen = r.bottom > 0 && r.right > 0 && r.top < innerHeight && r.left < innerWidth
+    const shown = onScreen && (media.checkVisibility?.({ opacityProperty: true, visibilityProperty: true }) ?? true)
+    wrap.classList.toggle('sg-off', !shown)
+    if (!shown) return
+    const w = wrap.offsetWidth
+    const h = wrap.offsetHeight
+    const pos = wrap.sgPos ?? cfg.overlayPos[host]
+    let x, y
+    if (pos) {
+      x = r.left + (r.width - w) * pos.x
+      y = r.top + (r.height - h) * pos.y
+    } else {
+      const [v, side] = cfg.overlay.corner.split('-')
+      x = side === 'left' ? r.left + 12 : r.right - w - 12
+      y = v === 'top' ? r.top + 12 : r.bottom - h - 64
+    }
+    // Stay on the visible part of the video (reels and stories are often taller than the window)
+    x = clamp(x, Math.max(r.left, 0) + 4, Math.min(r.right, innerWidth) - w - 4)
+    y = clamp(y, Math.max(r.top, 0) + 4, Math.min(r.bottom, innerHeight) - h - 4)
+    wrap.style.left = `${x}px`
+    wrap.style.top = `${y}px`
+    const over = pointer.x >= r.left && pointer.x <= r.right && pointer.y >= r.top && pointer.y <= r.bottom
+    wrap.classList.toggle('sg-show', over)
+  }
+
+  let frame = 0
+  function tick() {
+    frame = 0
+    if (!tracked.size) return
+    layerRoot()
+    for (const [media, item] of tracked) {
+      if (!media.isConnected || !item.wrap.isConnected) {
+        remove(item.wrap)
+        tracked.delete(media)
+      } else follow(item.wrap, media)
+    }
+    frame = requestAnimationFrame(tick)
+  }
+
+  function tagMedia() {
+    const found = [...document.querySelectorAll('video')]
+    if (photoPage()) found.push(...document.querySelectorAll('img'))
+    for (const media of found) {
+      const old = tracked.get(media)
+      if (!wanted(media)) {
+        if (old) {
+          remove(old.wrap)
+          tracked.delete(media)
+        }
+        continue
+      }
+      const key = mediaKey(media)
       // Feeds recycle <video> elements for the next post — refresh the button when it changes
       if (old && old.key === key && old.wrap.isConnected) continue
       if (old) remove(old.wrap)
-      const box = video.parentElement
-      if (!box || dismissed.has(key)) continue
-      if (getComputedStyle(box).position === 'static') box.style.position = 'relative'
-      const wrap = makeButton(key, (mode) => {
-        const src = video.currentSrc || video.src
-        const post = postUrlFor(video)
-        // A plain file on a normal site can go straight to the fast engine;
-        // social/blob/stream players need the post URL (yt-dlp picks quality & sound)
-        if (mode === 'video' && post === location.href && /^https?:/i.test(src) && !/\.m3u8|\.mpd/i.test(src) && !isPostUrl(post)) {
-          return ext.runtime.sendMessage({ type: 'file', url: src, referrer: location.href })
-        }
-        return sendMedia(post, mode)
+      tracked.delete(media)
+      if (dismissed.has(key)) continue
+      const wrap = makeButton(key, (mode) => download(media, mode), {
+        audio: media.tagName === 'VIDEO' && !isWhatsApp,
+        box: () => media.getBoundingClientRect()
       })
-      box.appendChild(wrap)
-      tagged.set(video, { key, wrap })
+      wrap.classList.add('sg-layer')
+      layerRoot().appendChild(wrap)
+      tracked.set(media, { key, wrap })
     }
+    if (tracked.size && !frame) frame = requestAnimationFrame(tick)
   }
 
   function scan() {
     if (!allowed()) {
       for (const w of [...wraps]) remove(w)
+      tracked.clear()
       document.getElementById('downly-playlist')?.remove()
       return
     }
-    if (isYouTube) youtubeButton()
-    else tagVideos()
+    // Embedded YouTube players have no watch page around them: treat them like any video
+    if (isYouTube && !location.pathname.startsWith('/embed/')) youtubeButton()
+    else tagMedia()
   }
 
   function reset() {
     for (const w of [...wraps]) remove(w)
+    tracked.clear()
     document.getElementById('downly-playlist')?.remove()
     scan()
   }
@@ -285,6 +435,7 @@
     }
     if (!['overlay', 'overlayHidden', 'overlayPos'].some((k) => k in changes)) return
     cfg = await ext.storage.local.get(DEFAULTS)
+    for (const w of wraps) delete w.sgPos
     if (allowed()) wraps.forEach(place)
     scan()
   })
@@ -302,9 +453,14 @@
     timer = setTimeout(scan, 400)
   }).observe(document.documentElement, { childList: true, subtree: true })
   document.addEventListener('yt-navigate-finish', scan)
+  document.addEventListener('fullscreenchange', () => tracked.size && layerRoot())
   // Social feeds swap videos while scrolling without DOM changes big enough to notice
-  window.addEventListener('scroll', () => {
-    clearTimeout(timer)
-    timer = setTimeout(scan, 300)
-  }, { passive: true })
+  window.addEventListener(
+    'scroll',
+    () => {
+      clearTimeout(timer)
+      timer = setTimeout(scan, 300)
+    },
+    { passive: true }
+  )
 })()

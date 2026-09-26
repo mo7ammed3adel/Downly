@@ -296,6 +296,10 @@ app.whenReady().then(async () => {
     if (scheduler.afterDone()) void quit()
   })
   bridge.on('add', handleExternal)
+  bridge.on('file', ({ path, fileName, pageUrl }: { path: string; fileName: string; pageUrl?: string }) => {
+    manager.importFile(path, fileName, pageUrl).catch((err) => notify(t('notify.failed'), `${fileName}
+${err}`))
+  })
   bridge.on('batch', ({ urls }: { urls: string[] }) => {
     bringToFront()
     sendToUi('external:batch', urls)

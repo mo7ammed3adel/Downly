@@ -1,5 +1,5 @@
 import { EventEmitter } from 'node:events'
-import { mkdir, readFile, rename, rm, stat, writeFile } from 'node:fs/promises'
+import { copyFile, mkdir, readFile, rename, rm, stat, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { randomUUID } from 'node:crypto'
 import type { Category, DownloadItem, NewDownloadRequest, Settings } from '@shared/types'
@@ -215,6 +215,52 @@ export class DownloadManager extends EventEmitter {
     for (const task of this.tasks.values()) task.stop()
     for (const item of this.items.values()) if (isActive(item) || item.status === 'queued') item.status = 'paused'
     await this.save()
+  }
+
+  /**
+   * Adds a file that already exists in full (media the browser extension read out of a page,
+   * e.g. WhatsApp's encrypted media) as a completed download in its category folder.
+   */
+  async importFile(tempPath: string, name: string, pageUrl?: string): Promise<DownloadItem> {
+    const settings = this.deps.getSettings()
+    const fileName = sanitizeFileName(name) || 'file'
+    const category = categorize(fileName, settings.categories)
+    const directory = this.dirFor(category)
+    await mkdir(directory, { recursive: true })
+    const id = randomUUID()
+    const finalName = await this.uniqueName(directory, fileName, id)
+    const target = join(directory, finalName)
+    try {
+      await rename(tempPath, target)
+    } catch {
+      // Temp folder on another drive
+      await copyFile(tempPath, target)
+      await rm(tempPath, { force: true })
+    }
+    const size = (await stat(target)).size
+    const now = Date.now()
+    const item: DownloadItem = {
+      id,
+      kind: 'http',
+      url: pageUrl ?? '',
+      pageUrl,
+      fileName: finalName,
+      directory,
+      category,
+      size,
+      downloaded: size,
+      status: 'completed',
+      resumable: false,
+      segments: [],
+      createdAt: now,
+      completedAt: now,
+      speed: 0,
+      eta: 0
+    }
+    this.items.set(id, item)
+    this.markDirty(item)
+    this.emit('completed', item)
+    return item
   }
 
   // ---------------------------------------------------------------- internals

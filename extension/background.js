@@ -79,6 +79,21 @@ async function api(path, body) {
   return res.json()
 }
 
+/** One piece of a file the page script read out of the page (see sendBlob in content.js) */
+async function uploadChunk(id, offset, data) {
+  if (!appPort) await ping(true)
+  if (!appPort) throw new Error('Downly is not running')
+  const bytes = Uint8Array.from(atob(data), (c) => c.charCodeAt(0))
+  const res = await fetch(`http://127.0.0.1:${appPort}/upload?id=${encodeURIComponent(id)}&offset=${offset}`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/octet-stream', 'x-downly': '1' },
+    body: bytes,
+    signal: AbortSignal.timeout(60_000)
+  })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json()
+}
+
 async function cookiesFor(url) {
   try {
     const list = await ext.cookies.getAll({ url })
@@ -347,6 +362,10 @@ ext.runtime.onMessage.addListener((msg, sender, reply) => {
       case 'file':
         await send('/download', { url: msg.url, referrer: msg.referrer, pageUrl: msg.referrer })
         return { ok: true }
+      case 'upload:chunk':
+        return uploadChunk(msg.id, msg.offset, msg.data)
+      case 'upload:done':
+        return api('/upload/done', { id: msg.id, fileName: msg.fileName, pageUrl: msg.pageUrl })
       case 'links':
         return api('/links', { urls: await collectLinks(msg.tabId), pageUrl: msg.pageUrl })
       default:

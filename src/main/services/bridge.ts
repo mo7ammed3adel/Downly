@@ -1,5 +1,10 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http'
 import { EventEmitter } from 'node:events'
+import { createWriteStream } from 'node:fs'
+import { mkdir, rm } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { pipeline } from 'node:stream/promises'
 import type { ExternalAddRequest, Settings } from '@shared/types'
 import { isHttpUrl } from '@shared/util'
 import { BRIDGE_PORT_COUNT } from '@shared/defaults'
@@ -10,7 +15,8 @@ const EXTENSION_ORIGIN = /^(chrome-extension|moz-extension|extension|safari-web-
  * Local HTTP endpoint the browser extension talks to (127.0.0.1 only).
  * Web pages cannot use it: every call must come from an extension origin,
  * which pages cannot fake, so a random site can't queue downloads.
- * Events: 'add' (ExternalAddRequest), 'batch' ({ urls, pageUrl })
+ * Events: 'add' (ExternalAddRequest), 'batch' ({ urls, pageUrl }),
+ * 'file' ({ path, fileName, pageUrl }) for media the extension read out of a page (/upload)
  */
 export class BrowserBridge extends EventEmitter {
   private server?: Server
@@ -20,6 +26,8 @@ export class BrowserBridge extends EventEmitter {
   port = 0
   /** When the extension last talked to us (0 = never since start) */
   lastSeen = 0
+  /** Files being uploaded in chunks: id → bytes received so far */
+  private uploads = new Map<string, number>()
 
   constructor(
     private getSettings: () => Settings,
@@ -85,6 +93,7 @@ export class BrowserBridge extends EventEmitter {
       })
     }
     if (req.method !== 'POST') return this.reply(res, 404)
+    if (url.pathname === '/upload') return this.receiveChunk(req, res, url)
 
     let body: Record<string, unknown>
     try {
@@ -116,7 +125,41 @@ export class BrowserBridge extends EventEmitter {
       this.emit('batch', { urls, pageUrl: str(body.pageUrl) })
       return this.reply(res, 200, { ok: true, count: urls.length })
     }
+    if (url.pathname === '/upload/done') {
+      const id = String(body.id ?? '')
+      if (!this.uploads.has(id)) return this.reply(res, 404, { error: 'unknown upload' })
+      this.uploads.delete(id)
+      this.emit('file', { path: uploadPath(id), fileName: str(body.fileName) ?? 'file', pageUrl: str(body.pageUrl) })
+      return this.reply(res, 200, { ok: true })
+    }
     return this.reply(res, 404)
+  }
+
+  /**
+   * One piece of a file the extension read out of a page (WhatsApp media only exists
+   * decrypted inside the page). Pieces arrive in order: ?id=…&offset=<bytes so far>.
+   */
+  private async receiveChunk(req: IncomingMessage, res: ServerResponse, url: URL): Promise<void> {
+    const id = url.searchParams.get('id') ?? ''
+    const offset = Number(url.searchParams.get('offset'))
+    if (!UPLOAD_ID.test(id)) return this.reply(res, 400, { error: 'bad id' })
+    const received = this.uploads.get(id) ?? 0
+    if (offset !== received) return this.reply(res, 409, { error: 'out of order', received })
+    try {
+      if (offset === 0) await mkdir(join(tmpdir(), 'downly-uploads'), { recursive: true })
+      let size = 0
+      req.on('data', (c: Buffer) => {
+        size += c.length
+        if (size > MAX_CHUNK) req.destroy(new Error('chunk too large'))
+      })
+      await pipeline(req, createWriteStream(uploadPath(id), { flags: offset === 0 ? 'w' : 'a' }))
+      this.uploads.set(id, received + size)
+      this.reply(res, 200, { ok: true, received: received + size })
+    } catch {
+      this.uploads.delete(id)
+      await rm(uploadPath(id), { force: true })
+      this.reply(res, 500, { error: 'write failed' })
+    }
   }
 
   private reply(res: ServerResponse, status: number, json?: unknown): void {
@@ -125,6 +168,10 @@ export class BrowserBridge extends EventEmitter {
     res.end(json !== undefined ? JSON.stringify(json) : undefined)
   }
 }
+
+const UPLOAD_ID = /^[\w-]{8,64}$/
+const MAX_CHUNK = 16 * 1024 * 1024
+const uploadPath = (id: string) => join(tmpdir(), 'downly-uploads', `${id}.part`)
 
 const str = (v: unknown) => (typeof v === 'string' && v ? v : undefined)
 
