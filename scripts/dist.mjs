@@ -1,6 +1,7 @@
 // Builds the installers for one platform into release/:
 //   node scripts/dist.mjs win     → Downly-Setup.exe (Windows 10/11, x64)
 //   node scripts/dist.mjs win7    → Downly-Setup-Win7-x64.exe + Downly-Setup-Win7-x86.exe (Electron 22)
+//   node scripts/dist.mjs store   → Downly-Store.appx for the Microsoft Store (the Store signs it)
 //   node scripts/dist.mjs mac     → Downly-mac-arm64.dmg + Downly-mac-x64.dmg
 //   node scripts/dist.mjs linux   → Downly-linux.AppImage + Downly-linux.deb
 // ffmpeg-static only ships the binary for one CPU, so it is swapped per architecture.
@@ -29,6 +30,18 @@ const JOBS = {
   win: () => {
     installFfmpeg('win32', 'x64')
     builder('--win nsis --x64')
+  },
+  store: () => {
+    // The package identity comes from Partner Center (Product identity page)
+    const { STORE_IDENTITY_NAME, STORE_PUBLISHER, STORE_PUBLISHER_NAME } = process.env
+    if (!STORE_IDENTITY_NAME || !STORE_PUBLISHER || !STORE_PUBLISHER_NAME) {
+      throw new Error('Set STORE_IDENTITY_NAME, STORE_PUBLISHER and STORE_PUBLISHER_NAME from Partner Center')
+    }
+    installFfmpeg('win32', 'x64')
+    builder(
+      `--win appx --x64 -c.appx.identityName="${STORE_IDENTITY_NAME}" -c.appx.publisher="${STORE_PUBLISHER}" ` +
+        `-c.appx.publisherDisplayName="${STORE_PUBLISHER_NAME}"`
+    )
   },
   win7: () => {
     for (const [arch, label] of [

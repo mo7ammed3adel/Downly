@@ -51,6 +51,16 @@ def export(img: Image.Image, size: int, path: Path) -> None:
     img.resize((size, size), Image.LANCZOS).save(path)
 
 
+def tile(img: Image.Image, width: int, height: int, path: Path, scale: float = 0.7) -> None:
+    """Microsoft Store tile: the icon centred on a transparent canvas of that size."""
+    side = round(min(width, height) * scale)
+    canvas = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+    mark = img.resize((side, side), Image.LANCZOS)
+    canvas.paste(mark, ((width - side) // 2, (height - side) // 2), mark)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    canvas.save(path)
+
+
 def main() -> None:
     icon = master()
     res = ROOT / "resources"
@@ -63,6 +73,15 @@ def main() -> None:
         export(icon, n, ROOT / "extension" / "icons" / f"icon{n}.png")
     export(icon, 256, ROOT / "website" / "assets" / "icon.png")
     export(icon, 128, ROOT / "src" / "renderer" / "src" / "assets" / "logo.png")
+
+    # Microsoft Store (MSIX) tiles, picked up by electron-builder from resources/appx
+    appx = res / "appx"
+    export(icon, 50, appx / "StoreLogo.png")
+    export(icon, 44, appx / "Square44x44Logo.png")
+    tile(icon, 71, 71, appx / "SmallTile.png")
+    tile(icon, 150, 150, appx / "Square150x150Logo.png")
+    tile(icon, 310, 150, appx / "Wide310x150Logo.png")
+    tile(icon, 310, 310, appx / "LargeTile.png")
 
     # Social preview (1200x630) for the website
     og = Image.new("RGB", (1200, 630), (13, 17, 26))

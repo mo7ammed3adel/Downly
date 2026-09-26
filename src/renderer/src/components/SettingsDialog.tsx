@@ -26,6 +26,7 @@ export function SettingsDialog({ initialTab }: { initialTab?: string }) {
   const saved = useStore((s) => s.settings)
   const components = useStore((s) => s.components)
   const version = useStore((s) => s.version)
+  const windowsStore = useStore((s) => s.windowsStore)
   const [tab, setTab] = useState<Tab>((initialTab as Tab) ?? 'general')
   const [s, setS] = useState<Settings>(saved)
   const patch = <K extends keyof Settings>(key: K, value: Settings[K]) => setS((prev) => ({ ...prev, [key]: value }))
@@ -84,7 +85,9 @@ export function SettingsDialog({ initialTab }: { initialTab?: string }) {
                 </select>
               </Field>
             </div>
-            <Toggle label={t('settings.startWithSystem')} checked={s.startWithSystem} onChange={(v) => patch('startWithSystem', v)} />
+            {!windowsStore && (
+              <Toggle label={t('settings.startWithSystem')} checked={s.startWithSystem} onChange={(v) => patch('startWithSystem', v)} />
+            )}
             <Toggle label={t('settings.minimizeToTray')} checked={s.minimizeToTray} onChange={(v) => patch('minimizeToTray', v)} />
             <Toggle label={t('settings.notifications')} checked={s.notifications} onChange={(v) => patch('notifications', v)} />
             <Toggle label={t('settings.clipboard')} checked={s.clipboardMonitor} onChange={(v) => patch('clipboardMonitor', v)} />

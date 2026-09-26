@@ -19,6 +19,7 @@
     "icons": "python scripts/make-icons.py",
     "dist:win": "node scripts/dist.mjs win",
     "dist:win7": "node scripts/dist.mjs win7",
+    "dist:store": "node scripts/dist.mjs store",
     "dist:mac": "node scripts/dist.mjs mac",
     "dist:linux": "node scripts/dist.mjs linux",
     "extension:zip": "node scripts/pack-extension.mjs"
@@ -86,6 +87,18 @@
       "allowToChangeInstallationDirectory": true,
       "multiLanguageInstaller": true,
       "createDesktopShortcut": true
+    },
+    "appx": {
+      "applicationId": "Downly",
+      "displayName": "Downly",
+      "backgroundColor": "transparent",
+      "minVersion": "10.0.17763.0",
+      "maxVersionTested": "10.0.26100.0",
+      "languages": [
+        "en-US",
+        "ar-EG"
+      ],
+      "artifactName": "Downly-Store.${ext}"
     },
     "mac": {
       "target": [

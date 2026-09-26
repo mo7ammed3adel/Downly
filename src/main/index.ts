@@ -71,7 +71,8 @@ export function getState(): AppState {
     settings: settings.get(),
     components: binaries.state,
     version: app.getVersion(),
-    platform: process.platform
+    platform: process.platform,
+    windowsStore: process.windowsStore === true
   }
 }
 
@@ -247,7 +248,8 @@ function notify(title: string, body: string, onClick?: () => void): void {
 function applySystemSettings(): void {
   const s = settings.get()
   nativeTheme.themeSource = s.theme
-  if (app.isPackaged) app.setLoginItemSettings({ openAtLogin: s.startWithSystem, args: ['--hidden'] })
+  // Store packages virtualize the registry Run key, so this would silently do nothing there
+  if (app.isPackaged && !process.windowsStore) app.setLoginItemSettings({ openAtLogin: s.startWithSystem, args: ['--hidden'] })
   bridge.apply()
   clipboardMonitor.apply()
   manager.applySettings()

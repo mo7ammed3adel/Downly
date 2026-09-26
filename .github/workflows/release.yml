@@ -4,6 +4,9 @@
 # Trigger: push a tag like v1.0.1   (git tag v1.0.1 && git push --tags)
 #          or run it by hand from the Actions tab.
 # Needs secret RELEASES_TOKEN: a token that can create releases in downly-releases.
+# Optional repository variables STORE_IDENTITY_NAME, STORE_PUBLISHER, STORE_PUBLISHER_NAME
+# (Partner Center → Product identity): also builds Downly-Store.appx for the Microsoft Store,
+# kept as a workflow artifact to upload in Partner Center (not published to the releases repo).
 # Optional AMO_JWT_ISSUER + AMO_JWT_SECRET (addons.mozilla.org API key): signs the Firefox
 # extension so it installs permanently. Without them Firefox only gets a temporary add-on.
 name: Release
@@ -113,6 +116,40 @@ jobs:
             release/*.deb
           if-no-files-found: error
 
+  store:
+    needs: firefox
+    if: vars.STORE_IDENTITY_NAME != ''
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: firefox-xpi
+          path: resources
+
+      - name: Build the Store package
+        run: node scripts/dist.mjs store
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+          STORE_IDENTITY_NAME: ${{ vars.STORE_IDENTITY_NAME }}
+          STORE_PUBLISHER: ${{ vars.STORE_PUBLISHER }}
+          STORE_PUBLISHER_NAME: ${{ vars.STORE_PUBLISHER_NAME }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: microsoft-store-package
+          path: release/*.appx
+          if-no-files-found: error
+
   publish:
     needs: build
     runs-on: ubuntu-latest
@@ -127,6 +164,8 @@ jobs:
       - name: Pack the browser extension
         run: |
           if [ -f dist/downly-firefox.xpi ]; then mv dist/downly-firefox.xpi dist/Downly-firefox.xpi; fi
+          # The Store package is uploaded in Partner Center, not offered as a download
+          rm -f dist/*.appx
           cd extension && zip -qr ../dist/Downly-extension.zip . && cd ..
           ls -la dist
 

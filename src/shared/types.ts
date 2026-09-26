@@ -224,6 +224,8 @@ export interface AppState {
   components: ComponentsState
   version: string
   platform: string
+  /** Installed from the Microsoft Store (MSIX package) */
+  windowsStore: boolean
 }
 
 export type BrowserId = 'chrome' | 'edge' | 'brave' | 'opera' | 'vivaldi' | 'firefox'

@@ -24,6 +24,7 @@ interface Store {
   components: ComponentsState
   version: string
   platform: string
+  windowsStore: boolean
   filter: SidebarFilter
   search: string
   selected: string[]
@@ -45,6 +46,7 @@ export const useStore = create<Store>((set) => ({
   components: { ytdlp: { ready: false, busy: false }, ffmpeg: { ready: false } },
   version: '',
   platform: 'win32',
+  windowsStore: false,
   filter: 'all',
   search: '',
   selected: [],
@@ -57,7 +59,8 @@ export const useStore = create<Store>((set) => ({
       settings: s.settings,
       components: s.components,
       version: s.version,
-      platform: s.platform
+      platform: s.platform,
+      windowsStore: s.windowsStore
     }),
   upsert: (items) =>
     set((st) => {

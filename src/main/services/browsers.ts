@@ -1,7 +1,7 @@
 import { app, shell } from 'electron'
 import { spawn } from 'node:child_process'
 import { copyFile, mkdir, readdir, rm, stat } from 'node:fs/promises'
-import { join } from 'node:path'
+import { basename, dirname, join, relative } from 'node:path'
 import type { BrowserId, BrowserInfo } from '@shared/types'
 
 /**
@@ -90,6 +90,22 @@ async function copyDir(from: string, to: string): Promise<void> {
 }
 
 /**
+ * Microsoft Store (MSIX) builds: Windows redirects what the app writes under AppData to a
+ * private per-package folder, so other programs (the browser) don't see it at the usual path.
+ * Returns where the file really is, or the path unchanged outside the Store build.
+ */
+async function pathOutsidePackage(path: string): Promise<string> {
+  if (!process.windowsStore) return path
+  // The app runs from ...\WindowsApps\<Name>_<Version>_<Arch>_<ResourceId>_<PublisherId>pp\Downly.exe
+  const parts = basename(dirname(dirname(process.execPath))).split('_')
+  if (parts.length < 5) return path
+  const family = `${parts[0]}_${parts[parts.length - 1]}`
+  const appData = dirname(app.getPath('appData')) // ...\AppData
+  const real = join(appData, 'Local', 'Packages', family, 'LocalCache', relative(appData, path))
+  return (await exists(real)) ? real : path
+}
+
+/**
  * Copies the extension to a stable per-user folder (the app folder can move on update,
  * and macOS may run the app from a random translocated path) and returns that folder.
  */
@@ -97,7 +113,7 @@ export async function prepareExtensionFolder(): Promise<string> {
   const target = join(app.getPath('userData'), 'browser-extension')
   await rm(target, { recursive: true, force: true })
   await copyDir(bundledExtensionDir(), target)
-  return target
+  return pathOutsidePackage(target)
 }
 
 /** Signed Firefox package, present only when the release pipeline had AMO signing keys */
