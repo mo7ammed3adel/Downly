@@ -48,7 +48,7 @@ in the submission's **Packages** step.
 > yt-dlp. yt-dlp is downloaded from its official GitHub releases on first use and kept up to
 > date, because sites change often and a bundled copy stops working within weeks. No account
 > is needed and nothing is collected. The optional browser extension talks only to the app on
-> 127.0.0.1. To test: paste any direct file link (e.g. a .zip) into the address box and click
+> 127.0.0.1. To test: click "Add URL", paste a direct file link such as https://proof.ovh.net/files/100Mb.dat, and click
 > Download.
 
 **Risk to know about:** reviewers may object to the yt-dlp download (policy 10.2.2, code not in
