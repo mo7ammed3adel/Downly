@@ -11,6 +11,7 @@ import { SettingsDialog } from './components/SettingsDialog'
 import { SchedulerDialog } from './components/SchedulerDialog'
 import { SupportDialog } from './components/SupportDialog'
 import { ExtensionDialog } from './components/ExtensionDialog'
+import { IdmDialog } from './components/IdmDialog'
 import { DeleteDialog, RefreshDialog } from './components/SmallDialogs'
 import type { ThemeMode } from '@shared/types'
 
@@ -61,6 +62,15 @@ export default function App() {
     }, 1200)
     return () => clearTimeout(timer)
   }, [ready, onboarded])
+  // IDM grabs browser downloads before Downly: explain how to turn that off (until dismissed)
+  const idmDismissed = settings?.onboarding.idmDismissed
+  useEffect(() => {
+    if (!ready || idmDismissed) return
+    const timer = setTimeout(async () => {
+      if ((await window.api.isIdmRunning()) && !useStore.getState().dialog) useStore.getState().openDialog({ type: 'idm' })
+    }, 2500)
+    return () => clearTimeout(timer)
+  }, [ready, idmDismissed])
   useEffect(() => {
     if (settings) applyLanguage(settings.language)
   }, [settings?.language])
@@ -115,6 +125,7 @@ export default function App() {
       {dialog?.type === 'scheduler' && <SchedulerDialog />}
       {dialog?.type === 'support' && <SupportDialog />}
       {dialog?.type === 'extension' && <ExtensionDialog />}
+      {dialog?.type === 'idm' && <IdmDialog />}
       {dialog?.type === 'delete' && <DeleteDialog ids={dialog.ids} />}
       {dialog?.type === 'refresh' && <RefreshDialog id={dialog.id} />}
     </div>

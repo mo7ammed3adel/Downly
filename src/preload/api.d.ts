@@ -7,7 +7,8 @@ import type {
   ExternalAddRequest,
   NewDownloadRequest,
   ProbeResult,
-  Settings
+  Settings,
+  SettingsPatch
 } from '../shared/types'
 
 type Unsubscribe = () => void
@@ -27,7 +28,7 @@ export interface Api {
   refreshUrl(id: string, url: string): Promise<void>
   open(id: string): Promise<void>
   openFolder(id: string): Promise<void>
-  updateSettings(patch: Partial<Settings>): Promise<Settings>
+  updateSettings(patch: SettingsPatch): Promise<Settings>
   chooseDirectory(current?: string): Promise<string | null>
   updateComponents(): Promise<void>
   openExternal(url: string): Promise<void>
@@ -40,6 +41,8 @@ export interface Api {
   showExtensionFolder(folder: string): Promise<void>
   /** ms timestamp of the extension's last contact with the app, 0 if never */
   extensionLastSeen(): Promise<number>
+  /** Internet Download Manager is running (it grabs browser downloads first) */
+  isIdmRunning(): Promise<boolean>
   onDownloadsChanged(cb: (items: DownloadItem[]) => void): Unsubscribe
   onDownloadsRemoved(cb: (ids: string[]) => void): Unsubscribe
   onSettingsChanged(cb: (s: Settings) => void): Unsubscribe

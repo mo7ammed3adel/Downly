@@ -282,5 +282,16 @@
     "otherBrowser": "متصفح تاني",
     "later": "بعدين",
     "done": "تم"
+  },
+  "idm": {
+    "title": "IDM ممكن ياخد التحميلات قبل Downly",
+    "intro": "برنامج Internet Download Manager شغال على الجهاز. لو الربط بتاعه بالمتصفح شغال، هيمسك التحميلات قبل Downly وتفتح فيه هو. علشان Downly هو اللي يحمّل:",
+    "step1": "افتح IDM، وبعدين قايمة Downloads ← Options",
+    "step2": "في تبويب General، شيل العلامة من «Use advanced browser integration»",
+    "step2Hint": "شيل العلامة من المتصفحات اللي في القايمة جنبها كمان، وبعدين دوس OK.",
+    "step3": "من صفحة الإضافات في المتصفح، اقفل إضافة «IDM Integration Module»",
+    "note": "قفل IDM لوحده مش كفاية: الربط بتاعه بيشغّله تاني مع أول تحميل.",
+    "dontShow": "متظهرش تاني",
+    "ok": "تمام"
   }
 }

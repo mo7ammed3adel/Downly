@@ -14,6 +14,7 @@ export type Dialog =
   | { type: 'scheduler' }
   | { type: 'support' }
   | { type: 'extension' }
+  | { type: 'idm' }
   | { type: 'delete'; ids: string[] }
   | { type: 'refresh'; id: string }
 

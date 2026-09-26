@@ -1130,19 +1130,36 @@ input[type='checkbox'] {
 }
 .steps {
   margin: 0;
-  padding-inline-start: 22px;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
   display: grid;
   gap: 16px;
 }
+/* Flex items lose the list marker, so the numbers are drawn as circles */
 .steps li {
+  counter-increment: step;
+  position: relative;
+  padding-inline-start: 32px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 6px;
 }
-.steps li::marker {
+.steps li::before {
+  content: counter(step);
+  position: absolute;
+  inset-inline-start: 0;
+  top: -1px;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-size: 12px;
   font-weight: 700;
-  color: var(--accent);
 }
 .path-box {
   display: flex;
@@ -1367,6 +1384,14 @@ input[type='checkbox'] {
   display: block;
   padding: 2px 8px;
   border-radius: 4px;
+}
+.shot-check::before {
+  content: '☐ ';
+}
+.shot-check {
+  display: inline-block;
+  padding: 2px 6px;
+  color: var(--text);
 }
 .shot-file.selected {
   background: var(--accent-soft);

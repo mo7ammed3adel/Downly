@@ -1,4 +1,4 @@
-import type { Category, CategoryConfig, Settings } from './types'
+import type { Category, CategoryConfig, Settings, SettingsPatch } from './types'
 
 export const DEFAULT_CATEGORIES: Record<Category, CategoryConfig> = {
   video: {
@@ -85,12 +85,12 @@ export function createDefaultSettings(downloadDir: string, language: string): Se
     scheduler: { enabled: false, startTime: '02:00', stopTime: '', days: [0, 1, 2, 3, 4, 5, 6], afterDone: 'none' },
     categories: DEFAULT_CATEGORIES,
     support: { completedCount: 0, prompted: false },
-    onboarding: { extensionShown: false }
+    onboarding: { extensionShown: false, idmDismissed: false }
   }
 }
 
 /** Deep-ish merge so settings saved by older versions pick up new keys */
-export function mergeSettings(base: Settings, saved: Partial<Settings> | undefined): Settings {
+export function mergeSettings(base: Settings, saved: SettingsPatch | undefined): Settings {
   if (!saved) return base
   return {
     ...base,

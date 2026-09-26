@@ -3,7 +3,7 @@ import { EventEmitter } from 'node:events'
 import { readFileSync } from 'node:fs'
 import { rename, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import type { Settings } from '@shared/types'
+import type { Settings, SettingsPatch } from '@shared/types'
 import { createDefaultSettings, mergeSettings } from '@shared/defaults'
 import { SUPPORTED_LANGUAGES } from '@shared/i18n'
 
@@ -16,7 +16,7 @@ export class SettingsStore extends EventEmitter {
     const sys = app.getLocale().split('-')[0]
     const lang = SUPPORTED_LANGUAGES.some((l) => l.code === sys) ? sys : 'en'
     const defaults = createDefaultSettings(join(app.getPath('downloads'), 'Downly'), lang)
-    let saved: Partial<Settings> | undefined
+    let saved: SettingsPatch | undefined
     try {
       saved = JSON.parse(readFileSync(this.file, 'utf8'))
     } catch {
@@ -29,7 +29,7 @@ export class SettingsStore extends EventEmitter {
     return this.value
   }
 
-  update(patch: Partial<Settings>): Settings {
+  update(patch: SettingsPatch): Settings {
     this.value = mergeSettings(this.value, patch)
     this.emit('changed', this.value)
     void this.persist()

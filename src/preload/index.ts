@@ -38,6 +38,7 @@ const api: Api = {
   openExtensionsPage: (id) => ipcRenderer.invoke('extension:openPage', id),
   showExtensionFolder: (folder) => ipcRenderer.invoke('extension:showFolder', folder),
   extensionLastSeen: () => ipcRenderer.invoke('extension:lastSeen'),
+  isIdmRunning: () => ipcRenderer.invoke('idm:running'),
   onDownloadsChanged: on('downloads:changed'),
   onDownloadsRemoved: on('downloads:removed'),
   onSettingsChanged: on('settings:changed'),

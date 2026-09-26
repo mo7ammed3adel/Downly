@@ -1,6 +1,7 @@
 import { BrowserWindow, clipboard, dialog, ipcMain, shell } from 'electron'
+import { execFile } from 'node:child_process'
 import { join } from 'node:path'
-import type { AppState, NewDownloadRequest, ProbeResult, Settings } from '@shared/types'
+import type { AppState, NewDownloadRequest, ProbeResult, SettingsPatch } from '@shared/types'
 import { extensionOf, isKnownMediaSite, parseSpotifyUrl } from '@shared/util'
 import type { DownloadManager } from './engine/DownloadManager'
 import { buildHeaders, createFetcher, probe, type ProxyResolver } from './engine/http'
@@ -96,7 +97,7 @@ export function registerIpc(d: Deps): void {
     else void shell.openPath(item.directory)
   })
 
-  ipcMain.handle('settings:update', (_e, patch: Partial<Settings>) => settings.update(patch))
+  ipcMain.handle('settings:update', (_e, patch: SettingsPatch) => settings.update(patch))
   ipcMain.handle('dialog:chooseDir', async (_e, current?: string) => {
     const win = d.getWindow()
     const opts = { defaultPath: current, properties: ['openDirectory', 'createDirectory'] as ('openDirectory' | 'createDirectory')[] }
@@ -123,10 +124,24 @@ export function registerIpc(d: Deps): void {
   })
   ipcMain.handle('extension:showFolder', (_e, folder: string) => showFolder(folder))
   ipcMain.handle('extension:lastSeen', () => d.bridge.lastSeen)
+  ipcMain.handle('idm:running', () => isIdmRunning())
   ipcMain.handle('shell:openExternal', (_e, url: string) => {
     if (/^https?:\/\//.test(url)) return shell.openExternal(url)
   })
   ipcMain.handle('shell:openPath', (_e, path: string) => shell.openPath(path))
   ipcMain.handle('clipboard:write', (_e, text: string) => clipboard.writeText(text))
   ipcMain.handle('clipboard:read', () => clipboard.readText())
+}
+
+/**
+ * IDM hooks into browsers below the extension level and grabs downloads before Downly sees
+ * them, so the UI warns when it is running (Windows only).
+ */
+function isIdmRunning(): Promise<boolean> {
+  if (process.platform !== 'win32') return Promise.resolve(false)
+  return new Promise((resolve) =>
+    execFile('tasklist', ['/FI', 'IMAGENAME eq IDMan.exe', '/NH'], { windowsHide: true }, (err, out) =>
+      resolve(!err && /IDMan\.exe/i.test(out))
+    )
+  )
 }

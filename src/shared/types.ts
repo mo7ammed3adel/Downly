@@ -163,7 +163,12 @@ export interface Settings {
   /** Donation prompt bookkeeping: shown once after a number of finished downloads */
   support: { completedCount: number; prompted: boolean }
   /** The browser-extension setup screen is shown once on first launch */
-  onboarding: { extensionShown: boolean }
+  onboarding: { extensionShown: boolean; idmDismissed: boolean }
+}
+
+/** A settings change: any top-level key, and nested groups (proxy, onboarding…) only in part */
+export type SettingsPatch = {
+  [K in keyof Settings]?: Settings[K] extends unknown[] ? Settings[K] : Settings[K] extends object ? Partial<Settings[K]> : Settings[K]
 }
 
 export interface MediaFormat {

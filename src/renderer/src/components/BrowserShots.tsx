@@ -218,3 +218,33 @@ export function FilePickerShot({ platform, file }: { platform: string; file?: st
     </div>
   )
 }
+
+/** IDM's Options → General tab, pointing at the browser integration checkbox to clear */
+export function IdmOptionsShot() {
+  return (
+    <div className="shot" dir="ltr" aria-hidden="true">
+      <div className="shot-dialog-title">Configuration</div>
+      <div className="shot-page">
+        <div className="shot-actions">
+          <span className="shot-btn primary">General</span>
+          <span className="shot-btn">File types</span>
+          <span className="shot-btn">Connection</span>
+          <span className="shot-btn">Save to</span>
+        </div>
+        <div className="shot-head">
+          <Target>
+            <span className="shot-check">Use advanced browser integration</span>
+          </Target>
+        </div>
+        <div className="shot-files">
+          <span className="shot-file">☐ Chrome</span>
+          <span className="shot-file">☐ Edge</span>
+          <span className="shot-file">☐ Firefox</span>
+        </div>
+        <div className="shot-popup-buttons end">
+          <span className="shot-btn primary">OK</span>
+        </div>
+      </div>
+    </div>
+  )
+}

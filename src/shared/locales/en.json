@@ -282,5 +282,16 @@
     "otherBrowser": "Another browser",
     "later": "Later",
     "done": "Done"
+  },
+  "idm": {
+    "title": "IDM might take your downloads",
+    "intro": "Internet Download Manager is running on this PC. If its browser integration is on, it catches downloads before Downly can, so they open in IDM instead. To let Downly handle them:",
+    "step1": "Open IDM, then the Downloads menu → Options",
+    "step2": "In the General tab, uncheck “Use advanced browser integration”",
+    "step2Hint": "Uncheck the browsers in the list next to it too, then click OK.",
+    "step3": "In your browser's extensions page, turn off “IDM Integration Module”",
+    "note": "Closing IDM isn't enough: its integration starts it again with the next download.",
+    "dontShow": "Don't show again",
+    "ok": "OK"
   }
 }
