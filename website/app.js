@@ -15,7 +15,8 @@ const SITE = {
   // Store pages — fill in once the extension is published
   chrome: '',
   edge: '',
-  firefox: ''
+  // Signed by Mozilla in the release pipeline (swap for the addons.mozilla.org page once listed)
+  firefox: 'https://github.com/mo7ammed3adel/downly-releases/releases/latest/download/Downly-firefox.xpi'
 }
 
 const latest = `https://github.com/${SITE.releasesRepo}/releases/latest/download`
