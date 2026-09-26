@@ -1,4 +1,4 @@
-import { BrowserWindow, clipboard, dialog, ipcMain, shell } from 'electron'
+import { app, BrowserWindow, clipboard, dialog, ipcMain, shell } from 'electron'
 import { execFile } from 'node:child_process'
 import { join } from 'node:path'
 import type { AppState, NewDownloadRequest, ProbeRequest, ProbeResult, SettingsPatch } from '@shared/types'
@@ -11,6 +11,9 @@ import { partPath } from './engine/HttpDownload'
 import type { Binaries } from './services/binaries'
 import type { SettingsStore } from './services/settings'
 import { DOWNLOAD_PAGE, type Updater } from './services/updater'
+import { recentLog } from './services/log'
+import { buildReport, saveReport } from './services/report'
+import { SOCIAL } from '@shared/support'
 import type { BrowserBridge } from './services/bridge'
 import { detectBrowsers, openExtensionsPage, setupExtension, showFolder } from './services/browsers'
 
@@ -120,6 +123,23 @@ export function registerIpc(d: Deps): void {
   ipcMain.handle('extension:showFolder', (_e, folder: string) => showFolder(folder))
   ipcMain.handle('extension:lastSeen', () => d.bridge.lastSeen)
   ipcMain.handle('idm:running', () => isIdmRunning())
+  ipcMain.handle('report:create', async (_e, note: string) => {
+    const state = d.getState()
+    const text = buildReport({
+      note: String(note ?? '').slice(0, 5000),
+      version: state.version,
+      ytdlpVersion: state.components.ytdlp.version,
+      windowsStore: state.windowsStore,
+      settings: state.settings,
+      downloads: state.downloads,
+      log: await recentLog()
+    })
+    const path = await saveReport(text, app.getPath('desktop'))
+    shell.showItemInFolder(path)
+    // The chat opens with a first line ready; the user attaches the file from the desktop
+    void shell.openExternal(`${SOCIAL.whatsapp}?text=${encodeURIComponent('Downly problem report (file attached)')}`)
+    return path
+  })
   ipcMain.handle('update:state', () => d.updater.state)
   ipcMain.handle('update:check', () => d.updater.check())
   ipcMain.handle('update:install', () => {

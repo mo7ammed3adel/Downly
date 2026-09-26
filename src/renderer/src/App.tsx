@@ -13,6 +13,7 @@ import { SupportDialog } from './components/SupportDialog'
 import { ExtensionDialog } from './components/ExtensionDialog'
 import { IdmDialog } from './components/IdmDialog'
 import { UpdateBanner } from './components/UpdateBanner'
+import { ReportDialog } from './components/ReportDialog'
 import { DeleteDialog, RefreshDialog } from './components/SmallDialogs'
 import type { ThemeMode } from '@shared/types'
 
@@ -128,6 +129,7 @@ export default function App() {
       {dialog?.type === 'support' && <SupportDialog />}
       {dialog?.type === 'extension' && <ExtensionDialog />}
       {dialog?.type === 'idm' && <IdmDialog />}
+      {dialog?.type === 'report' && <ReportDialog />}
       {dialog?.type === 'delete' && <DeleteDialog ids={dialog.ids} />}
       {dialog?.type === 'refresh' && <RefreshDialog id={dialog.id} />}
     </div>

@@ -307,5 +307,15 @@
     "installVersion": "Update to {{version}}",
     "latest": "You have the latest version.",
     "checkFailed": "Couldn't check: {{error}}"
+  },
+  "report": {
+    "open": "Report a problem",
+    "title": "Report a problem",
+    "intro": "Tell us what happened. Downly saves a report file on your desktop and opens our WhatsApp chat, where you attach it.",
+    "placeholder": "For example: the video from this site doesn't download, it says…",
+    "contains": "The report includes the Downly and Windows versions, the log, and the links of your recent failed downloads. It has no passwords or saved files.",
+    "create": "Create report and open WhatsApp",
+    "done": "The report is on your desktop: {{name}}. Attach it in the WhatsApp chat that just opened.",
+    "failed": "Couldn't create the report: {{error}}"
   }
 }

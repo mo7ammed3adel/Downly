@@ -45,6 +45,8 @@ export interface Api {
   extensionLastSeen(): Promise<number>
   /** Internet Download Manager is running (it grabs browser downloads first) */
   isIdmRunning(): Promise<boolean>
+  /** Saves a problem report on the desktop and opens the WhatsApp chat; returns the file path */
+  createReport(note: string): Promise<string>
   getUpdateState(): Promise<UpdateState>
   checkForUpdate(): Promise<UpdateState>
   /** Windows: download + install (the app restarts); elsewhere opens the download page */

@@ -12,6 +12,7 @@ import { BrowserBridge } from './services/bridge'
 import { Binaries } from './services/binaries'
 import { refreshExtensionFolder } from './services/browsers'
 import { installerFor, Updater } from './services/updater'
+import { startLog } from './services/log'
 import { ClipboardMonitor } from './services/clipboard'
 import { createProxyResolver, proxyFor } from './services/network'
 import { Scheduler } from './services/scheduler'
@@ -29,6 +30,7 @@ let win: BrowserWindow | null = null
 let tray: Tray | null = null
 let quitting = false
 
+startLog()
 const settings = new SettingsStore()
 const proxyResolver = createProxyResolver(() => settings.get())
 const binaries = new Binaries(proxyResolver)
@@ -334,7 +336,10 @@ app.whenReady().then(async () => {
     notify(t('notify.completed'), item.fileName, () => shell.showItemInFolder(join(item.directory, item.fileName)))
     countForSupportPrompt()
   })
-  manager.on('failed', (item) => notify(t('notify.failed'), `${item.fileName}\n${item.error ?? ''}`, showWindow))
+  manager.on('failed', (item) => {
+    console.log(`[download] failed ${item.url}: ${item.error ?? ''}`)
+    notify(t('notify.failed'), `${item.fileName}\n${item.error ?? ''}`, showWindow)
+  })
   manager.on('idle', () => {
     if (scheduler.afterDone()) void quit()
   })

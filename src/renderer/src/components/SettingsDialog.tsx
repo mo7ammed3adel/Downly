@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Chrome, Download, FolderOpen, Globe, Info, RefreshCw, Settings as Cog, Video } from 'lucide-react'
+import { Chrome, Download, FolderOpen, Globe, Info, LifeBuoy, RefreshCw, Settings as Cog, Video } from 'lucide-react'
 import type { Settings } from '@shared/types'
 import { SUPPORTED_LANGUAGES } from '@shared/i18n'
 import { useStore } from '../store'
@@ -352,6 +352,9 @@ export function SettingsDialog({ initialTab }: { initialTab?: string }) {
               {t('settings.version')} {version} · yt-dlp {components.ytdlp.version ?? '—'}
             </div>
             <UpdateCheck />
+            <button className="btn ghost" onClick={() => useStore.getState().openDialog({ type: 'report' })}>
+              <LifeBuoy size={14} /> {t('report.open')}
+            </button>
             <SocialLinks />
           </div>
         )}

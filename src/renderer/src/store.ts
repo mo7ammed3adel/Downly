@@ -15,6 +15,7 @@ export type Dialog =
   | { type: 'support' }
   | { type: 'extension' }
   | { type: 'idm' }
+  | { type: 'report' }
   | { type: 'delete'; ids: string[] }
   | { type: 'refresh'; id: string }
 

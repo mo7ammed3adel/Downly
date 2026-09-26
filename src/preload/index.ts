@@ -39,6 +39,7 @@ const api: Api = {
   showExtensionFolder: (folder) => ipcRenderer.invoke('extension:showFolder', folder),
   extensionLastSeen: () => ipcRenderer.invoke('extension:lastSeen'),
   isIdmRunning: () => ipcRenderer.invoke('idm:running'),
+  createReport: (note) => ipcRenderer.invoke('report:create', note),
   getUpdateState: () => ipcRenderer.invoke('update:state'),
   checkForUpdate: () => ipcRenderer.invoke('update:check'),
   installUpdate: () => ipcRenderer.invoke('update:install'),
