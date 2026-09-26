@@ -9,11 +9,11 @@
   const i18n = globalThis.SG_I18N
   const t = (k) => i18n.t(k)
   const ICON =
-    '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="m6 11 6 6 6-6"/><path d="M5 20h14"/></svg>'
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="m6 11 6 6 6-6"/><path d="M5 20h14"/></svg>'
   const NOTE =
-    '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>'
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>'
   const LIST =
-    '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h13"/><path d="M3 12h13"/><path d="M3 18h9"/><path d="m16 16 3 3 3-3"/><path d="M19 12v7"/></svg>'
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h13"/><path d="M3 12h13"/><path d="M3 18h9"/><path d="m16 16 3 3 3-3"/><path d="M19 12v7"/></svg>'
   const DEFAULTS = { overlay: { enabled: true, corner: 'top-right' }, overlayHidden: [], overlayPos: {} }
   const host = location.hostname.replace(/^www\.|^m\./, '')
   const isYouTube = /(^|\.)youtube\.com$/.test(location.hostname)
@@ -94,6 +94,22 @@
     setTimeout(() => btn.classList.remove(cls), 1800)
   }
 
+  /** Builds a <button> from DOM nodes (no innerHTML, which store reviewers flag) */
+  function button(className, title, svg, label) {
+    const b = document.createElement('button')
+    b.type = 'button'
+    if (className) b.className = className
+    if (title) b.title = title
+    if (title && !label) b.setAttribute('aria-label', title)
+    if (svg) b.append(document.importNode(new DOMParser().parseFromString(svg, 'image/svg+xml').documentElement, true))
+    if (label) {
+      const span = document.createElement('span')
+      span.textContent = label
+      b.append(span)
+    }
+    return b
+  }
+
   /**
    * `send(mode)` delivers the video to the app with 'video' or 'audio' preselected.
    * `playlist` (optional) adds a button that sends the whole playlist.
@@ -101,15 +117,12 @@
   function makeButton(key, send, playlist) {
     const wrap = document.createElement('div')
     wrap.className = 'downly-wrap'
-    wrap.innerHTML =
-      `<button type="button" class="downly-btn" title="${t('video')}">${ICON}<span>${t('overlay')}</span></button>` +
-      `<button type="button" class="downly-audio" title="${t('audio')}" aria-label="${t('audio')}">${NOTE}</button>` +
-      (playlist ? `<button type="button" class="downly-audio sg-playlist" title="${t('playlistBtn')}" aria-label="${t('playlistBtn')}">${LIST}</button>` : '') +
-      `<button type="button" class="downly-x" title="${t('hideHere')}" aria-label="${t('hideHere')}">×</button>`
-    const main = wrap.querySelector('.downly-btn')
-    const audio = wrap.querySelector('.downly-audio:not(.sg-playlist)')
-    const close = wrap.querySelector('.downly-x')
-    const list = wrap.querySelector('.sg-playlist')
+    const main = button('downly-btn', t('video'), ICON, t('overlay'))
+    const audio = button('downly-audio', t('audio'), NOTE)
+    const list = playlist ? button('downly-audio sg-playlist', t('playlistBtn'), LIST) : null
+    const close = button('downly-x', t('hideHere'))
+    close.textContent = '×'
+    wrap.append(...[main, audio, list, close].filter(Boolean))
     if (list) list.addEventListener('click', () => feedback(list, playlist()))
 
     // The player reacts to clicks (pause/fullscreen/open post) — keep ours to ourselves
@@ -209,10 +222,8 @@
     const onPlaylist = location.pathname === '/playlist' && playlistId()
     if (!onPlaylist || !allowed()) return existing?.remove()
     if (existing) return
-    const btn = document.createElement('button')
+    const btn = button(null, null, LIST, t('playlistBtn'))
     btn.id = 'downly-playlist'
-    btn.type = 'button'
-    btn.innerHTML = `${LIST}<span>${t('playlistBtn')}</span>`
     btn.addEventListener('click', () => feedback(btn, sendPlaylist()))
     document.body.appendChild(btn)
   }

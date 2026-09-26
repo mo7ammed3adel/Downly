@@ -64,7 +64,8 @@
         "to": ".",
         "filter": [
           "icon.png",
-          "tray.png"
+          "tray.png",
+          "downly-firefox.xpi"
         ]
       },
       {

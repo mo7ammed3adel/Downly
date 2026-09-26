@@ -4,6 +4,8 @@
 # Trigger: push a tag like v1.0.1   (git tag v1.0.1 && git push --tags)
 #          or run it by hand from the Actions tab.
 # Needs secret RELEASES_TOKEN: a token that can create releases in downly-releases.
+# Optional AMO_JWT_ISSUER + AMO_JWT_SECRET (addons.mozilla.org API key): signs the Firefox
+# extension so it installs permanently. Without them Firefox only gets a temporary add-on.
 name: Release
 
 on:
@@ -23,7 +25,50 @@ env:
   RELEASES_REPO: mo7ammed3adel/downly-releases
 
 jobs:
+  # Firefox only installs extensions Mozilla has signed. Signed once here, then bundled
+  # into every installer (one-click install from the app) and published for the website.
+  firefox:
+    runs-on: ubuntu-latest
+    env:
+      AMO_JWT_ISSUER: ${{ secrets.AMO_JWT_ISSUER }}
+      AMO_JWT_SECRET: ${{ secrets.AMO_JWT_SECRET }}
+      GH_TOKEN: ${{ secrets.RELEASES_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        if: env.AMO_JWT_ISSUER != ''
+
+      - uses: actions/setup-node@v4
+        if: env.AMO_JWT_ISSUER != ''
+        with:
+          node-version: 22
+
+      - name: Sign the Firefox extension
+        if: env.AMO_JWT_ISSUER != ''
+        # A failed signing must not block the desktop release
+        continue-on-error: true
+        run: |
+          mkdir -p signed
+          # Mozilla refuses to sign the same version twice: reuse it when re-running a tag
+          if gh release download "$TAG" --repo "$RELEASES_REPO" -p Downly-firefox.xpi -O signed/downly-firefox.xpi; then
+            exit 0
+          fi
+          node -e "
+            const f = 'extension/manifest.json', m = require('./' + f)
+            m.version = process.env.TAG.replace(/^v/, '')
+            m.background = { scripts: ['i18n.js', 'background.js'] }
+            require('fs').writeFileSync(f, JSON.stringify(m, null, 2))
+          "
+          npx -y web-ext@8 sign --source-dir extension --artifacts-dir web-ext-artifacts             --channel unlisted --api-key "$AMO_JWT_ISSUER" --api-secret "$AMO_JWT_SECRET"
+          mv web-ext-artifacts/*.xpi signed/downly-firefox.xpi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: firefox-xpi
+          path: signed/downly-firefox.xpi
+          if-no-files-found: ignore
+
   build:
+    needs: firefox
     strategy:
       fail-fast: false
       matrix:
@@ -44,6 +89,13 @@ jobs:
       - run: npm ci
 
       - run: npm test
+
+      - uses: actions/download-artifact@v4
+        # Absent when signing was skipped: the app then falls back to a temporary add-on
+        continue-on-error: true
+        with:
+          name: firefox-xpi
+          path: resources
 
       - name: Build installers
         run: node scripts/dist.mjs ${{ matrix.target }}
@@ -74,6 +126,7 @@ jobs:
 
       - name: Pack the browser extension
         run: |
+          if [ -f dist/downly-firefox.xpi ]; then mv dist/downly-firefox.xpi dist/Downly-firefox.xpi; fi
           cd extension && zip -qr ../dist/Downly-extension.zip . && cd ..
           ls -la dist
 
