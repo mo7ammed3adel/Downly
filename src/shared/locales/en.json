@@ -173,7 +173,7 @@
     "skipDomains": "Never take over from these sites",
     "port": "Connection port",
     "installExtension": "Install the browser extension",
-    "extensionHint": "Load the “extension” folder in Chrome, Edge, Brave, Opera or Firefox (see README), or install it from the store.",
+    "extensionHint": "Downloads, videos and playlists from your browser open straight in Downly.",
     "defaultMode": "Default download type",
     "defaultQuality": "Default quality",
     "defaultContainer": "Default video format",
@@ -255,6 +255,28 @@
     "cardBody": "No ads, no limits. If Downly helps you, consider supporting it.",
     "bmc": "Buy me a coffee ☕",
     "instapayPay": "Pay with InstaPay",
-    "instapayScan": "Or scan the code with your bank app / InstaPay"
+    "instapayScan": "Or scan the code with your bank app / InstaPay",
+    "follow": "Follow us"
+  },
+  "ext": {
+    "title": "Connect your browser",
+    "setup": "Set up",
+    "intro": "Add the Downly extension so downloads, videos and playlists from your browser open in Downly. Pick your browser:",
+    "noBrowsers": "No supported browser was found. Install Chrome, Edge, Brave, Opera, Vivaldi or Firefox, then try again.",
+    "step1": "We opened the extensions page in {{browser}}",
+    "openAgain": "Open it again",
+    "step2": "Turn on “Developer mode”",
+    "step2Hint": "The switch is in the top-right corner of the page (on Edge it’s in the left sidebar).",
+    "step3": "Click “Load unpacked” and choose this folder",
+    "step3Hint": "The folder path is already copied — paste it into the address bar of the folder picker.",
+    "firefoxAdd": "Click “Add” in the Firefox window that just opened.",
+    "firefoxTemp1": "In the Firefox page that opened, click “Load Temporary Add-on…”.",
+    "firefoxTemp2": "Open this folder and choose the file manifest.json",
+    "firefoxTempNote": "Firefox removes temporary add-ons when it closes. A permanent one-click version is coming soon.",
+    "waiting": "Waiting for the extension to connect…",
+    "connected": "Connected! Downly now works with your browser.",
+    "otherBrowser": "Another browser",
+    "later": "Later",
+    "done": "Done"
   }
 }

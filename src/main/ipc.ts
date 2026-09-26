@@ -9,11 +9,14 @@ import { analyze, type YtdlpEnv } from './engine/ytdlp'
 import { partPath } from './engine/HttpDownload'
 import type { Binaries } from './services/binaries'
 import type { SettingsStore } from './services/settings'
+import type { BrowserBridge } from './services/bridge'
+import { detectBrowsers, openExtensionsPage, setupExtension, showFolder } from './services/browsers'
 
 interface Deps {
   manager: DownloadManager
   settings: SettingsStore
   binaries: Binaries
+  bridge: BrowserBridge
   proxyFor: ProxyResolver
   ytdlpEnv(url: string): Promise<YtdlpEnv>
   getState(): AppState
@@ -103,6 +106,23 @@ export function registerIpc(d: Deps): void {
 
 
   ipcMain.handle('components:update', () => binaries.update())
+
+  // Browser extension setup wizard
+  const findBrowser = async (id: string) => (await detectBrowsers()).find((b) => b.id === id)
+  ipcMain.handle('browsers:list', () => detectBrowsers())
+  ipcMain.handle('extension:setup', async (_e, id: string) => {
+    const browser = await findBrowser(id)
+    if (!browser) throw new Error('Browser not found')
+    const result = await setupExtension(browser)
+    clipboard.writeText(result.folder)
+    return result
+  })
+  ipcMain.handle('extension:openPage', async (_e, id: string) => {
+    const browser = await findBrowser(id)
+    if (browser) openExtensionsPage(browser)
+  })
+  ipcMain.handle('extension:showFolder', (_e, folder: string) => showFolder(folder))
+  ipcMain.handle('extension:lastSeen', () => d.bridge.lastSeen)
   ipcMain.handle('shell:openExternal', (_e, url: string) => {
     if (/^https?:\/\//.test(url)) return shell.openExternal(url)
   })

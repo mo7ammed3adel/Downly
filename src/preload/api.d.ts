@@ -1,5 +1,7 @@
 import type {
   AppState,
+  BrowserId,
+  BrowserInfo,
   ComponentsState,
   DownloadItem,
   ExternalAddRequest,
@@ -32,6 +34,12 @@ export interface Api {
   openPath(path: string): Promise<string>
   copy(text: string): Promise<void>
   readClipboard(): Promise<string>
+  listBrowsers(): Promise<BrowserInfo[]>
+  setupExtension(id: BrowserId): Promise<{ folder: string; oneClick: boolean }>
+  openExtensionsPage(id: BrowserId): Promise<void>
+  showExtensionFolder(folder: string): Promise<void>
+  /** ms timestamp of the extension's last contact with the app, 0 if never */
+  extensionLastSeen(): Promise<number>
   onDownloadsChanged(cb: (items: DownloadItem[]) => void): Unsubscribe
   onDownloadsRemoved(cb: (ids: string[]) => void): Unsubscribe
   onSettingsChanged(cb: (s: Settings) => void): Unsubscribe

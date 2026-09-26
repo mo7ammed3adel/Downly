@@ -13,6 +13,7 @@ export type Dialog =
   | { type: 'settings'; tab?: string }
   | { type: 'scheduler' }
   | { type: 'support' }
+  | { type: 'extension' }
   | { type: 'delete'; ids: string[] }
   | { type: 'refresh'; id: string }
 

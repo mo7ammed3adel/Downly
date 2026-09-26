@@ -23,4 +23,4 @@ The desktop app contacts only the websites you choose to download from, and GitH
 
 ## Contact
 
-https://downly.vercel.app
+https://downly-app.vercel.app

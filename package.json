@@ -4,7 +4,10 @@
   "version": "1.0.0",
   "description": "Fast download manager with browser integration, video/audio grabbing and playlists",
   "main": "./out/main/index.js",
-  "author": "Downly",
+  "author": {
+    "name": "Mohamed Adel",
+    "email": "92869559+mo7ammed3adel@users.noreply.github.com"
+  },
   "license": "UNLICENSED",
   "private": true,
   "scripts": {
@@ -14,11 +17,10 @@
     "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
     "test": "vitest run",
     "icons": "python scripts/make-icons.py",
-    "dist": "electron-vite build && electron-builder",
-    "dist:win": "electron-vite build && electron-builder --win --publish never",
-    "dist:win7": "node scripts/dist-win7.mjs",
-    "dist:mac": "electron-vite build && electron-builder --mac",
-    "dist:linux": "electron-vite build && electron-builder --linux",
+    "dist:win": "node scripts/dist.mjs win",
+    "dist:win7": "node scripts/dist.mjs win7",
+    "dist:mac": "node scripts/dist.mjs mac",
+    "dist:linux": "node scripts/dist.mjs linux",
     "extension:zip": "node scripts/pack-extension.mjs"
   },
   "dependencies": {
@@ -90,7 +92,7 @@
       ],
       "category": "public.app-category.utilities",
       "icon": "resources/icon.png",
-      "artifactName": "Downly-mac.${ext}"
+      "artifactName": "Downly-mac-${arch}.${ext}"
     },
     "linux": {
       "target": [
@@ -99,12 +101,15 @@
       ],
       "category": "Network",
       "icon": "resources/icon.png",
-      "artifactName": "Downly-linux.${ext}"
+      "artifactName": "Downly-linux.${ext}",
+      "maintainer": "Mohamed Adel <92869559+mo7ammed3adel@users.noreply.github.com>",
+      "synopsis": "Fast free download manager"
     },
     "publish": {
       "provider": "github",
       "owner": "mo7ammed3adel",
-      "repo": "Downly"
+      "repo": "downly-releases"
     }
-  }
+  },
+  "homepage": "https://downly-app.vercel.app"
 }

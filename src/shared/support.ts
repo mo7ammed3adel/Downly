@@ -1,6 +1,7 @@
 /**
- * Downly is free; these are the ways people can support it.
- * Empty values are hidden in the app and on the website — fill them in to show them.
+ * Downly is free; these are the ways people can support it and reach us.
+ * Empty values are hidden in the app — fill them in to show them.
+ * (The website keeps its own copy in website/app.js → SITE.)
  */
 export const SUPPORT = {
   buyMeACoffee: 'https://buymeacoffee.com/mohamed3abuzaid',
@@ -10,8 +11,16 @@ export const SUPPORT = {
   instapay: 'mohamed2abuzaid@instapay',
   instapayLink: 'https://ipn.eg/S/mohamed2abuzaid/instapay/90WeD3',
   vodafoneCash: '01014025928',
-  website: 'https://downly.vercel.app',
-  github: 'https://github.com/mo7ammed3adel/Downly'
+  website: 'https://downly-app.vercel.app',
+  /** The source repo is private, so no "star on GitHub" button */
+  github: ''
+}
+
+export const SOCIAL = {
+  facebook: 'https://www.facebook.com/mo7ammedbondok',
+  instagram: 'https://www.instagram.com/mo7ammed3adel/',
+  whatsapp: 'https://wa.me/201014025928',
+  telegram: 'https://t.me/mohamed3abuzaid'
 }
 
 /** Show the "support us" dialog once, after this many finished downloads */

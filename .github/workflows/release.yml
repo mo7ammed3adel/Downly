@@ -1,0 +1,89 @@
+# Builds every installer and publishes them to the PUBLIC releases repo
+# (mo7ammed3adel/downly-releases) — this source repo stays private.
+#
+# Trigger: push a tag like v1.0.1   (git tag v1.0.1 && git push --tags)
+#          or run it by hand from the Actions tab.
+# Needs secret RELEASES_TOKEN: a token that can create releases in downly-releases.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag to publish (e.g. v1.0.0)'
+        required: true
+
+permissions:
+  contents: read
+
+env:
+  TAG: ${{ github.event.inputs.version || github.ref_name }}
+  RELEASES_REPO: mo7ammed3adel/downly-releases
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: windows-latest, target: win }
+          - { os: windows-latest, target: win7 }
+          - { os: macos-latest, target: mac }
+          - { os: ubuntu-latest, target: linux }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm test
+
+      - name: Build installers
+        run: node scripts/dist.mjs ${{ matrix.target }}
+        env:
+          # No code-signing certificates yet: build unsigned
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: installers-${{ matrix.target }}
+          path: |
+            release/*.exe
+            release/*.dmg
+            release/*.AppImage
+            release/*.deb
+          if-no-files-found: error
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Pack the browser extension
+        run: |
+          cd extension && zip -qr ../dist/Downly-extension.zip . && cd ..
+          ls -la dist
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.RELEASES_TOKEN }}
+        run: |
+          NOTES="Download the installer for your system from https://downly-app.vercel.app"
+          if gh release view "$TAG" --repo "$RELEASES_REPO" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/* --repo "$RELEASES_REPO" --clobber
+          else
+            gh release create "$TAG" dist/* --repo "$RELEASES_REPO" --title "Downly $TAG" --notes "$NOTES" --latest
+          fi

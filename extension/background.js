@@ -230,8 +230,15 @@ async function createMenus() {
     ext.contextMenus.create({ id: 'sg-all', title: t('menuDownloadAll'), contexts: ['page', 'selection'] })
   })
 }
-ext.runtime.onInstalled.addListener(createMenus)
-ext.runtime.onStartup?.addListener(createMenus)
+// Say hello to the app right away so its setup screen can show "Connected"
+ext.runtime.onInstalled.addListener(() => {
+  createMenus()
+  ping(true)
+})
+ext.runtime.onStartup?.addListener(() => {
+  createMenus()
+  ping(true)
+})
 ext.storage.onChanged.addListener((changes, area) => area === 'local' && 'lang' in changes && createMenus())
 
 async function collectLinks(tabId) {

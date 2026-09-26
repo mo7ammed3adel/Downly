@@ -4,6 +4,7 @@ import { Check, Coffee, Copy, Github, Heart, Share2 } from 'lucide-react'
 import { SUPPORT } from '@shared/support'
 import { Modal, closeDialog } from './ui'
 import instapayQr from '../assets/instapay-qr.png'
+import { SocialLinks } from './SocialLinks'
 
 /** Downly is free: this is where users can chip in. Empty links in SUPPORT are hidden. */
 export function SupportDialog() {
@@ -106,6 +107,11 @@ export function SupportDialog() {
           </button>
         )}
       </div>
+
+      <div className="field-label" style={{ margin: '18px 0 8px' }}>
+        {t('support.follow')}
+      </div>
+      <SocialLinks />
     </Modal>
   )
 }

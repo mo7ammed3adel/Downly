@@ -39,8 +39,11 @@
         <symbol id="i-coffee" viewBox="0 0 24 24"><path d="M4 8h13v5a6 6 0 0 1-6 6h-1a6 6 0 0 1-6-6z" /><path d="M17 10h1.5a2.5 2.5 0 0 1 0 5H17" /><path d="M8 2.5c0 1.2 1 1.3 1 2.5M12 2.5c0 1.2 1 1.3 1 2.5" /></symbol>
         <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v12M6 11l6 6 6-6M5 21h14" /></symbol>
         <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10" /></symbol>
-      </defs>
-    </svg>
+        <symbol id="i-facebook" viewBox="0 0 24 24"><path d="M15 3h-2.5A3.5 3.5 0 0 0 9 6.5V10H6.5v3.5H9V21h3.5v-7.5H15l.5-3.5h-3V7a1 1 0 0 1 1-1H15z" /></symbol>
+        <symbol id="i-instagram" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r="0.6" fill="currentColor" /></symbol>
+        <symbol id="i-whatsapp" viewBox="0 0 24 24"><path d="M20.5 11.8a8.5 8.5 0 0 1-12.6 7.4L3.5 20.5l1.3-4.2A8.5 8.5 0 1 1 20.5 11.8z" /><path fill="currentColor" stroke="none" d="M9 8.6c.3-.5.6-.5 1-.5.3 0 .5.2.6.5l.6 1.5c.1.3 0 .5-.2.7l-.5.5c.6 1.1 1.5 2 2.6 2.6l.5-.5c.2-.2.4-.3.7-.2l1.5.6c.3.1.5.3.5.6 0 .4 0 .7-.5 1-.7.4-1.5.5-2.2.3-2.4-.7-4.3-2.6-5-5-.2-.7-.1-1.5.4-2.1z" /></symbol>
+        <symbol id="i-telegram" viewBox="0 0 24 24"><path d="M21 4 3 11l6 2m12-9-3 16-6-5m9-11L9 13m0 0v6l3-4" /></symbol>
+      </defs>    </svg>
 
     <header class="nav">
       <div class="nav-inner">
@@ -82,7 +85,7 @@
           </div>
           <p class="meta">
             <span>v1.0.0</span><span class="sep">|</span><a class="os-link" data-os="win" href="#">Windows 10/11</a><span class="sep">|</span
-            ><a class="os-link" data-os="win7" href="#">Windows 7/8</a><span class="sep">|</span><a class="os-link" data-os="mac" href="#">macOS</a
+            ><a class="os-link" data-os="win7" href="#">Windows 7/8</a><span class="sep">|</span><a class="os-link" data-os="mac" href="#">macOS</a><span class="sep">|</span><a class="os-link" data-os="macIntel" href="#">Mac Intel</a
             ><span class="sep">|</span><a class="os-link" data-os="linux" href="#">Linux</a><span class="sep">|</span><span data-i18n="meta.free"
               >Free, no ads</span
             >
@@ -214,6 +217,12 @@
               </div>
             </div>
             <p class="meta" data-i18n="support.free">Can’t donate? Sharing Downly with a friend helps a lot too.</p>
+            <div class="social">
+              <a class="social-btn" data-social="facebook" href="#" target="_blank" rel="noopener" aria-label="Facebook"><svg class="ico"><use href="#i-facebook" /></svg></a>
+              <a class="social-btn" data-social="instagram" href="#" target="_blank" rel="noopener" aria-label="Instagram"><svg class="ico"><use href="#i-instagram" /></svg></a>
+              <a class="social-btn" data-social="whatsapp" href="#" target="_blank" rel="noopener" aria-label="WhatsApp"><svg class="ico"><use href="#i-whatsapp" /></svg></a>
+              <a class="social-btn" data-social="telegram" href="#" target="_blank" rel="noopener" aria-label="Telegram"><svg class="ico"><use href="#i-telegram" /></svg></a>
+            </div>
           </div>
         </div>
       </section>
@@ -249,8 +258,13 @@
         <nav>
           <a href="/privacy" data-i18n="footer.privacy">Privacy</a>
           <a href="#support" data-i18n="nav.support">Support</a>
-          <a id="githubLink" href="#" hidden>GitHub</a>
         </nav>
+        <div class="social small-social">
+          <a class="social-btn" data-social="facebook" href="#" target="_blank" rel="noopener" aria-label="Facebook"><svg class="ico"><use href="#i-facebook" /></svg></a>
+          <a class="social-btn" data-social="instagram" href="#" target="_blank" rel="noopener" aria-label="Instagram"><svg class="ico"><use href="#i-instagram" /></svg></a>
+          <a class="social-btn" data-social="whatsapp" href="#" target="_blank" rel="noopener" aria-label="WhatsApp"><svg class="ico"><use href="#i-whatsapp" /></svg></a>
+          <a class="social-btn" data-social="telegram" href="#" target="_blank" rel="noopener" aria-label="Telegram"><svg class="ico"><use href="#i-telegram" /></svg></a>
+        </div>
       </div>
     </footer>
 

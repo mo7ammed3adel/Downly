@@ -162,6 +162,8 @@ export interface Settings {
   categories: Record<Category, CategoryConfig>
   /** Donation prompt bookkeeping: shown once after a number of finished downloads */
   support: { completedCount: number; prompted: boolean }
+  /** The browser-extension setup screen is shown once on first launch */
+  onboarding: { extensionShown: boolean }
 }
 
 export interface MediaFormat {
@@ -222,6 +224,15 @@ export interface AppState {
   components: ComponentsState
   version: string
   platform: string
+}
+
+export type BrowserId = 'chrome' | 'edge' | 'brave' | 'opera' | 'vivaldi' | 'firefox'
+
+export interface BrowserInfo {
+  id: BrowserId
+  name: string
+  kind: 'chromium' | 'firefox'
+  path: string
 }
 
 /** What the browser extension / clipboard hands to the UI */

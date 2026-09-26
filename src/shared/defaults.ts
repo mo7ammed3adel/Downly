@@ -82,7 +82,8 @@ export function createDefaultSettings(downloadDir: string, language: string): Se
     spotify: { clientId: '', clientSecret: '' },
     scheduler: { enabled: false, startTime: '02:00', stopTime: '', days: [0, 1, 2, 3, 4, 5, 6], afterDone: 'none' },
     categories: DEFAULT_CATEGORIES,
-    support: { completedCount: 0, prompted: false }
+    support: { completedCount: 0, prompted: false },
+    onboarding: { extensionShown: false }
   }
 }
 
@@ -98,6 +99,7 @@ export function mergeSettings(base: Settings, saved: Partial<Settings> | undefin
     spotify: { ...base.spotify, ...saved.spotify },
     scheduler: { ...base.scheduler, ...saved.scheduler },
     categories: { ...base.categories, ...saved.categories },
-    support: { ...base.support, ...saved.support }
+    support: { ...base.support, ...saved.support },
+    onboarding: { ...base.onboarding, ...saved.onboarding }
   }
 }

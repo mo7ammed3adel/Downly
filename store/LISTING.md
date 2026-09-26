@@ -20,7 +20,7 @@ Downly connects your browser to the Downly desktop download manager.
 • Shortcuts: Alt+Shift+D (video), Alt+Shift+A (audio)
 • English and Arabic
 
-Requires the free Downly app for Windows / macOS / Linux: https://downly.vercel.app
+Requires the free Downly app for Windows / macOS / Linux: https://downly-app.vercel.app
 
 ## Full description (AR)
 Downly بيربط المتصفح ببرنامج Downly لإدارة التحميل.
@@ -35,7 +35,7 @@ Downly بيربط المتصفح ببرنامج Downly لإدارة التحمي
 • اختصارات: Alt+Shift+D (فيديو)، Alt+Shift+A (صوت)
 • عربي وإنجليزي
 
-محتاج برنامج Downly المجاني على ويندوز / ماك / لينكس: https://downly.vercel.app
+محتاج برنامج Downly المجاني على ويندوز / ماك / لينكس: https://downly-app.vercel.app
 
 ## Category
 Productivity (Chrome) / Download Management (Firefox)

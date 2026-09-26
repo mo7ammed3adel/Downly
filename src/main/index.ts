@@ -305,7 +305,7 @@ app.whenReady().then(async () => {
     })
   )
 
-  registerIpc({ manager, settings, binaries, proxyFor: proxyResolver, ytdlpEnv, getState, getWindow: () => win })
+  registerIpc({ manager, settings, binaries, bridge, proxyFor: proxyResolver, ytdlpEnv, getState, getWindow: () => win })
   createWindow()
   applySystemSettings()
   scheduler.run()

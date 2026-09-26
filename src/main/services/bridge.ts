@@ -14,6 +14,8 @@ const EXTENSION_ORIGIN = /^(chrome-extension|moz-extension|extension|safari-web-
 export class BrowserBridge extends EventEmitter {
   private server?: Server
   private port = 0
+  /** When the extension last talked to us (0 = never since start) */
+  lastSeen = 0
 
   constructor(
     private getSettings: () => Settings,
@@ -55,6 +57,7 @@ export class BrowserBridge extends EventEmitter {
     const trusted = extOrigin || (!origin && req.headers['x-downly'] === '1')
     console.log(`[bridge] ${req.method} ${req.url} origin=${origin || '-'} ${trusted ? 'ok' : 'REJECTED'}`)
     if (!trusted) return this.reply(res, 403, { error: 'forbidden' })
+    this.lastSeen = Date.now()
 
     const url = new URL(req.url ?? '/', 'http://127.0.0.1')
     if (req.method === 'GET' && url.pathname === '/ping') {

@@ -10,6 +10,7 @@ import { AddDialog } from './components/AddDialog'
 import { SettingsDialog } from './components/SettingsDialog'
 import { SchedulerDialog } from './components/SchedulerDialog'
 import { SupportDialog } from './components/SupportDialog'
+import { ExtensionDialog } from './components/ExtensionDialog'
 import { DeleteDialog, RefreshDialog } from './components/SmallDialogs'
 import type { ThemeMode } from '@shared/types'
 
@@ -49,6 +50,17 @@ export default function App() {
   }, [])
 
   useTheme(settings?.theme)
+
+  // First launch: offer to connect the browser (skipped if the extension already talks to us)
+  const onboarded = settings?.onboarding.extensionShown
+  useEffect(() => {
+    if (!ready || onboarded) return
+    const timer = setTimeout(async () => {
+      if ((await window.api.extensionLastSeen()) > 0) return
+      if (!useStore.getState().dialog) useStore.getState().openDialog({ type: 'extension' })
+    }, 1200)
+    return () => clearTimeout(timer)
+  }, [ready, onboarded])
   useEffect(() => {
     if (settings) applyLanguage(settings.language)
   }, [settings?.language])
@@ -102,6 +114,7 @@ export default function App() {
       {dialog?.type === 'settings' && <SettingsDialog initialTab={dialog.tab} />}
       {dialog?.type === 'scheduler' && <SchedulerDialog />}
       {dialog?.type === 'support' && <SupportDialog />}
+      {dialog?.type === 'extension' && <ExtensionDialog />}
       {dialog?.type === 'delete' && <DeleteDialog ids={dialog.ids} />}
       {dialog?.type === 'refresh' && <RefreshDialog id={dialog.id} />}
     </div>

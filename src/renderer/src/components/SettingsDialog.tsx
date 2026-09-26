@@ -6,6 +6,7 @@ import { SUPPORTED_LANGUAGES } from '@shared/i18n'
 import { useStore } from '../store'
 import { Field, Modal, Toggle, closeDialog } from './ui'
 import logo from '../assets/logo.png'
+import { SocialLinks } from './SocialLinks'
 
 type Tab = 'general' | 'downloads' | 'connection' | 'browser' | 'media' | 'about'
 
@@ -184,10 +185,13 @@ export function SettingsDialog({ initialTab }: { initialTab?: string }) {
           <>
             <div className="note">
               <Chrome size={16} style={{ flex: 'none' }} />
-              <div>
+              <div style={{ flex: 1 }}>
                 <strong>{t('settings.installExtension')}</strong>
                 <div>{t('settings.extensionHint')}</div>
               </div>
+              <button className="btn primary" onClick={() => useStore.getState().openDialog({ type: 'extension' })}>
+                {t('ext.setup')}
+              </button>
             </div>
             <Toggle
               label={t('settings.browserEnabled')}
@@ -342,6 +346,7 @@ export function SettingsDialog({ initialTab }: { initialTab?: string }) {
             <div className="hint">
               {t('settings.version')} {version} · yt-dlp {components.ytdlp.version ?? '—'}
             </div>
+            <SocialLinks />
           </div>
         )}
       </div>

@@ -852,3 +852,41 @@ details p {
     display: none;
   }
 }
+
+/* ---------- social icons ---------- */
+.social {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 24px;
+}
+.social-btn {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 99999px;
+  background: var(--obsidian);
+  color: var(--ash);
+  box-shadow: var(--key);
+  transition: color 0.15s, background 0.15s;
+}
+.social-btn .ico {
+  width: 18px;
+  height: 18px;
+}
+.social-btn:hover {
+  color: var(--white);
+  background: var(--graphite);
+}
+.small-social {
+  margin-top: 0;
+}
+.small-social .social-btn {
+  width: 32px;
+  height: 32px;
+}
+.small-social .social-btn .ico {
+  width: 15px;
+  height: 15px;
+}

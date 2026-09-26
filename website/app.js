@@ -1,24 +1,32 @@
 // ---------------------------------------------------------------- site config (edit me)
 const SITE = {
-  // GitHub repo where installers are published (electron-builder "publish" in package.json)
-  repo: 'mo7ammed3adel/Downly',
+  // Public repo that only holds the installers (the source repo is private)
+  releasesRepo: 'mo7ammed3adel/downly-releases',
   buyMeACoffee: 'https://buymeacoffee.com/mohamed3abuzaid',
   vodafoneCash: '01014025928',
   instapay: 'mohamed2abuzaid@instapay',
   instapayLink: 'https://ipn.eg/S/mohamed2abuzaid/instapay/90WeD3',
+  social: {
+    facebook: 'https://www.facebook.com/mo7ammedbondok',
+    instagram: 'https://www.instagram.com/mo7ammed3adel/',
+    whatsapp: 'https://wa.me/201014025928',
+    telegram: 'https://t.me/mohamed3abuzaid'
+  },
   // Store pages — fill in once the extension is published
   chrome: '',
   edge: '',
   firefox: ''
 }
 
-const releases = `https://github.com/${SITE.repo}/releases`
+const latest = `https://github.com/${SITE.releasesRepo}/releases/latest/download`
 const FILES = {
-  win: `${releases}/latest/download/Downly-Setup.exe`,
-  mac: `${releases}/latest/download/Downly-mac.dmg`,
-  linux: `${releases}/latest/download/Downly-linux.AppImage`,
-  win7: `${releases}/latest/download/Downly-Setup-Win7-x64.exe`,
-  win7x86: `${releases}/latest/download/Downly-Setup-Win7-x86.exe`
+  win: `${latest}/Downly-Setup.exe`,
+  win7: `${latest}/Downly-Setup-Win7-x64.exe`,
+  win7x86: `${latest}/Downly-Setup-Win7-x86.exe`,
+  mac: `${latest}/Downly-mac-arm64.dmg`,
+  macIntel: `${latest}/Downly-mac-x64.dmg`,
+  linux: `${latest}/Downly-linux.AppImage`,
+  linuxDeb: `${latest}/Downly-linux.deb`
 }
 
 // ---------------------------------------------------------------- translations
@@ -215,10 +223,11 @@ for (const [id, url] of [
   }
 }
 
-const gh = document.getElementById('githubLink')
-if (!SITE.repo.startsWith('your-name')) {
-  gh.href = `https://github.com/${SITE.repo}`
-  gh.hidden = false
+// Social icons: every [data-social] link gets its URL (or disappears if empty)
+for (const a of document.querySelectorAll('[data-social]')) {
+  const url = SITE.social[a.dataset.social]
+  if (url) a.href = url
+  else a.hidden = true
 }
 document.getElementById('year').textContent = new Date().getFullYear()
 
