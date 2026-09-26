@@ -320,6 +320,17 @@ for (const [id, url] of [
   }
 }
 
+// Firefox: once Mozilla approves the listed add-on, send people to its store page instead of the
+// signed file (the API answers 401 while it isn't public)
+fetch('https://addons.mozilla.org/api/v5/addons/addon/downly@downly.app/')
+  .then((res) => (res.ok ? res.json() : null))
+  .then((addon) => {
+    if (addon?.status === 'public' && addon.url) document.getElementById('firefoxLink').href = addon.url
+  })
+  .catch(() => {
+    /* offline or blocked: the signed file link stays */
+  })
+
 // Social icons: every [data-social] link gets its URL (or disappears if empty)
 for (const a of document.querySelectorAll('[data-social]')) {
   const url = SITE.social[a.dataset.social]
