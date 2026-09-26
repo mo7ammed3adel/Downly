@@ -147,7 +147,7 @@ async function cookiesFor(url) {
 }
 
 async function send(path, payload) {
-  const cookies = payload.url ? await cookiesFor(payload.url) : ''
+  const cookies = payload.cookies || (payload.url ? await cookiesFor(payload.url) : '')
   return api(path, { ...payload, cookies: cookies || undefined, userAgent: navigator.userAgent })
 }
 
@@ -320,8 +320,36 @@ async function addMedia(tabId, entry) {
   ext.action.setBadgeBackgroundColor({ tabId, color: '#3d63f5' })
 }
 
+// How the page asked for each file: guarded sites (hotlink checks, session cookies, token
+// headers) only answer the app if it asks the same way, which is what makes those sites work.
+const requestHeaders = new Map()
+const EXTRA_HEADERS = ext.webRequest.OnSendHeadersOptions?.EXTRA_HEADERS // Chrome: needed to see Cookie/Referer
+const KEPT_HEADERS = /^(referer|cookie|origin|authorization|x-[\w-]+)$/i
+
+ext.webRequest.onSendHeaders.addListener(
+  (details) => {
+    if (details.tabId < 0) return
+    const kept = {}
+    for (const h of details.requestHeaders || []) if (KEPT_HEADERS.test(h.name) && h.value) kept[h.name.toLowerCase()] = h.value
+    requestHeaders.set(details.requestId, kept)
+    // Requests whose response never comes would pile up
+    if (requestHeaders.size > 500) requestHeaders.delete(requestHeaders.keys().next().value)
+  },
+  { urls: ['<all_urls>'], types: ['media', 'xmlhttprequest', 'other', 'object'] },
+  EXTRA_HEADERS ? ['requestHeaders', EXTRA_HEADERS] : ['requestHeaders']
+)
+ext.webRequest.onErrorOccurred.addListener((details) => requestHeaders.delete(details.requestId), { urls: ['<all_urls>'] })
+
+/** Splits what the page sent into the fields the app takes */
+function requestContext(headers = {}) {
+  const { referer, cookie, ...rest } = headers
+  return { referrer: referer, cookies: cookie, headers: Object.keys(rest).length ? rest : undefined }
+}
+
 ext.webRequest.onHeadersReceived.addListener(
   (details) => {
+    const sent = requestHeaders.get(details.requestId)
+    requestHeaders.delete(details.requestId)
     if (details.tabId < 0 || details.statusCode >= 400) return
     const type = (details.responseHeaders || []).find((h) => h.name.toLowerCase() === 'content-type')?.value || ''
     const length = Number((details.responseHeaders || []).find((h) => h.name.toLowerCase() === 'content-length')?.value || 0)
@@ -331,11 +359,21 @@ ext.webRequest.onHeadersReceived.addListener(
     if (!isStream && (!isMedia || (length > 0 && length < 512 * 1024) || /\.(ts|m4s)(\?|$)/i.test(details.url))) return
     // YouTube serves chunked googlevideo URLs that expire — the page URL is what works
     if (/googlevideo\.com/.test(details.url)) return
-    addMedia(details.tabId, { url: details.url, type: type.split(';')[0], size: length || undefined, stream: isStream })
+    addMedia(details.tabId, { url: details.url, type: type.split(';')[0], size: length || undefined, stream: isStream, request: requestContext(sent) })
   },
   { urls: ['<all_urls>'], types: ['media', 'xmlhttprequest', 'other', 'object'] },
   ['responseHeaders']
 )
+
+/**
+ * What a video player on this tab is actually playing: the newest stream playlist
+ * (HLS/DASH), else the newest whole video file. Split video-only/audio-only tracks are
+ * skipped, those need the page. Used when the page itself isn't something yt-dlp knows.
+ */
+async function playingStream(tabId) {
+  const { list } = await mediaFor(tabId)
+  return list.find((m) => m.stream && !m.part) ?? list.find((m) => !m.part && m.kind === 'video') ?? null
+}
 
 ext.tabs.onUpdated.addListener(async (tabId, info) => {
   if (info.status === 'loading' && info.url) {
@@ -435,11 +473,21 @@ ext.runtime.onMessage.addListener((msg, sender, reply) => {
         await ext.storage.local.set({ enabled: !!msg.enabled })
         await syncDownloadUi()
         return { ok: true }
-      case 'media':
-        await send('/media', { url: msg.url || sender.tab?.url, mode: msg.mode, quick: msg.quick ?? (await settings()).quick })
+      case 'media': {
+        const quick = msg.quick ?? (await settings()).quick
+        const pageUrl = sender.tab?.url ?? msg.pageUrl
+        const stream = msg.preferStream && sender.tab ? await playingStream(sender.tab.id) : null
+        if (stream?.stream) {
+          await send('/media', { url: stream.url, mode: msg.mode, quick, pageUrl, ...stream.request, referrer: stream.request?.referrer || pageUrl })
+        } else if (stream) {
+          await send('/download', { url: stream.url, pageUrl, ...stream.request, referrer: stream.request?.referrer || pageUrl })
+        } else {
+          await send('/media', { url: msg.url || sender.tab?.url, mode: msg.mode, quick, referrer: msg.referrer, headers: msg.headers, cookies: msg.cookies })
+        }
         return { ok: true }
+      }
       case 'file':
-        await send('/download', { url: msg.url, referrer: msg.referrer, pageUrl: msg.referrer })
+        await send('/download', { url: msg.url, referrer: msg.referrer, pageUrl: msg.pageUrl ?? msg.referrer, headers: msg.headers, cookies: msg.cookies })
         return { ok: true }
       case 'upload:chunk':
         return uploadChunk(msg.id, msg.offset, msg.data)

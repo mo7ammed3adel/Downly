@@ -6,6 +6,7 @@ import type {
   DownloadItem,
   ExternalAddRequest,
   NewDownloadRequest,
+  ProbeRequest,
   ProbeResult,
   Settings,
   SettingsPatch
@@ -15,7 +16,7 @@ type Unsubscribe = () => void
 
 export interface Api {
   getState(): Promise<AppState>
-  probe(req: { url: string; cookies?: string; referrer?: string; userAgent?: string }): Promise<ProbeResult>
+  probe(req: ProbeRequest): Promise<ProbeResult>
   cancelProbe(): Promise<void>
   add(reqs: NewDownloadRequest[]): Promise<DownloadItem[]>
   pause(ids: string[]): Promise<void>

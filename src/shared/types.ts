@@ -242,15 +242,28 @@ export interface BrowserInfo {
   path: string
 }
 
+/**
+ * How the browser itself requested a file. Sites that guard their media (hotlink checks,
+ * session cookies, token headers) only answer requests that look the same.
+ */
+export interface RequestContext {
+  cookies?: string
+  referrer?: string
+  userAgent?: string
+  /** Extra headers the page sent, e.g. Origin, Authorization, X-… tokens */
+  headers?: Record<string, string>
+}
+
+export interface ProbeRequest extends RequestContext {
+  url: string
+}
+
 /** What the browser extension / clipboard hands to the UI */
-export interface ExternalAddRequest {
+export interface ExternalAddRequest extends RequestContext {
   url: string
   fileName?: string
   size?: number
-  referrer?: string
   pageUrl?: string
-  cookies?: string
-  userAgent?: string
   /** true when the extension says this is a page with media (YouTube button etc.) */
   media?: boolean
   /** Which button was used on the video: Download (video) or ♪ (audio only) */

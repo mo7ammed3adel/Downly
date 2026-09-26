@@ -198,6 +198,9 @@ function handleExternal(req: ExternalAddRequest): void {
           url: req.url,
           kind: 'media',
           pageUrl: req.pageUrl,
+          cookies: req.cookies,
+          referrer: req.referrer,
+          headers: { ...req.headers, ...(req.userAgent ? { 'user-agent': req.userAgent } : {}) },
           media: {
             mode: req.mode ?? m.defaultMode,
             quality: m.defaultQuality,
@@ -226,7 +229,7 @@ function handleExternal(req: ExternalAddRequest): void {
     referrer: req.referrer,
     pageUrl: req.pageUrl,
     cookies: req.cookies,
-    headers: req.userAgent ? { 'user-agent': req.userAgent } : undefined
+    headers: req.headers || req.userAgent ? { ...req.headers, ...(req.userAgent ? { 'user-agent': req.userAgent } : {}) } : undefined
   }
   void manager.add([add])
 }

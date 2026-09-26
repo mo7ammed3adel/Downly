@@ -113,6 +113,7 @@ export class BrowserBridge extends EventEmitter {
         pageUrl: str(body.pageUrl),
         cookies: str(body.cookies),
         userAgent: str(body.userAgent),
+        headers: forwardHeaders(body.headers),
         media: url.pathname === '/media',
         mode: body.mode === 'audio' || body.mode === 'video' ? body.mode : undefined,
         quick: body.quick === true
@@ -172,6 +173,21 @@ export class BrowserBridge extends EventEmitter {
 const UPLOAD_ID = /^[\w-]{8,64}$/
 const MAX_CHUNK = 16 * 1024 * 1024
 const uploadPath = (id: string) => join(tmpdir(), 'downly-uploads', `${id}.part`)
+
+/**
+ * Page headers worth repeating to the site (tokens and origin checks). Everything else is
+ * either set by the app itself (Referer, Cookie, User-Agent have their own fields) or would
+ * break the request (Range, Host, encodings).
+ */
+const FORWARDED = /^(origin|authorization|x-[\w-]+)$/i
+function forwardHeaders(v: unknown): Record<string, string> | undefined {
+  if (!v || typeof v !== 'object') return undefined
+  const safe = (value: unknown): value is string => typeof value === 'string' && value.length <= 4096 && !/[\r\n]/.test(value)
+  const picked = Object.entries(v as Record<string, unknown>)
+    .filter(([name, value]) => FORWARDED.test(name) && safe(value))
+    .slice(0, 20) as [string, string][]
+  return picked.length ? Object.fromEntries(picked) : undefined
+}
 
 const str = (v: unknown) => (typeof v === 'string' && v ? v : undefined)
 

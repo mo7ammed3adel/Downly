@@ -1,7 +1,7 @@
 import { BrowserWindow, clipboard, dialog, ipcMain, shell } from 'electron'
 import { execFile } from 'node:child_process'
 import { join } from 'node:path'
-import type { AppState, NewDownloadRequest, ProbeResult, SettingsPatch } from '@shared/types'
+import type { AppState, NewDownloadRequest, ProbeRequest, ProbeResult, SettingsPatch } from '@shared/types'
 import { extensionOf, isKnownMediaSite, parseSpotifyUrl } from '@shared/util'
 import type { DownloadManager } from './engine/DownloadManager'
 import { buildHeaders, createFetcher, probe, type ProxyResolver } from './engine/http'
@@ -22,13 +22,6 @@ interface Deps {
   ytdlpEnv(url: string): Promise<YtdlpEnv>
   getState(): AppState
   getWindow(): BrowserWindow | null
-}
-
-export interface ProbeRequest {
-  url: string
-  cookies?: string
-  referrer?: string
-  userAgent?: string
 }
 
 const STREAM_EXT = new Set(['m3u8', 'mpd'])
@@ -55,16 +48,16 @@ export function registerIpc(d: Deps): void {
       }
     })()
     if (isKnownMediaSite(url) || STREAM_EXT.has(extensionOf(path))) {
-      return { kind: 'media', info: await analyze(url, await ytdlpEnv(url), abort.signal) }
+      return { kind: 'media', info: await analyze(url, await ytdlpEnv(url), abort.signal, req) }
     }
 
     const s = settings.get()
-    const headers = buildHeaders(req.userAgent || s.userAgent, undefined, req.cookies, req.referrer)
+    const headers = buildHeaders(req.userAgent || s.userAgent, req.headers, req.cookies, req.referrer)
     const meta = await probe(url, { headers, timeoutMs: s.timeoutSec * 1000, proxyFor: d.proxyFor, signal: abort.signal })
     // A web page or a stream playlist: let yt-dlp look for embedded media
     if (meta.mime === 'text/html' || (meta.mime && STREAM_MIME.test(meta.mime))) {
       try {
-        return { kind: 'media', info: await analyze(url, await ytdlpEnv(url), abort.signal) }
+        return { kind: 'media', info: await analyze(url, await ytdlpEnv(url), abort.signal, req) }
       } catch {
         /* no media on the page — offer it as a plain file */
       }

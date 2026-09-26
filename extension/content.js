@@ -196,7 +196,12 @@
     wrap.remove()
   }
 
-  const sendMedia = (url, mode) => ext.runtime.sendMessage({ type: 'media', url, mode })
+  const sendMedia = (url, mode, preferStream = false) => ext.runtime.sendMessage({ type: 'media', url, mode, preferStream })
+
+  /** Sites yt-dlp reads from the page URL; anywhere else the stream the player loads works better */
+  const KNOWN_SITES =
+    /(^|\.)(youtube\.com|youtu\.be|instagram\.com|facebook\.com|fb\.watch|tiktok\.com|twitter\.com|x\.com|reddit\.com|vimeo\.com|dailymotion\.com|twitch\.tv|pinterest\.com|snapchat\.com|linkedin\.com|soundcloud\.com|bilibili\.com)$/
+  const knownSite = () => KNOWN_SITES.test(location.hostname)
   const sendFile = (url) => ext.runtime.sendMessage({ type: 'file', url, referrer: location.href })
 
   // ------------------------------------------------------------ media that only exists in the page
@@ -307,13 +312,13 @@
   async function download(media, mode) {
     const src = media.currentSrc || media.src || ''
     const post = postUrlFor(media)
-    if (src.startsWith('blob:')) return (await sendBlob(media, src)) ?? sendMedia(post, mode)
+    if (src.startsWith('blob:')) return (await sendBlob(media, src)) ?? sendMedia(post, mode, !knownSite())
     if (media.tagName === 'IMG') return sendFile(src)
     // A plain file goes straight to the fast engine: on normal sites, and on story pages where
     // the file is exactly the story on screen. Feeds/streams need the post URL (yt-dlp).
     const plainFile = /^https?:/i.test(src) && !/\.m3u8|\.mpd/i.test(src)
     if (mode === 'video' && plainFile && (photoPage() || (post === location.href && !isPostUrl(post)))) return sendFile(src)
-    return sendMedia(post, mode)
+    return sendMedia(post, mode, !knownSite())
   }
 
   // Every other site: one layer above the page, each button following its video

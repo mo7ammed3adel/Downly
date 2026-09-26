@@ -2,7 +2,7 @@ import { spawn, execFile, type ChildProcess } from 'node:child_process'
 import { readdir, readFile, rename, rm, stat } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { basename, dirname, join } from 'node:path'
-import type { DownloadItem, MediaFormat, MediaInfo, PlaylistInfo, Settings } from '@shared/types'
+import type { DownloadItem, MediaFormat, MediaInfo, PlaylistInfo, RequestContext, Settings } from '@shared/types'
 import { searchQuery } from './spotify'
 import { AbortError } from './errors'
 
@@ -23,6 +23,23 @@ function baseArgs(env: YtdlpEnv): string[] {
   if (env.ffmpegPath) args.push('--ffmpeg-location', env.ffmpegPath)
   if (env.nodePath && env.supportsJsRuntimes) args.push('--js-runtimes', `node:${env.nodePath}`)
   args.push('--user-agent', env.settings.userAgent)
+  return args
+}
+
+/**
+ * The browser's own request details, so sites that check them (Referer, session cookies,
+ * token headers) answer yt-dlp like they answered the browser. Later flags override baseArgs.
+ */
+export function requestArgs(ctx: RequestContext): string[] {
+  const args: string[] = []
+  const userAgent = ctx.userAgent ?? ctx.headers?.['user-agent']
+  if (ctx.referrer) args.push('--referer', ctx.referrer)
+  if (userAgent) args.push('--user-agent', userAgent)
+  for (const [name, value] of Object.entries(ctx.headers ?? {})) {
+    if (name.toLowerCase() !== 'user-agent') args.push('--add-header', `${name}:${value}`)
+  }
+  // yt-dlp scopes a Cookie header to the domain of the URL it downloads
+  if (ctx.cookies) args.push('--add-header', `Cookie:${ctx.cookies}`)
   return args
 }
 
@@ -61,8 +78,8 @@ interface RawInfo {
   ie_key?: string
 }
 
-export function analyze(url: string, env: YtdlpEnv, signal?: AbortSignal): Promise<MediaInfo | PlaylistInfo> {
-  const args = [...baseArgs(env), '-J', '--flat-playlist', url]
+export function analyze(url: string, env: YtdlpEnv, signal?: AbortSignal, ctx: RequestContext = {}): Promise<MediaInfo | PlaylistInfo> {
+  const args = [...baseArgs(env), ...requestArgs(ctx), '-J', '--flat-playlist', url]
   return new Promise((resolve, reject) => {
     execFile(
       env.ytdlpPath,
@@ -156,6 +173,7 @@ export function buildDownloadArgs(
   const s = env.settings.media
   const args = [
     ...baseArgs(env),
+    ...requestArgs({ cookies: item.cookies, referrer: item.referrer, headers: item.headers }),
     '--newline',
     '--progress',
     '--no-playlist',

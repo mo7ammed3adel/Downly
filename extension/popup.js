@@ -104,10 +104,14 @@ async function init() {
     btn.disabled = !state.connected
     btn.onclick = async () => {
       // Streams and split tracks need the page (yt-dlp merges video + sound); plain files go direct
+      // The page's own request details (Referer, cookies, tokens) let guarded sites answer the app
+      const request = m.request ?? {}
       const ok =
-        m.stream || m.part
-          ? await run({ type: 'media', url: m.part ? tab.url : m.url }, false)
-          : await run({ type: 'file', url: m.url, referrer: tab.url }, false)
+        m.part
+          ? await run({ type: 'media', url: tab.url }, false)
+          : m.stream
+            ? await run({ type: 'media', url: m.url, ...request, referrer: request.referrer || tab.url }, false)
+            : await run({ type: 'file', url: m.url, pageUrl: tab.url, ...request, referrer: request.referrer || tab.url }, false)
       if (ok) flash(btn)
     }
     li.append(name, meta, btn)

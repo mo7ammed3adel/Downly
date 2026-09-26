@@ -10,6 +10,7 @@ import type {
   NewDownloadRequest,
   PlaylistInfo,
   ProbeResult,
+  RequestContext,
   VideoContainer
 } from '@shared/types'
 import { categorize, expandBatchPattern, mediaCategory, formatBytes, formatDuration, isHttpUrl, isKnownMediaSite, parseSpotifyUrl } from '@shared/util'
@@ -29,6 +30,21 @@ export function AddDialog({ initial, urls }: { initial?: ExternalAddRequest; url
   const platform = useStore((s) => s.platform)
 
   const [text, setText] = useState(initial?.url ?? urls?.join('\n') ?? '')
+  // How the browser requested this link: guarded sites only answer requests that look the same
+  const browserContext: RequestContext = {
+    cookies: initial?.cookies,
+    referrer: initial?.referrer,
+    userAgent: initial?.userAgent,
+    headers: initial?.headers
+  }
+  const downloadContext: RequestContext = {
+    cookies: initial?.cookies,
+    referrer: initial?.referrer,
+    headers:
+      initial?.headers || initial?.userAgent
+        ? { ...initial?.headers, ...(initial?.userAgent ? { 'user-agent': initial.userAgent } : {}) }
+        : undefined
+  }
   const [phase, setPhase] = useState<Phase>('idle')
   const [result, setResult] = useState<ProbeResult | null>(null)
   const [batch, setBatch] = useState<string[] | null>(null)
@@ -69,12 +85,7 @@ export function AddDialog({ initial, urls }: { initial?: ExternalAddRequest; url
     }
     setPhase('loading')
     try {
-      const res = await window.api.probe({
-        url: list[0],
-        cookies: initial?.cookies,
-        referrer: initial?.referrer,
-        userAgent: initial?.userAgent
-      })
+      const res = await window.api.probe({ url: list[0], ...browserContext })
       setResult(res)
       if (res.kind === 'http' && !initial?.fileName) setFileName(res.fileName)
       if (res.kind !== 'http' && res.info.type === 'playlist') {
@@ -130,15 +141,23 @@ export function AddDialog({ initial, urls }: { initial?: ExternalAddRequest; url
         fileName: fileName || result.fileName,
         size: result.size,
         directory: dir,
-        cookies: initial?.cookies,
-        referrer: initial?.referrer,
         pageUrl: initial?.pageUrl,
-        headers: initial?.userAgent ? { 'user-agent': initial.userAgent } : undefined,
+        ...downloadContext,
         startPaused
       })
     } else if (result && result.info.type === 'single') {
       const info = result.info
-      reqs.push({ url: info.url, kind: 'media', title: info.title, thumbnail: info.thumbnail, media, directory: dir, startPaused })
+      reqs.push({
+        url: info.url,
+        kind: 'media',
+        title: info.title,
+        thumbnail: info.thumbnail,
+        media,
+        directory: dir,
+        pageUrl: initial?.pageUrl,
+        ...downloadContext,
+        startPaused
+      })
     } else if (result && result.info.type === 'playlist') {
       const pl = result.info
       const many = pl.entries.length > 1
