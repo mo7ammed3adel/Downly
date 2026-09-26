@@ -213,6 +213,25 @@ button {
   line-height: 1.45;
 }
 
+.update-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 12px 0;
+  padding: 8px 8px 8px 14px;
+  border-radius: var(--radius);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+}
+.update-error {
+  color: var(--danger);
+  font-weight: 400;
+}
+.grow {
+  flex: 1;
+}
 .main {
   grid-area: main;
   display: flex;

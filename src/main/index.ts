@@ -1,14 +1,17 @@
 import { app, BrowserWindow, clipboard, Menu, nativeImage, nativeTheme, Notification, shell, Tray } from 'electron'
+import { spawn } from 'node:child_process'
 import { join } from 'node:path'
 import type { AppState, ExternalAddRequest, MediaOptions, NewDownloadRequest } from '@shared/types'
 import { translate } from '@shared/i18n'
 import { parseSpotifyUrl } from '@shared/util'
 import { SUPPORT_PROMPT_AFTER } from '@shared/support'
 import { DownloadManager } from './engine/DownloadManager'
+import { createFetcher } from './engine/http'
 import type { YtdlpEnv } from './engine/ytdlp'
 import { BrowserBridge } from './services/bridge'
 import { Binaries } from './services/binaries'
 import { refreshExtensionFolder } from './services/browsers'
+import { installerFor, Updater } from './services/updater'
 import { ClipboardMonitor } from './services/clipboard'
 import { createProxyResolver, proxyFor } from './services/network'
 import { Scheduler } from './services/scheduler'
@@ -29,6 +32,18 @@ let quitting = false
 const settings = new SettingsStore()
 const proxyResolver = createProxyResolver(() => settings.get())
 const binaries = new Binaries(proxyResolver)
+const updater = new Updater({
+  currentVersion: app.getVersion(),
+  installer: installerFor(process.platform, process.versions.electron, process.arch, process.windowsStore === true),
+  fetch: createFetcher(proxyResolver),
+  proxyFor: proxyResolver,
+  runInstaller: (path) => {
+    // /S installs over the current copy without questions; --force-run opens Downly afterwards
+    spawn(path, ['/S', '--force-run'], { detached: true, stdio: 'ignore' }).unref()
+    void quit()
+  }
+})
+const UPDATE_CHECK_EVERY_MS = 6 * 60 * 60 * 1000
 /** yt-dlp needs Node 20+ as a JS runtime; the Windows 7 build (Electron 22) ships Node 16 */
 const nodeRuntimeOk = Number(process.versions.node.split('.')[0]) >= 20
 
@@ -308,6 +323,11 @@ app.whenReady().then(async () => {
     send('settings:changed', s)
   })
   binaries.on('state', (state) => send('components:changed', state))
+  updater.on('state', (state) => send('update:state', state))
+  // Only installed copies update themselves (a dev run has nothing to replace)
+  const checkForUpdate = () => app.isPackaged && settings.get().autoUpdateCheck && void updater.check()
+  setTimeout(checkForUpdate, 15_000)
+  setInterval(checkForUpdate, UPDATE_CHECK_EVERY_MS)
   manager.on('changed', (items) => send('downloads:changed', items))
   manager.on('removed', (ids) => send('downloads:removed', ids))
   manager.on('completed', (item) => {
@@ -334,7 +354,7 @@ ${err}`))
     })
   )
 
-  registerIpc({ manager, settings, binaries, bridge, proxyFor: proxyResolver, ytdlpEnv, getState, getWindow: () => win })
+  registerIpc({ manager, settings, binaries, bridge, updater, proxyFor: proxyResolver, ytdlpEnv, getState, getWindow: () => win })
   createWindow()
   applySystemSettings()
   scheduler.run()

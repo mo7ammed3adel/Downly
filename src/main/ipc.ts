@@ -10,6 +10,7 @@ import { analyze, type YtdlpEnv } from './engine/ytdlp'
 import { partPath } from './engine/HttpDownload'
 import type { Binaries } from './services/binaries'
 import type { SettingsStore } from './services/settings'
+import { DOWNLOAD_PAGE, type Updater } from './services/updater'
 import type { BrowserBridge } from './services/bridge'
 import { detectBrowsers, openExtensionsPage, setupExtension, showFolder } from './services/browsers'
 
@@ -18,6 +19,7 @@ interface Deps {
   settings: SettingsStore
   binaries: Binaries
   bridge: BrowserBridge
+  updater: Updater
   proxyFor: ProxyResolver
   ytdlpEnv(url: string): Promise<YtdlpEnv>
   getState(): AppState
@@ -118,6 +120,14 @@ export function registerIpc(d: Deps): void {
   ipcMain.handle('extension:showFolder', (_e, folder: string) => showFolder(folder))
   ipcMain.handle('extension:lastSeen', () => d.bridge.lastSeen)
   ipcMain.handle('idm:running', () => isIdmRunning())
+  ipcMain.handle('update:state', () => d.updater.state)
+  ipcMain.handle('update:check', () => d.updater.check())
+  ipcMain.handle('update:install', () => {
+    const s = d.updater.state
+    // Where the app can't replace itself, the new version is on the website
+    if (s.status === 'available' && !s.canInstall) return shell.openExternal(DOWNLOAD_PAGE)
+    return d.updater.install()
+  })
   ipcMain.handle('shell:openExternal', (_e, url: string) => {
     if (/^https?:\/\//.test(url)) return shell.openExternal(url)
   })

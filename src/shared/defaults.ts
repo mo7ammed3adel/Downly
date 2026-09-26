@@ -62,6 +62,7 @@ export function createDefaultSettings(downloadDir: string, language: string): Se
     confirmBrowserDownloads: true,
     clipboardMonitor: true,
     startWithSystem: false,
+    autoUpdateCheck: true,
     minimizeToTray: true,
     notifications: true,
     browserIntegration: {

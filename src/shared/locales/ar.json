@@ -293,5 +293,19 @@
     "note": "قفل IDM لوحده مش كفاية: الربط بتاعه بيشغّله تاني مع أول تحميل.",
     "dontShow": "متظهرش تاني",
     "ok": "تمام"
+  },
+  "update": {
+    "available": "في نسخة جديدة من Downly: {{version}}",
+    "install": "حدّث دلوقتي",
+    "download": "تحميل",
+    "later": "بعدين",
+    "downloading": "بننزّل Downly {{version}}… {{progress}}%",
+    "installing": "بنسطّب التحديث… Downly هيفتح تاني لوحده.",
+    "failed": "(التحميل فشل: {{error}}، جرب تاني)",
+    "auto": "دوّر على التحديثات لوحدك",
+    "check": "دوّر على تحديث",
+    "installVersion": "حدّث لـ {{version}}",
+    "latest": "معاك آخر نسخة.",
+    "checkFailed": "مقدرناش نشيك: {{error}}"
   }
 }

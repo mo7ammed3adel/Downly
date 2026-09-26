@@ -12,6 +12,7 @@ import { SchedulerDialog } from './components/SchedulerDialog'
 import { SupportDialog } from './components/SupportDialog'
 import { ExtensionDialog } from './components/ExtensionDialog'
 import { IdmDialog } from './components/IdmDialog'
+import { UpdateBanner } from './components/UpdateBanner'
 import { DeleteDialog, RefreshDialog } from './components/SmallDialogs'
 import type { ThemeMode } from '@shared/types'
 
@@ -116,6 +117,7 @@ export default function App() {
       <Toolbar />
       <Sidebar />
       <main className="main">
+        <UpdateBanner />
         <DownloadTable />
         <DetailsPanel />
       </main>

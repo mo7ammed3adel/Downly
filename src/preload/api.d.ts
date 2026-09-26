@@ -9,7 +9,8 @@ import type {
   ProbeRequest,
   ProbeResult,
   Settings,
-  SettingsPatch
+  SettingsPatch,
+  UpdateState
 } from '../shared/types'
 
 type Unsubscribe = () => void
@@ -44,6 +45,11 @@ export interface Api {
   extensionLastSeen(): Promise<number>
   /** Internet Download Manager is running (it grabs browser downloads first) */
   isIdmRunning(): Promise<boolean>
+  getUpdateState(): Promise<UpdateState>
+  checkForUpdate(): Promise<UpdateState>
+  /** Windows: download + install (the app restarts); elsewhere opens the download page */
+  installUpdate(): Promise<void>
+  onUpdateState(cb: (s: UpdateState) => void): Unsubscribe
   onDownloadsChanged(cb: (items: DownloadItem[]) => void): Unsubscribe
   onDownloadsRemoved(cb: (ids: string[]) => void): Unsubscribe
   onSettingsChanged(cb: (s: Settings) => void): Unsubscribe

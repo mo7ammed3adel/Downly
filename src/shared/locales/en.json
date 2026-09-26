@@ -293,5 +293,19 @@
     "note": "Closing IDM isn't enough: its integration starts it again with the next download.",
     "dontShow": "Don't show again",
     "ok": "OK"
+  },
+  "update": {
+    "available": "Downly {{version}} is available",
+    "install": "Update now",
+    "download": "Download",
+    "later": "Later",
+    "downloading": "Downloading Downly {{version}}… {{progress}}%",
+    "installing": "Installing the update… Downly will open again by itself.",
+    "failed": "(download failed: {{error}}, try again)",
+    "auto": "Check for updates automatically",
+    "check": "Check for updates",
+    "installVersion": "Update to {{version}}",
+    "latest": "You have the latest version.",
+    "checkFailed": "Couldn't check: {{error}}"
   }
 }

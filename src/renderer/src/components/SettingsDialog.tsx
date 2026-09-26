@@ -7,6 +7,7 @@ import { useStore } from '../store'
 import { Field, Modal, Toggle, closeDialog } from './ui'
 import logo from '../assets/logo.png'
 import { SocialLinks } from './SocialLinks'
+import { useUpdateState } from './UpdateBanner'
 
 type Tab = 'general' | 'downloads' | 'connection' | 'browser' | 'media' | 'about'
 
@@ -89,6 +90,7 @@ export function SettingsDialog({ initialTab }: { initialTab?: string }) {
               <Toggle label={t('settings.startWithSystem')} checked={s.startWithSystem} onChange={(v) => patch('startWithSystem', v)} />
             )}
             <Toggle label={t('settings.minimizeToTray')} checked={s.minimizeToTray} onChange={(v) => patch('minimizeToTray', v)} />
+            <Toggle label={t('update.auto')} checked={s.autoUpdateCheck} onChange={(v) => patch('autoUpdateCheck', v)} />
             <Toggle label={t('settings.notifications')} checked={s.notifications} onChange={(v) => patch('notifications', v)} />
             <Toggle label={t('settings.clipboard')} checked={s.clipboardMonitor} onChange={(v) => patch('clipboardMonitor', v)} />
           </>
@@ -349,10 +351,37 @@ export function SettingsDialog({ initialTab }: { initialTab?: string }) {
             <div className="hint">
               {t('settings.version')} {version} · yt-dlp {components.ytdlp.version ?? '—'}
             </div>
+            <UpdateCheck />
             <SocialLinks />
           </div>
         )}
       </div>
     </Modal>
+  )
+}
+
+/** "Check for updates" in About: shows the result, and offers the update when there is one */
+function UpdateCheck() {
+  const { t } = useTranslation()
+  const state = useUpdateState()
+  const [checking, setChecking] = useState(false)
+  const check = async () => {
+    setChecking(true)
+    await window.api.checkForUpdate().finally(() => setChecking(false))
+  }
+  return (
+    <div style={{ display: 'grid', justifyItems: 'center', gap: 8 }}>
+      {state.status === 'available' ? (
+        <button className="btn primary" onClick={() => void window.api.installUpdate()}>
+          {state.canInstall ? t('update.installVersion', { version: state.version }) : t('update.download')}
+        </button>
+      ) : (
+        <button className="btn" onClick={check} disabled={checking || state.status === 'downloading' || state.status === 'installing'}>
+          <RefreshCw size={14} className={checking ? 'spin' : ''} /> {t('update.check')}
+        </button>
+      )}
+      {state.status === 'latest' && <span className="hint">{t('update.latest')}</span>}
+      {state.status === 'error' && <span className="hint">{t('update.checkFailed', { error: state.error })}</span>}
+    </div>
   )
 }

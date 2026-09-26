@@ -138,6 +138,8 @@ export interface Settings {
   confirmBrowserDownloads: boolean
   clipboardMonitor: boolean
   startWithSystem: boolean
+  /** Look for a new Downly version at start and every few hours */
+  autoUpdateCheck: boolean
   minimizeToTray: boolean
   notifications: boolean
   browserIntegration: {
@@ -232,6 +234,14 @@ export interface AppState {
   /** Installed from the Microsoft Store (MSIX package) */
   windowsStore: boolean
 }
+
+/** The app's own update: found on GitHub, downloaded, then installed (Windows) or linked (others) */
+export type UpdateState =
+  | { status: 'idle' | 'latest' }
+  | { status: 'available'; version: string; canInstall: boolean; error?: string }
+  | { status: 'downloading'; version: string; progress: number }
+  | { status: 'installing'; version: string }
+  | { status: 'error'; error: string }
 
 export type BrowserId = 'chrome' | 'edge' | 'brave' | 'opera' | 'vivaldi' | 'firefox'
 
