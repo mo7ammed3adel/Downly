@@ -1,17 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Check, Chrome, Copy, ExternalLink, FolderOpen, Puzzle } from 'lucide-react'
-import type { BrowserId, BrowserInfo } from '@shared/types'
+import { Check, Copy, ExternalLink, FolderOpen, Puzzle } from 'lucide-react'
+import type { BrowserInfo } from '@shared/types'
+import { useStore } from '../store'
+import { BROWSER_LOGOS, ExtensionsPageShot, FilePickerShot, FirefoxAddShot, FirefoxDebuggingShot } from './BrowserShots'
 import { Modal, closeDialog } from './ui'
-
-const BROWSER_COLORS: Record<BrowserId, string> = {
-  chrome: '#1a73e8',
-  edge: '#0c8fd8',
-  brave: '#fb542b',
-  opera: '#ff1b2d',
-  vivaldi: '#ef3939',
-  firefox: '#ff7139'
-}
 
 type Step = { kind: 'pick' } | { kind: 'guide'; browser: BrowserInfo; folder: string; oneClick: boolean }
 
@@ -22,6 +15,7 @@ type Step = { kind: 'pick' } | { kind: 'guide'; browser: BrowserInfo; folder: st
  */
 export function ExtensionDialog() {
   const { t } = useTranslation()
+  const platform = useStore((s) => s.platform)
   const [browsers, setBrowsers] = useState<BrowserInfo[] | null>(null)
   const [step, setStep] = useState<Step>({ kind: 'pick' })
   const [connected, setConnected] = useState(false)
@@ -57,6 +51,7 @@ export function ExtensionDialog() {
     <Modal
       title={t('ext.title')}
       icon={<Puzzle size={18} />}
+      wide={step.kind === 'guide'}
       onClose={closeDialog}
       footer={
         <>
@@ -92,9 +87,7 @@ export function ExtensionDialog() {
             <div className="browser-grid">
               {browsers.map((b) => (
                 <button key={b.id} className="browser-card" onClick={() => choose(b)}>
-                  <span className="browser-dot" style={{ background: BROWSER_COLORS[b.id] }}>
-                    <Chrome size={20} />
-                  </span>
+                  <img className="browser-logo" src={BROWSER_LOGOS[b.id]} alt="" />
                   {b.name}
                 </button>
               ))}
@@ -113,11 +106,16 @@ export function ExtensionDialog() {
           </li>
           <li>
             <strong>{t('ext.step2')}</strong>
-            <span className="hint">{t('ext.step2Hint')}</span>
+            <span className="hint">{t(step.browser.id === 'edge' ? 'ext.step2HintEdge' : 'ext.step2Hint')}</span>
+            <ExtensionsPageShot browser={step.browser.id} devMode={false} />
           </li>
           <li>
             <strong>{t('ext.step3')}</strong>
-            <span className="hint">{t('ext.step3Hint')}</span>
+            <ExtensionsPageShot browser={step.browser.id} devMode />
+          </li>
+          <li>
+            <strong>{t('ext.step4')}</strong>
+            <span className="hint">{t(platform === 'darwin' ? 'ext.step4HintMac' : platform === 'linux' ? 'ext.step4HintLinux' : 'ext.step4Hint')}</span>
             <div className="path-box">
               <code dir="ltr">{step.folder}</code>
               <button className="btn" onClick={() => copyFolder(step.folder)}>
@@ -127,6 +125,7 @@ export function ExtensionDialog() {
                 <FolderOpen size={14} />
               </button>
             </div>
+            <FilePickerShot platform={platform} />
           </li>
         </ol>
       )}
@@ -136,11 +135,13 @@ export function ExtensionDialog() {
           {step.oneClick ? (
             <li>
               <strong>{t('ext.firefoxAdd')}</strong>
+              <FirefoxAddShot />
             </li>
           ) : (
             <>
               <li>
                 <strong>{t('ext.firefoxTemp1')}</strong>
+                <FirefoxDebuggingShot />
               </li>
               <li>
                 <strong>{t('ext.firefoxTemp2')}</strong>
@@ -150,6 +151,7 @@ export function ExtensionDialog() {
                     <FolderOpen size={14} />
                   </button>
                 </div>
+                <FilePickerShot platform={platform} file="manifest.json" />
                 <span className="hint">{t('ext.firefoxTempNote')}</span>
               </li>
             </>
