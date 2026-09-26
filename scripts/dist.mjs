@@ -9,6 +9,8 @@ import { rmSync } from 'node:fs'
 import { resolve } from 'node:path'
 
 const ELECTRON_LEGACY = '22.3.27'
+// ffmpeg-static's latest release has no 32-bit Windows binary; b6.0 is the newest that does
+const FFMPEG_RELEASE_IA32 = 'b6.0'
 const root = resolve(import.meta.dirname, '..')
 const target = process.argv[2]
 
@@ -17,7 +19,8 @@ const run = (cmd, env = {}) => execSync(cmd, { cwd: root, stdio: 'inherit', env:
 function installFfmpeg(platform, arch) {
   const binary = resolve(root, 'node_modules/ffmpeg-static', platform === 'win32' ? 'ffmpeg.exe' : 'ffmpeg')
   rmSync(binary, { force: true })
-  run('node node_modules/ffmpeg-static/install.js', { npm_config_arch: arch, npm_config_platform: platform })
+  const release = arch === 'ia32' ? { FFMPEG_BINARY_RELEASE: FFMPEG_RELEASE_IA32 } : {}
+  run('node node_modules/ffmpeg-static/install.js', { npm_config_arch: arch, npm_config_platform: platform, ...release })
 }
 
 const builder = (args) => run(`npx electron-builder ${args} --publish never`)
