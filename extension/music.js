@@ -100,7 +100,12 @@
         const track = rowTrack(row)
         if (track) feedback(btn, sendTracks([track]))
       })
-      link.parentElement.append(btn)
+      // The last cell lays out its buttons (add, duration, more) in a row: sit with them. Next to
+      // the title it would drop onto its own line under the song.
+      const cells = row.querySelectorAll('[role="gridcell"]')
+      const last = cells[cells.length - 1]
+      if (last && cells.length > 1) last.prepend(btn)
+      else link.parentElement.append(btn)
     }
   }
 
