@@ -170,6 +170,16 @@ jobs:
           cd extension && zip -qr ../dist/Downly-extension.zip . && cd ..
           ls -la dist
 
+      - name: Store packages of the extension
+        # downly-chrome.zip for the Chrome Web Store / Edge Add-ons, downly-firefox.zip for AMO:
+        # kept on the run page for uploading, not offered as downloads
+        run: node scripts/pack-extension.mjs
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: extension-store-packages
+          path: release/downly-*.zip
+
       - name: Publish release
         env:
           GH_TOKEN: ${{ secrets.RELEASES_TOKEN }}

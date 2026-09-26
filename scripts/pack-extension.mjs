@@ -1,7 +1,7 @@
 // Builds store-ready zips of ./extension:
 //   release/downly-chrome.zip   → Chrome Web Store, Edge Add-ons, Opera (service worker only)
 //   release/downly-firefox.zip  → Firefox AMO (background scripts + gecko id)
-import { cpSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { copyFileSync, cpSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
 import { resolve } from 'node:path'
 import { tmpdir } from 'node:os'
@@ -29,7 +29,16 @@ const targets = {
 function zip(dir, out) {
   rmSync(out, { force: true })
   if (process.platform === 'win32') {
-    execFileSync('powershell', ['-NoProfile', '-Command', `Compress-Archive -Path '${dir}\\*' -DestinationPath '${out}'`], { stdio: 'inherit' })
+    // Windows 10+ ships bsdtar, which writes a zip for a .zip name (PowerShell's module can be
+    // missing). By full path: a Git for Windows tar earlier on PATH reads "C:" as a remote host.
+    // bsdtar can't open non-ASCII paths, so it writes next to the staging folder, then we copy.
+    const tar = resolve(process.env.SystemRoot ?? 'C:\\Windows', 'System32', 'tar.exe')
+    const staged = `${dir}.zip`
+    rmSync(staged, { force: true })
+    // Name the entries (not ".") so the store sees manifest.json at the root, not ./manifest.json
+    execFileSync(tar, ['-a', '-c', '-f', staged, '-C', dir, ...readdirSync(dir)], { stdio: 'inherit' })
+    copyFileSync(staged, out)
+    rmSync(staged, { force: true })
   } else {
     execFileSync('zip', ['-qr', out, '.'], { cwd: dir, stdio: 'inherit' })
   }
