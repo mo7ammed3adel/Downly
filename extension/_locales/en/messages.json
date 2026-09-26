@@ -1,0 +1,95 @@
+{
+  "extName": {
+    "message": "Downly – Download Manager Integration"
+  },
+  "extDescription": {
+    "message": "Send downloads, videos and playlists from your browser to Downly for faster, resumable downloading."
+  },
+  "menuDownloadLink": {
+    "message": "Download with Downly"
+  },
+  "menuDownloadMedia": {
+    "message": "Download this video/audio with Downly"
+  },
+  "menuDownloadPage": {
+    "message": "Download video from this page"
+  },
+  "menuDownloadAll": {
+    "message": "Download all links with Downly"
+  },
+  "connected": {
+    "message": "Connected to Downly"
+  },
+  "disconnected": {
+    "message": "Downly is not running"
+  },
+  "disconnectedHint": {
+    "message": "Open the Downly app, then try again."
+  },
+  "takeOver": {
+    "message": "Take over browser downloads"
+  },
+  "pageVideo": {
+    "message": "Download video from this page"
+  },
+  "grabLinks": {
+    "message": "Download all links on this page"
+  },
+  "detected": {
+    "message": "Media found on this page"
+  },
+  "noneDetected": {
+    "message": "No media detected yet. Play the video, then open this again."
+  },
+  "download": {
+    "message": "Download"
+  },
+  "sent": {
+    "message": "Sent to Downly"
+  },
+  "overlay": {
+    "message": "Download"
+  },
+  "overlaySection": {
+    "message": "Download button on videos"
+  },
+  "overlayShow": {
+    "message": "Show the button on videos"
+  },
+  "overlayCorner": {
+    "message": "Default position"
+  },
+  "cornerTR": {
+    "message": "Top right"
+  },
+  "cornerTL": {
+    "message": "Top left"
+  },
+  "cornerBR": {
+    "message": "Bottom right"
+  },
+  "cornerBL": {
+    "message": "Bottom left"
+  },
+  "overlaySite": {
+    "message": "Hide on"
+  },
+  "overlayReset": {
+    "message": "Reset position"
+  },
+  "overlayRestore": {
+    "message": "Show hidden buttons"
+  },
+  "overlayHint": {
+    "message": "Tip: drag the button to move it (saved per site). Click × to hide it for the current video."
+  },
+  "hideHere": {
+    "message": "Hide for this video"
+  },
+  "sendFailed": {
+    "message": "Couldn't reach Downly."
+  },
+  "doneLabel": {
+    "message": "Done"
+  }
+}

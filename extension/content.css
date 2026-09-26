@@ -1,0 +1,119 @@
+.downly-wrap {
+  position: absolute;
+  z-index: 2147483000;
+  display: inline-flex;
+  align-items: stretch;
+  border-radius: 9px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  transition: opacity 0.15s;
+  pointer-events: auto;
+  font: 600 13px/1 system-ui, 'Segoe UI', Tahoma, sans-serif;
+  direction: ltr;
+}
+.downly-wrap.sg-top-left { top: 12px; left: 12px; }
+.downly-wrap.sg-top-right { top: 12px; right: 12px; }
+.downly-wrap.sg-bottom-left { bottom: 64px; left: 12px; }
+.downly-wrap.sg-bottom-right { bottom: 64px; right: 12px; }
+.downly-wrap.sg-custom {
+  left: calc((100% - var(--sg-w, 120px)) * var(--sg-x, 1));
+  top: calc((100% - var(--sg-h, 32px)) * var(--sg-y, 0));
+}
+
+*:hover > .downly-wrap,
+#movie_player > .downly-wrap,
+.downly-wrap.sg-dragging {
+  opacity: 0.95;
+}
+#movie_player.ytp-autohide > .downly-wrap:not(.sg-dragging) {
+  opacity: 0;
+}
+.downly-wrap:hover {
+  opacity: 1 !important;
+}
+
+.downly-audio {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  border-left: 1px solid rgba(255, 255, 255, 0.25) !important;
+}
+.downly-audio:hover {
+  filter: brightness(1.15);
+}
+.downly-audio.sent {
+  background: #17a466;
+}
+.downly-audio.failed {
+  background: #e0433a;
+}
+.downly-btn,
+.downly-audio,
+.downly-x {
+  border: 0;
+  margin: 0;
+  color: #fff !important;
+  font: inherit;
+  background: linear-gradient(135deg, #3d63f5, #8b5cf6);
+  cursor: pointer;
+}
+.downly-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px 7px 12px;
+  border-radius: 9px 0 0 9px;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.sg-dragging .downly-btn {
+  cursor: grabbing;
+}
+.downly-x {
+  width: 26px;
+  font-size: 16px;
+  border-radius: 0 9px 9px 0;
+  border-left: 1px solid rgba(255, 255, 255, 0.25);
+  opacity: 0.8;
+}
+.downly-x:hover {
+  opacity: 1;
+  background: #e0433a;
+}
+.downly-btn.sent {
+  background: #17a466;
+}
+
+.downly-btn.failed {
+  background: #e0433a;
+}
+
+
+#downly-playlist {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 2147483000;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 16px;
+  border: 0;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #3d63f5, #8b5cf6);
+  color: #fff;
+  font: 600 14px/1 system-ui, 'Segoe UI', Tahoma, sans-serif;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+}
+#downly-playlist:hover {
+  filter: brightness(1.1);
+}
+#downly-playlist.sent {
+  background: #17a466;
+}
+#downly-playlist.failed {
+  background: #e0433a;
+}

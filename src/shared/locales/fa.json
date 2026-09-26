@@ -1,0 +1,109 @@
+{
+  "toolbar": {
+    "add": "افزودن لینک",
+    "resume": "ادامه",
+    "pause": "توقف",
+    "resumeAll": "شروع همه",
+    "pauseAll": "توقف همه",
+    "delete": "حذف",
+    "clearCompleted": "پاک کردن تمام‌شده‌ها",
+    "scheduler": "زمان‌بندی",
+    "settings": "تنظیمات",
+    "search": "جستجوی دانلودها…",
+    "theme": "پوسته",
+    "support": "حمایت"
+  },
+  "sidebar": {
+    "all": "همه دانلودها",
+    "active": "در حال دانلود",
+    "unfinished": "ناتمام",
+    "finished": "تمام‌شده",
+    "categories": "دسته‌بندی‌ها",
+    "video": "ویدیو",
+    "music": "موسیقی",
+    "documents": "اسناد",
+    "compressed": "فشرده",
+    "programs": "برنامه‌ها",
+    "images": "تصاویر",
+    "other": "سایر"
+  },
+  "table": {
+    "name": "نام فایل",
+    "size": "حجم",
+    "status": "وضعیت",
+    "speed": "سرعت",
+    "eta": "زمان باقی‌مانده",
+    "added": "تاریخ افزودن",
+    "empty": "هنوز دانلودی نیست",
+    "emptyHint": "لینک را بچسبانید، روی افزودن لینک بزنید یا از مرورگر دانلود کنید."
+  },
+  "status": {
+    "queued": "در صف",
+    "downloading": "در حال دانلود",
+    "processing": "در حال پردازش",
+    "paused": "متوقف",
+    "completed": "کامل شد",
+    "error": "خطا"
+  },
+  "context": {
+    "open": "باز کردن",
+    "openFolder": "باز کردن پوشه",
+    "resume": "ادامه",
+    "pause": "توقف",
+    "restart": "دانلود دوباره",
+    "copyLink": "کپی لینک",
+    "refresh": "به‌روزرسانی آدرس دانلود",
+    "delete": "حذف",
+    "deleteWithFile": "حذف همراه فایل"
+  },
+  "add": {
+    "title": "دانلود جدید",
+    "analyze": "تحلیل",
+    "analyzing": "در حال تحلیل لینک…",
+    "fileName": "نام فایل",
+    "saveTo": "ذخیره در",
+    "browse": "انتخاب",
+    "start": "دانلود",
+    "later": "بعداً",
+    "cancel": "انصراف",
+    "video": "ویدیو",
+    "audio": "فقط صدا",
+    "quality": "کیفیت",
+    "best": "بهترین",
+    "container": "فرمت",
+    "audioFormat": "فرمت صدا",
+    "selectAll": "انتخاب همه",
+    "selectNone": "هیچ‌کدام",
+    "downloadSelected": "دانلود {{count}}"
+  },
+  "notify": {
+    "completed": "دانلود کامل شد",
+    "failed": "دانلود ناموفق بود",
+    "clipboard": "لینک کپی شد — دانلود شود؟",
+    "allDone": "همه دانلودها تمام شد"
+  },
+  "tray": {
+    "show": "نمایش Downly",
+    "add": "افزودن لینک از کلیپ‌بورد",
+    "pauseAll": "توقف همه",
+    "resumeAll": "شروع همه",
+    "quit": "خروج"
+  },
+  "settings": {
+    "title": "تنظیمات",
+    "tabs": {
+      "general": "عمومی",
+      "downloads": "دانلودها",
+      "connection": "اتصال",
+      "browser": "مرورگر",
+      "media": "ویدیو و صدا",
+      "about": "درباره"
+    },
+    "language": "زبان",
+    "theme": "ظاهر",
+    "themeSystem": "سیستم",
+    "themeLight": "روشن",
+    "themeDark": "تیره",
+    "save": "ذخیره"
+  }
+}

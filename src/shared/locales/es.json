@@ -1,0 +1,109 @@
+{
+  "toolbar": {
+    "add": "Añadir URL",
+    "resume": "Reanudar",
+    "pause": "Pausar",
+    "resumeAll": "Iniciar todo",
+    "pauseAll": "Detener todo",
+    "delete": "Eliminar",
+    "clearCompleted": "Limpiar terminados",
+    "scheduler": "Programador",
+    "settings": "Ajustes",
+    "search": "Buscar descargas…",
+    "theme": "Tema",
+    "support": "Apoyar"
+  },
+  "sidebar": {
+    "all": "Todas",
+    "active": "Descargando",
+    "unfinished": "Sin terminar",
+    "finished": "Terminadas",
+    "categories": "Categorías",
+    "video": "Vídeo",
+    "music": "Música",
+    "documents": "Documentos",
+    "compressed": "Comprimidos",
+    "programs": "Programas",
+    "images": "Imágenes",
+    "other": "Otros"
+  },
+  "table": {
+    "name": "Nombre",
+    "size": "Tamaño",
+    "status": "Estado",
+    "speed": "Velocidad",
+    "eta": "Tiempo restante",
+    "added": "Añadido",
+    "empty": "Aún no hay descargas",
+    "emptyHint": "Pega un enlace, pulsa Añadir URL o descarga desde el navegador."
+  },
+  "status": {
+    "queued": "En cola",
+    "downloading": "Descargando",
+    "processing": "Procesando",
+    "paused": "En pausa",
+    "completed": "Completado",
+    "error": "Error"
+  },
+  "context": {
+    "open": "Abrir",
+    "openFolder": "Abrir carpeta",
+    "resume": "Reanudar",
+    "pause": "Pausar",
+    "restart": "Descargar de nuevo",
+    "copyLink": "Copiar enlace",
+    "refresh": "Actualizar dirección",
+    "delete": "Eliminar",
+    "deleteWithFile": "Eliminar con archivo"
+  },
+  "add": {
+    "title": "Nueva descarga",
+    "analyze": "Analizar",
+    "analyzing": "Analizando enlace…",
+    "fileName": "Nombre del archivo",
+    "saveTo": "Guardar en",
+    "browse": "Examinar",
+    "start": "Descargar",
+    "later": "Más tarde",
+    "cancel": "Cancelar",
+    "video": "Vídeo",
+    "audio": "Solo audio",
+    "quality": "Calidad",
+    "best": "La mejor",
+    "container": "Formato",
+    "audioFormat": "Formato de audio",
+    "selectAll": "Seleccionar todo",
+    "selectNone": "Ninguno",
+    "downloadSelected": "Descargar {{count}}"
+  },
+  "notify": {
+    "completed": "Descarga completada",
+    "failed": "La descarga falló",
+    "clipboard": "Enlace copiado — ¿descargarlo?",
+    "allDone": "Todas las descargas terminaron"
+  },
+  "tray": {
+    "show": "Mostrar Downly",
+    "add": "Añadir desde el portapapeles",
+    "pauseAll": "Detener todo",
+    "resumeAll": "Iniciar todo",
+    "quit": "Salir"
+  },
+  "settings": {
+    "title": "Ajustes",
+    "tabs": {
+      "general": "General",
+      "downloads": "Descargas",
+      "connection": "Conexión",
+      "browser": "Navegador",
+      "media": "Vídeo y audio",
+      "about": "Acerca de"
+    },
+    "language": "Idioma",
+    "theme": "Apariencia",
+    "themeSystem": "Sistema",
+    "themeLight": "Claro",
+    "themeDark": "Oscuro",
+    "save": "Guardar"
+  }
+}

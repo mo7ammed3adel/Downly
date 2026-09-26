@@ -1,0 +1,109 @@
+{
+  "toolbar": {
+    "add": "URL hinzufügen",
+    "resume": "Fortsetzen",
+    "pause": "Pause",
+    "resumeAll": "Alle starten",
+    "pauseAll": "Alle stoppen",
+    "delete": "Löschen",
+    "clearCompleted": "Fertige entfernen",
+    "scheduler": "Zeitplaner",
+    "settings": "Einstellungen",
+    "search": "Downloads suchen…",
+    "theme": "Design",
+    "support": "Unterstützen"
+  },
+  "sidebar": {
+    "all": "Alle Downloads",
+    "active": "Lädt",
+    "unfinished": "Unvollständig",
+    "finished": "Fertig",
+    "categories": "Kategorien",
+    "video": "Video",
+    "music": "Musik",
+    "documents": "Dokumente",
+    "compressed": "Archive",
+    "programs": "Programme",
+    "images": "Bilder",
+    "other": "Sonstiges"
+  },
+  "table": {
+    "name": "Dateiname",
+    "size": "Größe",
+    "status": "Status",
+    "speed": "Geschwindigkeit",
+    "eta": "Restzeit",
+    "added": "Hinzugefügt",
+    "empty": "Noch keine Downloads",
+    "emptyHint": "Link einfügen, auf URL hinzufügen klicken oder im Browser herunterladen."
+  },
+  "status": {
+    "queued": "Warteschlange",
+    "downloading": "Lädt",
+    "processing": "Verarbeitung",
+    "paused": "Pausiert",
+    "completed": "Fertig",
+    "error": "Fehler"
+  },
+  "context": {
+    "open": "Öffnen",
+    "openFolder": "Ordner öffnen",
+    "resume": "Fortsetzen",
+    "pause": "Pause",
+    "restart": "Erneut herunterladen",
+    "copyLink": "Link kopieren",
+    "refresh": "Download-Adresse aktualisieren",
+    "delete": "Löschen",
+    "deleteWithFile": "Mit Datei löschen"
+  },
+  "add": {
+    "title": "Neuer Download",
+    "analyze": "Analysieren",
+    "analyzing": "Link wird analysiert…",
+    "fileName": "Dateiname",
+    "saveTo": "Speichern in",
+    "browse": "Durchsuchen",
+    "start": "Herunterladen",
+    "later": "Später",
+    "cancel": "Abbrechen",
+    "video": "Video",
+    "audio": "Nur Audio",
+    "quality": "Qualität",
+    "best": "Beste",
+    "container": "Format",
+    "audioFormat": "Audioformat",
+    "selectAll": "Alle auswählen",
+    "selectNone": "Keine",
+    "downloadSelected": "{{count}} herunterladen"
+  },
+  "notify": {
+    "completed": "Download abgeschlossen",
+    "failed": "Download fehlgeschlagen",
+    "clipboard": "Link kopiert — herunterladen?",
+    "allDone": "Alle Downloads fertig"
+  },
+  "tray": {
+    "show": "Downly anzeigen",
+    "add": "URL aus Zwischenablage",
+    "pauseAll": "Alle stoppen",
+    "resumeAll": "Alle starten",
+    "quit": "Beenden"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "tabs": {
+      "general": "Allgemein",
+      "downloads": "Downloads",
+      "connection": "Verbindung",
+      "browser": "Browser",
+      "media": "Video & Audio",
+      "about": "Über"
+    },
+    "language": "Sprache",
+    "theme": "Darstellung",
+    "themeSystem": "System",
+    "themeLight": "Hell",
+    "themeDark": "Dunkel",
+    "save": "Speichern"
+  }
+}

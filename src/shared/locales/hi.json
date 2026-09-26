@@ -1,0 +1,109 @@
+{
+  "toolbar": {
+    "add": "URL जोड़ें",
+    "resume": "फिर शुरू करें",
+    "pause": "रोकें",
+    "resumeAll": "सभी शुरू करें",
+    "pauseAll": "सभी रोकें",
+    "delete": "हटाएँ",
+    "clearCompleted": "पूर्ण हटाएँ",
+    "scheduler": "शेड्यूलर",
+    "settings": "सेटिंग्स",
+    "search": "डाउनलोड खोजें…",
+    "theme": "थीम",
+    "support": "समर्थन करें"
+  },
+  "sidebar": {
+    "all": "सभी डाउनलोड",
+    "active": "डाउनलोड हो रहे",
+    "unfinished": "अधूरे",
+    "finished": "पूर्ण",
+    "categories": "श्रेणियाँ",
+    "video": "वीडियो",
+    "music": "संगीत",
+    "documents": "दस्तावेज़",
+    "compressed": "संपीड़ित",
+    "programs": "प्रोग्राम",
+    "images": "चित्र",
+    "other": "अन्य"
+  },
+  "table": {
+    "name": "फ़ाइल नाम",
+    "size": "आकार",
+    "status": "स्थिति",
+    "speed": "गति",
+    "eta": "शेष समय",
+    "added": "जोड़ा गया",
+    "empty": "अभी कोई डाउनलोड नहीं",
+    "emptyHint": "लिंक पेस्ट करें, URL जोड़ें दबाएँ या ब्राउज़र से डाउनलोड करें।"
+  },
+  "status": {
+    "queued": "कतार में",
+    "downloading": "डाउनलोड हो रहा",
+    "processing": "प्रोसेसिंग",
+    "paused": "रुका हुआ",
+    "completed": "पूर्ण",
+    "error": "त्रुटि"
+  },
+  "context": {
+    "open": "खोलें",
+    "openFolder": "फ़ोल्डर खोलें",
+    "resume": "फिर शुरू करें",
+    "pause": "रोकें",
+    "restart": "फिर से डाउनलोड करें",
+    "copyLink": "लिंक कॉपी करें",
+    "refresh": "डाउनलोड पता रीफ़्रेश करें",
+    "delete": "हटाएँ",
+    "deleteWithFile": "फ़ाइल सहित हटाएँ"
+  },
+  "add": {
+    "title": "नया डाउनलोड",
+    "analyze": "विश्लेषण",
+    "analyzing": "लिंक का विश्लेषण…",
+    "fileName": "फ़ाइल नाम",
+    "saveTo": "यहाँ सहेजें",
+    "browse": "ब्राउज़ करें",
+    "start": "डाउनलोड",
+    "later": "बाद में",
+    "cancel": "रद्द करें",
+    "video": "वीडियो",
+    "audio": "केवल ऑडियो",
+    "quality": "गुणवत्ता",
+    "best": "सर्वश्रेष्ठ",
+    "container": "फ़ॉर्मेट",
+    "audioFormat": "ऑडियो फ़ॉर्मेट",
+    "selectAll": "सभी चुनें",
+    "selectNone": "कोई नहीं",
+    "downloadSelected": "{{count}} डाउनलोड करें"
+  },
+  "notify": {
+    "completed": "डाउनलोड पूर्ण",
+    "failed": "डाउनलोड विफल",
+    "clipboard": "लिंक कॉपी हुआ — डाउनलोड करें?",
+    "allDone": "सभी डाउनलोड पूर्ण"
+  },
+  "tray": {
+    "show": "Downly दिखाएँ",
+    "add": "क्लिपबोर्ड से URL जोड़ें",
+    "pauseAll": "सभी रोकें",
+    "resumeAll": "सभी शुरू करें",
+    "quit": "बाहर निकलें"
+  },
+  "settings": {
+    "title": "सेटिंग्स",
+    "tabs": {
+      "general": "सामान्य",
+      "downloads": "डाउनलोड",
+      "connection": "कनेक्शन",
+      "browser": "ब्राउज़र",
+      "media": "वीडियो और ऑडियो",
+      "about": "परिचय"
+    },
+    "language": "भाषा",
+    "theme": "रूप",
+    "themeSystem": "सिस्टम",
+    "themeLight": "हल्का",
+    "themeDark": "गहरा",
+    "save": "सहेजें"
+  }
+}

@@ -1,0 +1,76 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header>
+      <img src="icons/icon32.png" alt="" width="24" height="24" />
+      <strong>Downly</strong>
+      <span id="status" class="status"></span>
+    </header>
+    <div id="offline" class="offline" hidden>
+      <b data-i18n="disconnected"></b>
+      <div data-i18n="disconnectedHint"></div>
+    </div>
+    <p id="error" class="offline" hidden></p>
+
+    <div class="actions">
+      <button id="page" class="primary" data-i18n="pageVideo"></button>
+      <button id="links" data-i18n="grabLinks"></button>
+    </div>
+
+    <label class="row">
+      <span data-i18n="takeOver"></span>
+      <input id="enabled" type="checkbox" />
+    </label>
+    <label class="row" title="">
+      <span data-i18n="quickMode"></span>
+      <input id="quick" type="checkbox" />
+    </label>
+    <p class="muted small" data-i18n="quickHint"></p>
+
+    <h4 data-i18n="detected"></h4>
+    <p id="streams" class="note" data-i18n="streamsHint" hidden></p>
+    <ul id="media"></ul>
+    <p id="none" class="muted" data-i18n="noneDetected" hidden></p>
+
+    <details id="ovBox">
+      <summary data-i18n="overlaySection"></summary>
+      <label class="row">
+        <span data-i18n="overlayShow"></span>
+        <input id="ovEnabled" type="checkbox" />
+      </label>
+      <label class="row">
+        <span data-i18n="overlayCorner"></span>
+        <select id="ovCorner">
+          <option value="top-right" data-i18n="cornerTR"></option>
+          <option value="top-left" data-i18n="cornerTL"></option>
+          <option value="bottom-right" data-i18n="cornerBR"></option>
+          <option value="bottom-left" data-i18n="cornerBL"></option>
+        </select>
+      </label>
+      <label class="row">
+        <span id="ovSiteLabel"></span>
+        <input id="ovSite" type="checkbox" />
+      </label>
+      <div class="actions two">
+        <button id="ovReset" data-i18n="overlayReset"></button>
+        <button id="ovRestore" data-i18n="overlayRestore"></button>
+      </div>
+      <p class="muted small" data-i18n="overlayHint"></p>
+    </details>
+
+    <label class="row lang">
+      <span data-i18n="language"></span>
+      <select id="lang">
+        <option value="auto" data-i18n="langAuto"></option>
+        <option value="en">English</option>
+        <option value="ar">العربية</option>
+      </select>
+    </label>
+    <script src="i18n.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

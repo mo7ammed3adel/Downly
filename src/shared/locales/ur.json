@@ -1,0 +1,109 @@
+{
+  "toolbar": {
+    "add": "لنک شامل کریں",
+    "resume": "دوبارہ شروع",
+    "pause": "روکیں",
+    "resumeAll": "سب شروع کریں",
+    "pauseAll": "سب روکیں",
+    "delete": "حذف",
+    "clearCompleted": "مکمل صاف کریں",
+    "scheduler": "شیڈولر",
+    "settings": "ترتیبات",
+    "search": "ڈاؤن لوڈز تلاش کریں…",
+    "theme": "تھیم",
+    "support": "سپورٹ کریں"
+  },
+  "sidebar": {
+    "all": "تمام ڈاؤن لوڈز",
+    "active": "ڈاؤن لوڈ ہو رہے",
+    "unfinished": "نامکمل",
+    "finished": "مکمل",
+    "categories": "زمرے",
+    "video": "ویڈیو",
+    "music": "موسیقی",
+    "documents": "دستاویزات",
+    "compressed": "کمپریسڈ",
+    "programs": "پروگرام",
+    "images": "تصاویر",
+    "other": "دیگر"
+  },
+  "table": {
+    "name": "فائل کا نام",
+    "size": "سائز",
+    "status": "حالت",
+    "speed": "رفتار",
+    "eta": "باقی وقت",
+    "added": "شامل کیا گیا",
+    "empty": "ابھی کوئی ڈاؤن لوڈ نہیں",
+    "emptyHint": "لنک پیسٹ کریں، لنک شامل کریں دبائیں یا براؤزر سے ڈاؤن لوڈ کریں۔"
+  },
+  "status": {
+    "queued": "قطار میں",
+    "downloading": "ڈاؤن لوڈ ہو رہا",
+    "processing": "پروسیسنگ",
+    "paused": "رکا ہوا",
+    "completed": "مکمل",
+    "error": "خرابی"
+  },
+  "context": {
+    "open": "کھولیں",
+    "openFolder": "فولڈر کھولیں",
+    "resume": "دوبارہ شروع",
+    "pause": "روکیں",
+    "restart": "دوبارہ ڈاؤن لوڈ",
+    "copyLink": "لنک کاپی کریں",
+    "refresh": "ڈاؤن لوڈ پتہ تازہ کریں",
+    "delete": "حذف",
+    "deleteWithFile": "فائل سمیت حذف"
+  },
+  "add": {
+    "title": "نیا ڈاؤن لوڈ",
+    "analyze": "تجزیہ",
+    "analyzing": "لنک کا تجزیہ…",
+    "fileName": "فائل کا نام",
+    "saveTo": "یہاں محفوظ کریں",
+    "browse": "براؤز",
+    "start": "ڈاؤن لوڈ",
+    "later": "بعد میں",
+    "cancel": "منسوخ",
+    "video": "ویڈیو",
+    "audio": "صرف آڈیو",
+    "quality": "معیار",
+    "best": "بہترین",
+    "container": "فارمیٹ",
+    "audioFormat": "آڈیو فارمیٹ",
+    "selectAll": "سب منتخب کریں",
+    "selectNone": "کوئی نہیں",
+    "downloadSelected": "{{count}} ڈاؤن لوڈ کریں"
+  },
+  "notify": {
+    "completed": "ڈاؤن لوڈ مکمل",
+    "failed": "ڈاؤن لوڈ ناکام",
+    "clipboard": "لنک کاپی ہوا — ڈاؤن لوڈ کریں؟",
+    "allDone": "تمام ڈاؤن لوڈز مکمل"
+  },
+  "tray": {
+    "show": "Downly دکھائیں",
+    "add": "کلپ بورڈ سے لنک شامل کریں",
+    "pauseAll": "سب روکیں",
+    "resumeAll": "سب شروع کریں",
+    "quit": "باہر نکلیں"
+  },
+  "settings": {
+    "title": "ترتیبات",
+    "tabs": {
+      "general": "عمومی",
+      "downloads": "ڈاؤن لوڈز",
+      "connection": "کنکشن",
+      "browser": "براؤزر",
+      "media": "ویڈیو اور آڈیو",
+      "about": "تعارف"
+    },
+    "language": "زبان",
+    "theme": "ظاہری شکل",
+    "themeSystem": "سسٹم",
+    "themeLight": "روشن",
+    "themeDark": "تاریک",
+    "save": "محفوظ کریں"
+  }
+}

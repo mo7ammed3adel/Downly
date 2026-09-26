@@ -1,0 +1,109 @@
+{
+  "toolbar": {
+    "add": "Добавить URL",
+    "resume": "Продолжить",
+    "pause": "Пауза",
+    "resumeAll": "Запустить все",
+    "pauseAll": "Остановить все",
+    "delete": "Удалить",
+    "clearCompleted": "Очистить завершённые",
+    "scheduler": "Планировщик",
+    "settings": "Настройки",
+    "search": "Поиск загрузок…",
+    "theme": "Тема",
+    "support": "Поддержать"
+  },
+  "sidebar": {
+    "all": "Все загрузки",
+    "active": "Загружаются",
+    "unfinished": "Незавершённые",
+    "finished": "Завершённые",
+    "categories": "Категории",
+    "video": "Видео",
+    "music": "Музыка",
+    "documents": "Документы",
+    "compressed": "Архивы",
+    "programs": "Программы",
+    "images": "Изображения",
+    "other": "Другое"
+  },
+  "table": {
+    "name": "Имя файла",
+    "size": "Размер",
+    "status": "Статус",
+    "speed": "Скорость",
+    "eta": "Осталось",
+    "added": "Добавлено",
+    "empty": "Загрузок пока нет",
+    "emptyHint": "Вставьте ссылку, нажмите «Добавить URL» или скачайте из браузера."
+  },
+  "status": {
+    "queued": "В очереди",
+    "downloading": "Загрузка",
+    "processing": "Обработка",
+    "paused": "Пауза",
+    "completed": "Завершено",
+    "error": "Ошибка"
+  },
+  "context": {
+    "open": "Открыть",
+    "openFolder": "Открыть папку",
+    "resume": "Продолжить",
+    "pause": "Пауза",
+    "restart": "Скачать заново",
+    "copyLink": "Копировать ссылку",
+    "refresh": "Обновить адрес загрузки",
+    "delete": "Удалить",
+    "deleteWithFile": "Удалить с файлом"
+  },
+  "add": {
+    "title": "Новая загрузка",
+    "analyze": "Анализ",
+    "analyzing": "Анализ ссылки…",
+    "fileName": "Имя файла",
+    "saveTo": "Сохранить в",
+    "browse": "Обзор",
+    "start": "Скачать",
+    "later": "Позже",
+    "cancel": "Отмена",
+    "video": "Видео",
+    "audio": "Только аудио",
+    "quality": "Качество",
+    "best": "Лучшее",
+    "container": "Формат",
+    "audioFormat": "Формат аудио",
+    "selectAll": "Выбрать все",
+    "selectNone": "Снять выбор",
+    "downloadSelected": "Скачать {{count}}"
+  },
+  "notify": {
+    "completed": "Загрузка завершена",
+    "failed": "Ошибка загрузки",
+    "clipboard": "Ссылка скопирована — скачать?",
+    "allDone": "Все загрузки завершены"
+  },
+  "tray": {
+    "show": "Показать Downly",
+    "add": "Добавить из буфера",
+    "pauseAll": "Остановить все",
+    "resumeAll": "Запустить все",
+    "quit": "Выход"
+  },
+  "settings": {
+    "title": "Настройки",
+    "tabs": {
+      "general": "Общие",
+      "downloads": "Загрузки",
+      "connection": "Соединение",
+      "browser": "Браузер",
+      "media": "Видео и аудио",
+      "about": "О программе"
+    },
+    "language": "Язык",
+    "theme": "Оформление",
+    "themeSystem": "Системная",
+    "themeLight": "Светлая",
+    "themeDark": "Тёмная",
+    "save": "Сохранить"
+  }
+}

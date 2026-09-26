@@ -1,0 +1,95 @@
+{
+  "extName": {
+    "message": "Downly – ربط مدير التحميل"
+  },
+  "extDescription": {
+    "message": "ابعت التحميلات والفيديوهات وقوائم التشغيل من المتصفح لبرنامج Downly لتحميل أسرع وقابل للاستئناف."
+  },
+  "menuDownloadLink": {
+    "message": "تحميل بواسطة Downly"
+  },
+  "menuDownloadMedia": {
+    "message": "تحميل هذا الفيديو/الصوت بواسطة Downly"
+  },
+  "menuDownloadPage": {
+    "message": "تحميل الفيديو من هذه الصفحة"
+  },
+  "menuDownloadAll": {
+    "message": "تحميل كل الروابط بواسطة Downly"
+  },
+  "connected": {
+    "message": "متصل ببرنامج Downly"
+  },
+  "disconnected": {
+    "message": "برنامج Downly غير مفتوح"
+  },
+  "disconnectedHint": {
+    "message": "افتح برنامج Downly وحاول مرة أخرى."
+  },
+  "takeOver": {
+    "message": "استلام تحميلات المتصفح"
+  },
+  "pageVideo": {
+    "message": "تحميل الفيديو من هذه الصفحة"
+  },
+  "grabLinks": {
+    "message": "تحميل كل الروابط في الصفحة"
+  },
+  "detected": {
+    "message": "ملفات وسائط في هذه الصفحة"
+  },
+  "noneDetected": {
+    "message": "لم يتم اكتشاف وسائط بعد. شغّل الفيديو ثم افتح هذه النافذة مرة أخرى."
+  },
+  "download": {
+    "message": "تحميل"
+  },
+  "sent": {
+    "message": "تم الإرسال إلى Downly"
+  },
+  "overlay": {
+    "message": "تحميل"
+  },
+  "overlaySection": {
+    "message": "زرار التحميل على الفيديوهات"
+  },
+  "overlayShow": {
+    "message": "إظهار الزرار على الفيديوهات"
+  },
+  "overlayCorner": {
+    "message": "المكان الافتراضي"
+  },
+  "cornerTR": {
+    "message": "أعلى اليمين"
+  },
+  "cornerTL": {
+    "message": "أعلى الشمال"
+  },
+  "cornerBR": {
+    "message": "أسفل اليمين"
+  },
+  "cornerBL": {
+    "message": "أسفل الشمال"
+  },
+  "overlaySite": {
+    "message": "إخفاء في"
+  },
+  "overlayReset": {
+    "message": "إرجاع المكان الافتراضي"
+  },
+  "overlayRestore": {
+    "message": "إظهار الأزرار المخفية"
+  },
+  "overlayHint": {
+    "message": "تقدر تسحب الزرار وتحطه في أي مكان (بيتحفظ لكل موقع). اضغط × لإخفائه من الفيديو الحالي."
+  },
+  "hideHere": {
+    "message": "إخفاء من هذا الفيديو"
+  },
+  "sendFailed": {
+    "message": "تعذّر الوصول لبرنامج Downly."
+  },
+  "doneLabel": {
+    "message": "تم"
+  }
+}

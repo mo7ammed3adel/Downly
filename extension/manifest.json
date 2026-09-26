@@ -1,0 +1,53 @@
+{
+  "manifest_version": 3,
+  "name": "__MSG_extName__",
+  "short_name": "Downly",
+  "version": "1.0.0",
+  "description": "__MSG_extDescription__",
+  "default_locale": "en",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "permissions": ["downloads", "contextMenus", "cookies", "storage", "webRequest", "scripting"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js",
+    "scripts": ["i18n.js", "background.js"]
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Downly",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png"
+    }
+  },
+  "commands": {
+    "download-video": {
+      "suggested_key": { "default": "Alt+Shift+D" },
+      "description": "Download the video on this page with Downly"
+    },
+    "download-audio": {
+      "suggested_key": { "default": "Alt+Shift+A" },
+      "description": "Download the audio of this page with Downly"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["i18n.js", "content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "downly@downly.app",
+      "strict_min_version": "121.0"
+    }
+  }
+}

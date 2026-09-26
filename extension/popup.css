@@ -1,0 +1,170 @@
+:root {
+  --bg: #ffffff;
+  --surface: #f2f4f8;
+  --border: #e1e4ea;
+  --text: #171a21;
+  --muted: #7a8190;
+  --accent: #3d63f5;
+  --ok: #17a466;
+  --bad: #e0433a;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #161920;
+    --surface: #1f232d;
+    --border: #2a2f3b;
+    --text: #e9ecf2;
+    --muted: #8a91a0;
+    --accent: #5b7cff;
+  }
+}
+body {
+  width: 340px;
+  margin: 0;
+  padding: 14px;
+  background: var(--bg);
+  color: var(--text);
+  font: 13px/1.4 system-ui, 'Segoe UI', Tahoma, sans-serif;
+}
+header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 15px;
+}
+.status {
+  margin-inline-start: auto;
+  font-size: 11.5px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: var(--surface);
+  color: var(--muted);
+}
+.status.ok {
+  color: var(--ok);
+}
+.status.bad {
+  color: var(--bad);
+}
+.offline {
+  background: rgba(224, 67, 58, 0.1);
+  color: var(--bad);
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-bottom: 10px;
+}
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  cursor: pointer;
+}
+input[type='checkbox'] {
+  accent-color: var(--accent);
+  width: 16px;
+  height: 16px;
+}
+.actions {
+  display: grid;
+  gap: 8px;
+  margin: 8px 0 12px;
+}
+button {
+  font: inherit;
+  color: inherit;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+button:disabled {
+  opacity: 0.5;
+}
+h4 {
+  margin: 4px 0 6px;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 240px;
+  overflow-y: auto;
+}
+li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+li .name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+li .type {
+  font-size: 11px;
+  color: var(--muted);
+}
+li button {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+.actions.two {
+  grid-template-columns: 1fr 1fr;
+  margin-top: 4px;
+}
+select {
+  font: inherit;
+  color: inherit;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 6px;
+}
+.note {
+  background: rgba(61, 99, 245, 0.12);
+  color: var(--accent);
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin: 0 0 8px;
+  font-size: 12px;
+}
+details {
+  margin-top: 12px;
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
+summary {
+  cursor: pointer;
+  font-weight: 600;
+  padding: 4px 0;
+}
+.row.lang {
+  margin-top: 8px;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+.small {
+  font-size: 11.5px;
+}
+.muted {
+  color: var(--muted);
+  margin: 4px 0;
+}

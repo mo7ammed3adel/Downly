@@ -1,0 +1,109 @@
+{
+  "toolbar": {
+    "add": "Tambah URL",
+    "resume": "Lanjutkan",
+    "pause": "Jeda",
+    "resumeAll": "Mulai semua",
+    "pauseAll": "Hentikan semua",
+    "delete": "Hapus",
+    "clearCompleted": "Bersihkan selesai",
+    "scheduler": "Penjadwal",
+    "settings": "Pengaturan",
+    "search": "Cari unduhan…",
+    "theme": "Tema",
+    "support": "Dukung"
+  },
+  "sidebar": {
+    "all": "Semua unduhan",
+    "active": "Mengunduh",
+    "unfinished": "Belum selesai",
+    "finished": "Selesai",
+    "categories": "Kategori",
+    "video": "Video",
+    "music": "Musik",
+    "documents": "Dokumen",
+    "compressed": "Arsip",
+    "programs": "Program",
+    "images": "Gambar",
+    "other": "Lainnya"
+  },
+  "table": {
+    "name": "Nama file",
+    "size": "Ukuran",
+    "status": "Status",
+    "speed": "Kecepatan",
+    "eta": "Sisa waktu",
+    "added": "Ditambahkan",
+    "empty": "Belum ada unduhan",
+    "emptyHint": "Tempel tautan, klik Tambah URL, atau unduh dari browser."
+  },
+  "status": {
+    "queued": "Antre",
+    "downloading": "Mengunduh",
+    "processing": "Memproses",
+    "paused": "Dijeda",
+    "completed": "Selesai",
+    "error": "Galat"
+  },
+  "context": {
+    "open": "Buka",
+    "openFolder": "Buka folder",
+    "resume": "Lanjutkan",
+    "pause": "Jeda",
+    "restart": "Unduh ulang",
+    "copyLink": "Salin tautan",
+    "refresh": "Perbarui alamat unduhan",
+    "delete": "Hapus",
+    "deleteWithFile": "Hapus beserta file"
+  },
+  "add": {
+    "title": "Unduhan baru",
+    "analyze": "Analisis",
+    "analyzing": "Menganalisis tautan…",
+    "fileName": "Nama file",
+    "saveTo": "Simpan ke",
+    "browse": "Telusuri",
+    "start": "Unduh",
+    "later": "Nanti",
+    "cancel": "Batal",
+    "video": "Video",
+    "audio": "Audio saja",
+    "quality": "Kualitas",
+    "best": "Terbaik",
+    "container": "Format",
+    "audioFormat": "Format audio",
+    "selectAll": "Pilih semua",
+    "selectNone": "Tidak ada",
+    "downloadSelected": "Unduh {{count}}"
+  },
+  "notify": {
+    "completed": "Unduhan selesai",
+    "failed": "Unduhan gagal",
+    "clipboard": "Tautan disalin — unduh?",
+    "allDone": "Semua unduhan selesai"
+  },
+  "tray": {
+    "show": "Tampilkan Downly",
+    "add": "Tambah URL dari clipboard",
+    "pauseAll": "Hentikan semua",
+    "resumeAll": "Mulai semua",
+    "quit": "Keluar"
+  },
+  "settings": {
+    "title": "Pengaturan",
+    "tabs": {
+      "general": "Umum",
+      "downloads": "Unduhan",
+      "connection": "Koneksi",
+      "browser": "Browser",
+      "media": "Video & audio",
+      "about": "Tentang"
+    },
+    "language": "Bahasa",
+    "theme": "Tampilan",
+    "themeSystem": "Sistem",
+    "themeLight": "Terang",
+    "themeDark": "Gelap",
+    "save": "Simpan"
+  }
+}

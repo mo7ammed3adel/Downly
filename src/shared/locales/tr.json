@@ -1,0 +1,109 @@
+{
+  "toolbar": {
+    "add": "URL ekle",
+    "resume": "Devam",
+    "pause": "Duraklat",
+    "resumeAll": "Tümünü başlat",
+    "pauseAll": "Tümünü durdur",
+    "delete": "Sil",
+    "clearCompleted": "Bitenleri temizle",
+    "scheduler": "Zamanlayıcı",
+    "settings": "Ayarlar",
+    "search": "İndirmelerde ara…",
+    "theme": "Tema",
+    "support": "Destekle"
+  },
+  "sidebar": {
+    "all": "Tüm indirmeler",
+    "active": "İndiriliyor",
+    "unfinished": "Tamamlanmamış",
+    "finished": "Tamamlanan",
+    "categories": "Kategoriler",
+    "video": "Video",
+    "music": "Müzik",
+    "documents": "Belgeler",
+    "compressed": "Arşivler",
+    "programs": "Programlar",
+    "images": "Resimler",
+    "other": "Diğer"
+  },
+  "table": {
+    "name": "Dosya adı",
+    "size": "Boyut",
+    "status": "Durum",
+    "speed": "Hız",
+    "eta": "Kalan süre",
+    "added": "Eklendi",
+    "empty": "Henüz indirme yok",
+    "emptyHint": "Bir bağlantı yapıştırın, URL ekle düğmesine basın veya tarayıcıdan indirin."
+  },
+  "status": {
+    "queued": "Sırada",
+    "downloading": "İndiriliyor",
+    "processing": "İşleniyor",
+    "paused": "Duraklatıldı",
+    "completed": "Tamamlandı",
+    "error": "Hata"
+  },
+  "context": {
+    "open": "Aç",
+    "openFolder": "Klasörü aç",
+    "resume": "Devam",
+    "pause": "Duraklat",
+    "restart": "Yeniden indir",
+    "copyLink": "Bağlantıyı kopyala",
+    "refresh": "İndirme adresini yenile",
+    "delete": "Sil",
+    "deleteWithFile": "Dosyayla birlikte sil"
+  },
+  "add": {
+    "title": "Yeni indirme",
+    "analyze": "Analiz et",
+    "analyzing": "Bağlantı analiz ediliyor…",
+    "fileName": "Dosya adı",
+    "saveTo": "Kaydet",
+    "browse": "Gözat",
+    "start": "İndir",
+    "later": "Sonra indir",
+    "cancel": "İptal",
+    "video": "Video",
+    "audio": "Sadece ses",
+    "quality": "Kalite",
+    "best": "En iyi",
+    "container": "Format",
+    "audioFormat": "Ses formatı",
+    "selectAll": "Tümünü seç",
+    "selectNone": "Hiçbiri",
+    "downloadSelected": "{{count}} indir"
+  },
+  "notify": {
+    "completed": "İndirme tamamlandı",
+    "failed": "İndirme başarısız",
+    "clipboard": "Bağlantı kopyalandı — indirilsin mi?",
+    "allDone": "Tüm indirmeler bitti"
+  },
+  "tray": {
+    "show": "Downly’i göster",
+    "add": "Panodan URL ekle",
+    "pauseAll": "Tümünü durdur",
+    "resumeAll": "Tümünü başlat",
+    "quit": "Çıkış"
+  },
+  "settings": {
+    "title": "Ayarlar",
+    "tabs": {
+      "general": "Genel",
+      "downloads": "İndirmeler",
+      "connection": "Bağlantı",
+      "browser": "Tarayıcı",
+      "media": "Video ve ses",
+      "about": "Hakkında"
+    },
+    "language": "Dil",
+    "theme": "Görünüm",
+    "themeSystem": "Sistem",
+    "themeLight": "Açık",
+    "themeDark": "Koyu",
+    "save": "Kaydet"
+  }
+}

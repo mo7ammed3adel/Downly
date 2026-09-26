@@ -1,0 +1,109 @@
+{
+  "toolbar": {
+    "add": "添加链接",
+    "resume": "继续",
+    "pause": "暂停",
+    "resumeAll": "全部开始",
+    "pauseAll": "全部停止",
+    "delete": "删除",
+    "clearCompleted": "清除已完成",
+    "scheduler": "计划任务",
+    "settings": "设置",
+    "search": "搜索下载…",
+    "theme": "主题",
+    "support": "支持我们"
+  },
+  "sidebar": {
+    "all": "全部下载",
+    "active": "下载中",
+    "unfinished": "未完成",
+    "finished": "已完成",
+    "categories": "分类",
+    "video": "视频",
+    "music": "音乐",
+    "documents": "文档",
+    "compressed": "压缩包",
+    "programs": "程序",
+    "images": "图片",
+    "other": "其他"
+  },
+  "table": {
+    "name": "文件名",
+    "size": "大小",
+    "status": "状态",
+    "speed": "速度",
+    "eta": "剩余时间",
+    "added": "添加时间",
+    "empty": "暂无下载",
+    "emptyHint": "粘贴链接、点击添加链接，或直接在浏览器中下载。"
+  },
+  "status": {
+    "queued": "排队中",
+    "downloading": "下载中",
+    "processing": "处理中",
+    "paused": "已暂停",
+    "completed": "已完成",
+    "error": "错误"
+  },
+  "context": {
+    "open": "打开",
+    "openFolder": "打开文件夹",
+    "resume": "继续",
+    "pause": "暂停",
+    "restart": "重新下载",
+    "copyLink": "复制链接",
+    "refresh": "刷新下载地址",
+    "delete": "删除",
+    "deleteWithFile": "连同文件删除"
+  },
+  "add": {
+    "title": "新建下载",
+    "analyze": "分析",
+    "analyzing": "正在分析链接…",
+    "fileName": "文件名",
+    "saveTo": "保存到",
+    "browse": "浏览",
+    "start": "下载",
+    "later": "稍后下载",
+    "cancel": "取消",
+    "video": "视频",
+    "audio": "仅音频",
+    "quality": "画质",
+    "best": "最佳",
+    "container": "格式",
+    "audioFormat": "音频格式",
+    "selectAll": "全选",
+    "selectNone": "全不选",
+    "downloadSelected": "下载 {{count}} 项"
+  },
+  "notify": {
+    "completed": "下载完成",
+    "failed": "下载失败",
+    "clipboard": "已复制链接 — 要下载吗？",
+    "allDone": "所有下载已完成"
+  },
+  "tray": {
+    "show": "显示 Downly",
+    "add": "从剪贴板添加链接",
+    "pauseAll": "全部停止",
+    "resumeAll": "全部开始",
+    "quit": "退出"
+  },
+  "settings": {
+    "title": "设置",
+    "tabs": {
+      "general": "常规",
+      "downloads": "下载",
+      "connection": "连接",
+      "browser": "浏览器",
+      "media": "视频和音频",
+      "about": "关于"
+    },
+    "language": "语言",
+    "theme": "外观",
+    "themeSystem": "跟随系统",
+    "themeLight": "浅色",
+    "themeDark": "深色",
+    "save": "保存"
+  }
+}
