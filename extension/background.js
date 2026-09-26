@@ -52,7 +52,26 @@ async function ping(force = false) {
   config = await findApp()
   configAt = Date.now()
   syncDownloadUi()
+  if (config) reloadIfOutdated(config.version)
   return config
+}
+
+// ------------------------------------------------------------ staying current
+// The app ships this extension and refreshes its folder when it updates, but a browser keeps
+// running a folder-loaded extension's old code until it's reloaded. Seeing a newer app, reload
+// once so the browser picks up the new files (once per version, in case the files didn't change).
+const newer = (a, b) => {
+  const [x, y] = [a, b].map((v) => String(v).split('.').map(Number))
+  for (let i = 0; i < 3; i++) if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) > (y[i] || 0)
+  return false
+}
+
+async function reloadIfOutdated(appVersion) {
+  if (!appVersion || !newer(appVersion, ext.runtime.getManifest().version)) return
+  const { reloadedFor } = await ext.storage.local.get({ reloadedFor: '' })
+  if (reloadedFor === appVersion) return
+  await ext.storage.local.set({ reloadedFor: appVersion })
+  ext.runtime.reload()
 }
 
 // ------------------------------------------------------------ browser download bubble
@@ -203,7 +222,33 @@ async function takeOver(item) {
   }
 }
 
+// Chrome/Edge/Brave ask extensions for the file name before showing "Save as" (when the user
+// has "Ask where to save each file" on) or writing anything, so taking the download at that
+// point means the browser's own prompt never appears. Firefox has no such step: onCreated below.
+const canDecideEarly = !!ext.downloads.onDeterminingFilename
+
+async function wantsDownload(item) {
+  const { enabled } = await settings()
+  if (!enabled) return false
+  const cfg = await ping()
+  return !!cfg && shouldTake(item, cfg) === true
+}
+
+if (canDecideEarly) {
+  ext.downloads.onDeterminingFilename.addListener((item, suggest) => {
+    wantsDownload(item)
+      .then(async (take) => {
+        if (take) await takeOver(item)
+        else giveBack(item.id)
+      })
+      .catch(() => giveBack(item.id))
+      .finally(() => suggest())
+    return true // answering asynchronously
+  })
+}
+
 ext.downloads.onCreated.addListener(async (item) => {
+  if (canDecideEarly) return
   const { enabled } = await settings()
   if (!enabled || item.state !== 'in_progress') return
   const cfg = await ping()

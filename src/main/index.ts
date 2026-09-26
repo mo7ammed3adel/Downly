@@ -8,6 +8,7 @@ import { DownloadManager } from './engine/DownloadManager'
 import type { YtdlpEnv } from './engine/ytdlp'
 import { BrowserBridge } from './services/bridge'
 import { Binaries } from './services/binaries'
+import { refreshExtensionFolder } from './services/browsers'
 import { ClipboardMonitor } from './services/clipboard'
 import { createProxyResolver, proxyFor } from './services/network'
 import { Scheduler } from './services/scheduler'
@@ -316,4 +317,5 @@ ${err}`))
   applySystemSettings()
   scheduler.run()
   void binaries.init()
+  refreshExtensionFolder().catch(() => {})
 })

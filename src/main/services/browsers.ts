@@ -1,6 +1,6 @@
 import { app, shell } from 'electron'
 import { spawn } from 'node:child_process'
-import { copyFile, mkdir, readdir, rm, stat } from 'node:fs/promises'
+import { copyFile, mkdir, readFile, readdir, rm, stat } from 'node:fs/promises'
 import { basename, dirname, join, relative } from 'node:path'
 import type { BrowserId, BrowserInfo } from '@shared/types'
 
@@ -114,6 +114,21 @@ export async function prepareExtensionFolder(): Promise<string> {
   await rm(target, { recursive: true, force: true })
   await copyDir(bundledExtensionDir(), target)
   return pathOutsidePackage(target)
+}
+
+const manifestVersion = async (dir: string): Promise<string> =>
+  JSON.parse(await readFile(join(dir, 'manifest.json'), 'utf8')).version
+
+/**
+ * After an app update, puts the new extension files in the folder the browser loads them from
+ * (the extension then sees the newer app and reloads itself). Nothing to do if never set up.
+ */
+export async function refreshExtensionFolder(): Promise<void> {
+  const target = join(app.getPath('userData'), 'browser-extension')
+  const installed = await manifestVersion(target).catch(() => null)
+  if (!installed || installed === (await manifestVersion(bundledExtensionDir()))) return
+  await rm(target, { recursive: true, force: true })
+  await copyDir(bundledExtensionDir(), target)
 }
 
 /** Signed Firefox package, present only when the release pipeline had AMO signing keys */
