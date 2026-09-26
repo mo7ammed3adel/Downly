@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { useStore } from '../store'
+import { explainError } from '@shared/errors'
 
 /** Info about the selected download, with IDM's per-connection segment map */
 export function DetailsPanel() {
@@ -28,7 +29,10 @@ export function DetailsPanel() {
         {item.error && (
           <>
             <dt>{t('details.error')}</dt>
-            <dd className="error-text">{item.error}</dd>
+            <dd className="error-text">
+              {explainError(item.error) ? t(explainError(item.error)!) : item.error}
+              {explainError(item.error) && <div className="hint">{item.error}</div>}
+            </dd>
           </>
         )}
       </dl>

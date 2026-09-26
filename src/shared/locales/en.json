@@ -334,5 +334,15 @@
     "checked": "Last checked: {{when}}",
     "failed": "Last check failed: {{error}}",
     "remove": "Stop following"
+  },
+  "errors": {
+    "drm": "This video is encrypted (DRM), as on Netflix, Shahid or OSN. No downloader can save it, and breaking that protection is illegal.",
+    "login": "The site only shows this to signed-in users. Sign in to the site in your browser, then send the video from the browser extension.",
+    "private": "This video is private: only its owner (or people they allowed) can see it.",
+    "gone": "The video or file is no longer there (deleted, or the link is wrong).",
+    "unsupported": "Downly doesn't know this site. Open the page in your browser, play the video, and use the extension's Download button.",
+    "geo": "This video isn't available in your country.",
+    "forbidden": "The site refused the download. Try it from the browser extension, which sends the site the same details your browser used.",
+    "rateLimited": "The site is limiting requests right now. Wait a few minutes and try again."
   }
 }

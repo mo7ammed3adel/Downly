@@ -15,6 +15,7 @@ import type {
 } from '@shared/types'
 import { categorize, expandBatchPattern, mediaCategory, formatBytes, formatDuration, isHttpUrl, isKnownMediaSite, parseSpotifyUrl } from '@shared/util'
 import { useStore } from '../store'
+import { explainError } from '@shared/errors'
 import { SubtitleLangs } from './SubtitleLangs'
 import { Field, Modal, Segmented, Toggle, closeDialog } from './ui'
 
@@ -250,7 +251,10 @@ export function AddDialog({ initial, urls }: { initial?: ExternalAddRequest; url
           <AlertTriangle size={16} style={{ flex: 'none' }} />
           <div style={{ flex: 1 }}>
             <strong>{t('add.error')}</strong>
-            <div style={{ wordBreak: 'break-word' }}>{error}</div>
+            {explainError(error) && <div>{t(explainError(error)!)}</div>}
+            <div className={explainError(error) ? 'hint' : undefined} style={{ wordBreak: 'break-word' }}>
+              {error}
+            </div>
           </div>
         </div>
       )}
