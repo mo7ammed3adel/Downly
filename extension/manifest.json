@@ -11,7 +11,7 @@
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
-  "permissions": ["downloads", "contextMenus", "cookies", "storage", "webRequest", "scripting"],
+  "permissions": ["downloads", "downloads.ui", "contextMenus", "cookies", "storage", "webRequest", "scripting"],
   "host_permissions": ["<all_urls>"],
   "background": {
     "service_worker": "background.js",

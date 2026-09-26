@@ -51,7 +51,31 @@ async function ping(force = false) {
   if (!force && config && Date.now() - configAt < 30_000) return config
   config = await findApp()
   configAt = Date.now()
+  syncDownloadUi()
   return config
+}
+
+// ------------------------------------------------------------ browser download bubble
+// The browser only tells us about a download once it has started, so its download bubble
+// would flash before Downly shows up. While the app is running the bubble stays hidden
+// (Chrome/Edge; Firefox has no such option); downloads we leave to the browser bring it back.
+const canHideUi = typeof ext.downloads.setUiOptions === 'function'
+/** Downloads left to the browser that are still running */
+const givenBack = new Set()
+let uiHidden = null
+
+async function syncDownloadUi() {
+  if (!canHideUi) return
+  const { enabled } = await settings()
+  const hide = enabled && !!config && givenBack.size === 0
+  if (hide === uiHidden) return
+  uiHidden = hide
+  await ext.downloads.setUiOptions({ enabled: !hide }).catch(() => (uiHidden = null))
+}
+
+function giveBack(id) {
+  givenBack.add(id)
+  syncDownloadUi()
 }
 
 function request(path, body) {
@@ -187,21 +211,30 @@ ext.downloads.onCreated.addListener(async (item) => {
   const decision = shouldTake(item, cfg)
   if (decision === true) return takeOver(item)
   if (decision === null) pending.set(item.id, item)
+  else giveBack(item.id)
 })
 
 // Chrome often only knows the file name a moment after onCreated
 ext.downloads.onChanged.addListener(async (delta) => {
+  if (givenBack.has(delta.id) && delta.state && delta.state.current !== 'in_progress') {
+    givenBack.delete(delta.id)
+    syncDownloadUi()
+  }
   const item = pending.get(delta.id)
   if (!item) return
   if (delta.filename?.current) item.filename = delta.filename.current
   if (delta.mime?.current) item.mime = delta.mime.current
   if (delta.state?.current && delta.state.current !== 'in_progress') return pending.delete(delta.id)
   const cfg = await ping()
-  if (!cfg) return pending.delete(delta.id)
+  if (!cfg) {
+    pending.delete(delta.id)
+    return giveBack(delta.id)
+  }
   const decision = shouldTake(item, cfg)
   if (decision === null) return
   pending.delete(delta.id)
   if (decision) takeOver(item)
+  else giveBack(delta.id)
 })
 
 // ------------------------------------------------------------ media sniffing
@@ -355,6 +388,7 @@ ext.runtime.onMessage.addListener((msg, sender, reply) => {
       }
       case 'setEnabled':
         await ext.storage.local.set({ enabled: !!msg.enabled })
+        await syncDownloadUi()
         return { ok: true }
       case 'media':
         await send('/media', { url: msg.url || sender.tab?.url, mode: msg.mode, quick: msg.quick ?? (await settings()).quick })

@@ -20,6 +20,8 @@ const targets = {
   },
   firefox: (m) => {
     m.background = { scripts: ['i18n.js', 'background.js'] }
+    // Chrome-only: hides the browser's download bubble
+    m.permissions = m.permissions.filter((p) => p !== 'downloads.ui')
     return m
   }
 }
