@@ -41,6 +41,8 @@ export const DEFAULT_USER_AGENT =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36'
 
 export const BRIDGE_PORT = 58732
+/** When a port is taken the bridge moves to the next one; the extension scans the same range */
+export const BRIDGE_PORT_COUNT = 10
 
 export function createDefaultSettings(downloadDir: string, language: string): Settings {
   return {

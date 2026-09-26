@@ -2,6 +2,7 @@ import { createServer, type IncomingMessage, type Server, type ServerResponse } 
 import { EventEmitter } from 'node:events'
 import type { ExternalAddRequest, Settings } from '@shared/types'
 import { isHttpUrl } from '@shared/util'
+import { BRIDGE_PORT_COUNT } from '@shared/defaults'
 
 const EXTENSION_ORIGIN = /^(chrome-extension|moz-extension|extension|safari-web-extension):\/\//
 
@@ -13,7 +14,10 @@ const EXTENSION_ORIGIN = /^(chrome-extension|moz-extension|extension|safari-web-
  */
 export class BrowserBridge extends EventEmitter {
   private server?: Server
-  private port = 0
+  /** The configured first port; the server may sit on a later one if that was taken */
+  private basePort = 0
+  /** Port actually listened on (0 until listening) */
+  port = 0
   /** When the extension last talked to us (0 = never since start) */
   lastSeen = 0
 
@@ -27,20 +31,32 @@ export class BrowserBridge extends EventEmitter {
   apply(): void {
     const { enabled, port } = this.getSettings().browserIntegration
     if (!enabled) return this.stop()
-    if (this.server && this.port === port) return
+    if (this.server && this.basePort === port) return
     this.stop()
-    this.port = port
-    this.server = createServer((req, res) => void this.handle(req, res))
-    this.server.on('error', () => {
-      // Port busy (another instance?) — stay silent, the UI shows the extension as disconnected
+    this.basePort = port
+    this.listen(port, BRIDGE_PORT_COUNT)
+  }
+
+  private listen(port: number, triesLeft: number): void {
+    const server = createServer((req, res) => void this.handle(req, res))
+    this.server = server
+    server.once('error', (err) => {
+      if (this.server !== server) return // stopped or replaced meanwhile
       this.server = undefined
+      // Another program has this port: take the next one, the extension finds it by scanning
+      if (triesLeft > 1) this.listen(port + 1, triesLeft - 1)
+      else console.log(`[bridge] no free port from ${this.basePort}: ${err.message}`)
     })
-    this.server.listen(port, '127.0.0.1')
+    server.listen(port, '127.0.0.1', () => {
+      this.port = port
+      console.log(`[bridge] listening on ${port}`)
+    })
   }
 
   stop(): void {
     this.server?.close()
     this.server = undefined
+    this.port = 0
   }
 
   private async handle(req: IncomingMessage, res: ServerResponse): Promise<void> {

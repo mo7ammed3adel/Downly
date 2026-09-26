@@ -3,6 +3,8 @@ const ext = globalThis.browser ?? globalThis.chrome
 // Chrome's service worker loads the shared strings here; Firefox lists i18n.js in the manifest
 if (typeof globalThis.SG_I18N === 'undefined' && typeof importScripts === 'function') importScripts('i18n.js')
 const DEFAULT_PORT = 58732
+/** The app moves to the next port when another program holds one; same range as the app */
+const PORTS = Array.from({ length: 10 }, (_, i) => DEFAULT_PORT + i)
 const MEDIA_EXT = /\.(m3u8|mpd|mp4|webm|mkv|mov|flv|m4a|mp3|ogg|opus|aac|wav|flac)(\?|$)/i
 const MEDIA_MIME = /^(video|audio)\/|mpegurl|dash\+xml/i
 
@@ -10,36 +12,71 @@ const MEDIA_MIME = /^(video|audio)\/|mpegurl|dash\+xml/i
 const bypass = new Set()
 let config = null
 let configAt = 0
+/** Port the app answered on last (null = not found) */
+let appPort = null
 
 const t = (key) => globalThis.SG_I18N.t(key)
 
 async function settings() {
-  const s = await ext.storage.local.get({ enabled: true, port: DEFAULT_PORT, quick: false })
-  return s
+  return ext.storage.local.get({ enabled: true, quick: false })
 }
 
-async function api(path, body) {
-  const { port } = await settings()
-  const res = await fetch(`http://127.0.0.1:${port}${path}`, {
+/** Asks one port whether Downly is listening there (another program may hold it) */
+async function hello(port) {
+  try {
+    const res = await fetch(`http://127.0.0.1:${port}/ping`, { headers: { 'x-downly': '1' }, signal: AbortSignal.timeout(1500) })
+    const info = res.ok ? await res.json() : null
+    return info?.app === 'Downly' ? info : null
+  } catch {
+    return null
+  }
+}
+
+/** Finds the app: the port that worked last time, else every port in the range at once */
+async function findApp() {
+  const { port } = await ext.storage.local.get({ port: DEFAULT_PORT })
+  let info = await hello(port)
+  let found = info ? port : null
+  if (!found) {
+    const answers = await Promise.all(PORTS.filter((p) => p !== port).map(async (p) => [p, await hello(p)]))
+    ;[found, info] = answers.find(([, i]) => i) ?? [null, null]
+    if (found) await ext.storage.local.set({ port: found })
+  }
+  appPort = found
+  return info
+}
+
+/** Cached /ping — tells us the app is alive, where, and which file types it wants */
+async function ping(force = false) {
+  if (!force && config && Date.now() - configAt < 30_000) return config
+  config = await findApp()
+  configAt = Date.now()
+  return config
+}
+
+function request(path, body) {
+  return fetch(`http://127.0.0.1:${appPort}${path}`, {
     method: body ? 'POST' : 'GET',
     headers: body ? { 'content-type': 'application/json', 'x-downly': '1' } : { 'x-downly': '1' },
     body: body ? JSON.stringify(body) : undefined,
     signal: AbortSignal.timeout(3000)
   })
-  if (!res.ok) throw new Error(`HTTP ${res.status}`)
-  return res.json()
 }
 
-/** Cached /ping — tells us the app is alive and which file types it wants */
-async function ping(force = false) {
-  if (!force && config && Date.now() - configAt < 30_000) return config
+async function api(path, body) {
+  if (!appPort) await ping(true)
+  if (!appPort) throw new Error('Downly is not running')
+  let res
   try {
-    config = await api('/ping')
-  } catch {
-    config = null
+    res = await request(path, body)
+  } catch (err) {
+    // The app may have restarted on another port: look for it once more
+    await ping(true)
+    if (!appPort) throw err
+    res = await request(path, body)
   }
-  configAt = Date.now()
-  return config
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json()
 }
 
 async function cookiesFor(url) {
