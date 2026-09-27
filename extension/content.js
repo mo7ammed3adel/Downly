@@ -301,10 +301,17 @@
     return false
   }
 
+  /**
+   * WhatsApp: only a photo/video opened full size (viewer, status), not every picture in the
+   * chat. Chat bubbles are at most ~330px wide, the viewer shows media far bigger.
+   */
+  const WHATSAPP_OPENED = 420
+
   function wanted(media) {
     const [w, h] = MIN_SIZE[media.tagName]
     const r = media.getBoundingClientRect()
     if (r.width < w || r.height < h) return false
+    if (isWhatsApp && Math.max(r.width, r.height) < WHATSAPP_OPENED) return false
     if (media.tagName === 'IMG') return !!media.currentSrc && !(isWhatsApp && isVideoPreview(media))
     return true
   }
