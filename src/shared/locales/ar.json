@@ -313,7 +313,8 @@
     "check": "دوّر على تحديث",
     "installVersion": "حدّث لـ {{version}}",
     "latest": "معاك آخر نسخة.",
-    "checkFailed": "مقدرناش نشيك: {{error}}"
+    "checkFailed": "مقدرناش نشيك: {{error}}",
+    "network": "(النت فصل، اتأكد منه وجرب تاني)"
   },
   "report": {
     "open": "ابعت مشكلة",

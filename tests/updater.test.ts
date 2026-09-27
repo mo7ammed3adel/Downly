@@ -89,4 +89,36 @@ describe('Updater', () => {
     })
     expect(await updater.check()).toEqual({ status: 'available', version: '1.0.6', canInstall: false })
   })
+
+  it('carries on from where it stopped when the connection drops', async () => {
+    const ranges: string[] = []
+    server = createServer((req, res) => {
+      ranges.push(String(req.headers.range ?? 'none'))
+      const start = Number(/bytes=(\d+)-/.exec(req.headers.range ?? '')?.[1] ?? 0)
+      if (start > 0) {
+        res.writeHead(206, { 'content-range': `bytes ${start}-${INSTALLER.length - 1}/${INSTALLER.length}` })
+        return res.end(INSTALLER.subarray(start))
+      }
+      // First try: half the file, then the connection breaks
+      res.writeHead(200, { 'content-length': INSTALLER.length })
+      res.write(INSTALLER.subarray(0, 60_000), () => setTimeout(() => res.destroy(), 50))
+    })
+    await new Promise<void>((r) => server!.listen(0, '127.0.0.1', r))
+    const base = `http://127.0.0.1:${(server!.address() as AddressInfo).port}`
+    let ranWith = ''
+    const updater = new Updater({
+      currentVersion: '1.0.5',
+      installer: 'Downly-Setup.exe',
+      fetch: fakeFetch(release(base, 'v1.0.6')),
+      proxyFor: async () => undefined,
+      runInstaller: (path) => (ranWith = path)
+    })
+    await updater.check()
+    await updater.install()
+
+    expect(updater.state.status).toBe('installing')
+    expect(ranges[0]).toBe('none')
+    expect(ranges[1]).toMatch(/^bytes=\d+-$/)
+    expect(await readFile(ranWith)).toEqual(INSTALLER)
+  }, 20_000)
 })

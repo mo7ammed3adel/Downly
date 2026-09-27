@@ -1,15 +1,17 @@
 import { EventEmitter } from 'node:events'
 import { createWriteStream } from 'node:fs'
-import { mkdir, rename, rm } from 'node:fs/promises'
+import { mkdir, rename, rm, stat } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { Transform } from 'node:stream'
 import { pipeline } from 'node:stream/promises'
 import type { UpdateState } from '@shared/types'
-import { httpGet, type Fetcher, type ProxyResolver } from '../engine/http'
+import { discard, httpGet, type Fetcher, type ProxyResolver } from '../engine/http'
 
 const RELEASES_API = 'https://api.github.com/repos/mo7ammed3adel/downly-releases/releases/latest'
 export const DOWNLOAD_PAGE = 'https://downly-app.vercel.app/#download'
+const DOWNLOAD_ATTEMPTS = 4
+const RETRY_DELAY_MS = 3000
 
 /** "1.0.10" > "1.0.9" */
 export function isNewer(candidate: string, current: string): boolean {
@@ -87,27 +89,52 @@ export class Updater extends EventEmitter {
       const dir = join(tmpdir(), 'downly-update')
       await mkdir(dir, { recursive: true })
       const target = join(dir, asset.name)
-      const res = await httpGet(asset.browser_download_url, { headers: { 'user-agent': 'Downly' }, timeoutMs: 60_000, proxyFor: this.deps.proxyFor })
-      if (res.statusCode !== 200) throw new Error(`HTTP ${res.statusCode}`)
-      let received = 0
-      let shown = 0
-      const progress = new Transform({
-        transform: (chunk: Buffer, _enc, done) => {
-          received += chunk.length
-          const pct = asset.size ? Math.floor((received / asset.size) * 100) : 0
-          if (pct !== shown) this.set({ status: 'downloading', version, progress: (shown = pct) })
-          done(null, chunk)
+      const part = `${target}.part`
+      await rm(part, { force: true })
+      // Connections drop (flaky Wi-Fi, a moment without DNS): retry, carrying on from what arrived
+      for (let attempt = 1; ; attempt++) {
+        try {
+          await this.fetchInto(asset, part, version)
+          break
+        } catch (err) {
+          if (attempt >= DOWNLOAD_ATTEMPTS) throw err
+          await new Promise((r) => setTimeout(r, RETRY_DELAY_MS * attempt))
         }
-      })
-      await pipeline(res.body, progress, createWriteStream(`${target}.part`))
-      if (asset.size && received !== asset.size) throw new Error('The download was incomplete')
+      }
       await rm(target, { force: true })
-      await rename(`${target}.part`, target)
+      await rename(part, target)
       this.set({ status: 'installing', version })
       this.deps.runInstaller(target)
     } catch (err) {
       this.set({ status: 'available', version, canInstall: true, error: err instanceof Error ? err.message : String(err) })
     }
+  }
+
+  /** Appends the rest of the installer to `part` (asks for a range when some already arrived) */
+  private async fetchInto(asset: Release['assets'][number], part: string, version: string): Promise<void> {
+    const have = (await stat(part).catch(() => null))?.size ?? 0
+    const res = await httpGet(
+      asset.browser_download_url,
+      { headers: { 'user-agent': 'Downly' }, timeoutMs: 60_000, proxyFor: this.deps.proxyFor },
+      have > 0 ? `bytes=${have}-` : undefined
+    )
+    const resumed = have > 0 && res.statusCode === 206
+    if (res.statusCode !== 200 && !resumed) {
+      discard(res.body)
+      throw new Error(`HTTP ${res.statusCode}`)
+    }
+    let received = resumed ? have : 0
+    let shown = -1
+    const progress = new Transform({
+      transform: (chunk: Buffer, _enc, done) => {
+        received += chunk.length
+        const pct = asset.size ? Math.floor((received / asset.size) * 100) : 0
+        if (pct !== shown) this.set({ status: 'downloading', version, progress: (shown = pct) })
+        done(null, chunk)
+      }
+    })
+    await pipeline(res.body, progress, createWriteStream(part, { flags: resumed ? 'a' : 'w' }))
+    if (asset.size && received !== asset.size) throw new Error('The download was incomplete')
   }
 
   private set(state: UpdateState): UpdateState {

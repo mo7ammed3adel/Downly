@@ -313,7 +313,8 @@
     "check": "Check for updates",
     "installVersion": "Update to {{version}}",
     "latest": "You have the latest version.",
-    "checkFailed": "Couldn't check: {{error}}"
+    "checkFailed": "Couldn't check: {{error}}",
+    "network": "(the internet connection dropped, check it and try again)"
   },
   "report": {
     "open": "Report a problem",

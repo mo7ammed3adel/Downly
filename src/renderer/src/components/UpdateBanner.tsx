@@ -3,6 +3,9 @@ import { useTranslation } from 'react-i18next'
 import { Download, Sparkles } from 'lucide-react'
 import type { UpdateState } from '@shared/types'
 
+/** The connection dropped or the site couldn't be reached, rather than anything wrong with the update */
+const NETWORK_ERROR = /ENOTFOUND|EAI_AGAIN|ECONNRESET|ECONNREFUSED|ETIMEDOUT|aborted|timed out|stalled|socket hang up|incomplete/i
+
 /** Tracks the app's own update state (pushed from the main process) */
 export function useUpdateState(): UpdateState {
   const [state, setState] = useState<UpdateState>({ status: 'idle' })
@@ -44,7 +47,12 @@ export function UpdateBanner() {
       <Sparkles size={16} />
       <span>
         {t('update.available', { version: state.version })}
-        {state.error && <span className="update-error"> {t('update.failed', { error: state.error })}</span>}
+        {state.error && (
+          <span className="update-error">
+            {' '}
+            {NETWORK_ERROR.test(state.error) ? t('update.network') : t('update.failed', { error: state.error })}
+          </span>
+        )}
       </span>
       <span className="grow" />
       <button className="btn ghost" onClick={() => setLater(true)}>
