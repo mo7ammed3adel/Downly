@@ -68,6 +68,7 @@ export function createDefaultSettings(downloadDir: string, language: string): Se
     browserIntegration: {
       enabled: true,
       port: BRIDGE_PORT,
+      takeAll: true,
       interceptExtensions: DEFAULT_INTERCEPT,
       minSizeKB: 0,
       skipDomains: []

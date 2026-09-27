@@ -6,7 +6,7 @@ import { translate } from '@shared/i18n'
 import { parseSpotifyUrl } from '@shared/util'
 import { SUPPORT_PROMPT_AFTER } from '@shared/support'
 import { DownloadManager } from './engine/DownloadManager'
-import { createFetcher } from './engine/http'
+import { buildHeaders, createFetcher, probe } from './engine/http'
 import { analyze, type YtdlpEnv } from './engine/ytdlp'
 import { BrowserBridge } from './services/bridge'
 import { Binaries } from './services/binaries'
@@ -80,7 +80,7 @@ const manager = new DownloadManager({
   ytdlpEnv
 })
 
-const bridge = new BrowserBridge(() => settings.get(), app.getVersion())
+const bridge = new BrowserBridge(() => settings.get(), app.getVersion(), canFetchFromBrowser)
 const clipboardMonitor = new ClipboardMonitor(() => settings.get())
 const scheduler = new Scheduler(
   () => settings.get().scheduler,
@@ -209,6 +209,23 @@ function buildTray(): void {
     ])
   )
   tray.on('click', showWindow)
+}
+
+/**
+ * Before taking a download away from the browser: ask for its first byte with the browser's
+ * cookies/Referer/headers. A refusal, or a web page where a file was expected (login page,
+ * expired or single-use link), means the browser should keep it.
+ */
+async function canFetchFromBrowser(req: ExternalAddRequest): Promise<boolean> {
+  const s = settings.get()
+  const headers = buildHeaders(req.userAgent || s.userAgent, req.headers, req.cookies, req.referrer)
+  try {
+    const meta = await probe(req.url, { headers, timeoutMs: 10_000, proxyFor: proxyResolver })
+    const wantedPage = /\.html?$/i.test(req.fileName ?? '')
+    return meta.mime !== 'text/html' || wantedPage
+  } catch {
+    return false
+  }
 }
 
 /** The media options a download gets without the add dialog (quick mode, songs, subscriptions) */

@@ -205,6 +205,12 @@ export function SettingsDialog({ initialTab }: { initialTab?: string }) {
               onChange={(v) => sub('browserIntegration', { enabled: v })}
             />
             <Toggle label={t('settings.confirmBrowser')} checked={s.confirmBrowserDownloads} onChange={(v) => patch('confirmBrowserDownloads', v)} />
+            <Toggle
+              label={t('settings.takeAll')}
+              checked={s.browserIntegration.takeAll}
+              onChange={(v) => sub('browserIntegration', { takeAll: v })}
+            />
+            {!s.browserIntegration.takeAll && (
             <Field label={t('settings.interceptTypes')}>
               <textarea
                 className="textarea"
@@ -220,6 +226,7 @@ export function SettingsDialog({ initialTab }: { initialTab?: string }) {
                 }
               />
             </Field>
+            )}
             <Field label={t('settings.skipDomains')}>
               <input
                 className="input"

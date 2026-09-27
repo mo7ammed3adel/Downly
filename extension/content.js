@@ -220,7 +220,7 @@
 
   function fileNameFor(media, blob) {
     const type = (blob.type.split('/')[1] || '').split(';')[0]
-    const extension = { jpeg: 'jpg', quicktime: 'mov', 'x-matroska': 'mkv' }[type] ?? (type || (media.tagName === 'IMG' ? 'jpg' : 'mp4'))
+    const extension = { jpeg: 'jpg', quicktime: 'mov', 'x-matroska': 'mkv' }[type] ?? (type || (media?.tagName === 'IMG' ? 'jpg' : media ? 'mp4' : 'bin'))
     const site = isWhatsApp ? 'WhatsApp' : host.split('.')[0]
     const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')
     return `${site}-${stamp}.${extension}`
@@ -231,7 +231,7 @@
    * read it here and pass it over in pieces. Streaming players' blob: URLs can't be read at all:
    * returns null for those so the caller falls back to the post URL.
    */
-  async function sendBlob(media, src) {
+  async function sendBlob(media, src, fileName) {
     let blob
     try {
       blob = await (await pageFetch(src)).blob()
@@ -245,7 +245,7 @@
       const res = await ext.runtime.sendMessage({ type: 'upload:chunk', id, offset, data })
       if (!res?.ok) return { ok: false }
     }
-    return ext.runtime.sendMessage({ type: 'upload:done', id, fileName: fileNameFor(media, blob), pageUrl: location.href })
+    return ext.runtime.sendMessage({ type: 'upload:done', id, fileName: fileName || fileNameFor(media, blob), pageUrl: location.href })
   }
 
   // ------------------------------------------------------------ placement per site
@@ -445,10 +445,17 @@
     scan()
   })
   // The popup asks this tab to show again anything dismissed with ×
-  ext.runtime.onMessage.addListener((msg) => {
+  ext.runtime.onMessage.addListener((msg, _sender, reply) => {
     if (msg?.type === 'overlay:restore') {
       dismissed.clear()
       reset()
+    }
+    // A blob: download this page made (MEGA etc.): hand the file to the app
+    if (msg?.type === 'upload-blob') {
+      sendBlob(null, msg.url, msg.fileName)
+        .then((res) => reply({ ok: !!res && res.ok !== false }))
+        .catch(() => reply({ ok: false }))
+      return true
     }
   })
 

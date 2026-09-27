@@ -145,6 +145,8 @@ export interface Settings {
   browserIntegration: {
     enabled: boolean
     port: number
+    /** Take every file the browser downloads (web pages excluded); off → only interceptExtensions */
+    takeAll: boolean
     interceptExtensions: string[]
     minSizeKB: number
     skipDomains: string[]

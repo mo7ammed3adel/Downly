@@ -195,7 +195,8 @@
     "version": "Version",
     "save": "Save",
     "saved": "Saved",
-    "subtitles": "Add subtitles to videos (automatic ones when there are none)"
+    "subtitles": "Add subtitles to videos (automatic ones when there are none)",
+    "takeAll": "Take every file the browser downloads (off: only the types below)"
   },
   "scheduler": {
     "title": "Scheduler",

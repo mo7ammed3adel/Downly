@@ -183,9 +183,23 @@ const MIME_EXT = {
   'audio/mpeg': 'mp3'
 }
 
+/** Downloads the page started with a form POST: the app can't repeat those, the browser keeps them */
+const postedUrls = new Set()
+ext.webRequest.onBeforeRequest.addListener(
+  (details) => {
+    if (details.method === 'GET') return
+    postedUrls.add(details.url)
+    if (postedUrls.size > 200) postedUrls.delete(postedUrls.values().next().value)
+  },
+  { urls: ['<all_urls>'], types: ['main_frame', 'sub_frame'] }
+)
+
 function shouldTake(item, cfg) {
   const url = item.finalUrl || item.url
-  if (!/^https?:/i.test(url) || bypass.has(url)) return false
+  if (bypass.has(url) || postedUrls.has(url) || postedUrls.has(item.url)) return false
+  // Files the page built itself (MEGA decrypts in the page, exports, generated zips)
+  if (/^blob:/i.test(url)) return cfg.intercept.all !== false
+  if (!/^https?:/i.test(url)) return false
   const { extensions, minSizeKB, skipDomains } = cfg.intercept
   const host = hostOf(url)
   const refHost = hostOf(item.referrer || '')
@@ -193,35 +207,65 @@ function shouldTake(item, cfg) {
   const size = item.fileSize > 0 ? item.fileSize : item.totalBytes
   if (minSizeKB && size > 0 && size < minSizeKB * 1024) return false
   const type = extOf(item.filename) || extOf(url) || MIME_EXT[item.mime] || ''
+  // Every file (older apps don't send `all`): web pages saved with Ctrl+S stay in the browser
+  if (cfg.intercept.all !== false) return !/^html?$/.test(type) && item.mime !== 'text/html'
   if (!type) return null // undecided — wait for the filename
   return extensions.includes(type)
 }
 
 const pending = new Map()
 
+/**
+ * The browser's copy is paused, not cancelled, until the app confirms it can get the file
+ * itself: single-use links, sessions it can't repeat or pages only the browser can read would
+ * otherwise be lost. If the app can't, the browser simply carries on.
+ */
 async function takeOver(item) {
   const url = item.finalUrl || item.url
-  try {
-    await ext.downloads.cancel(item.id)
-    await ext.downloads.erase({ id: item.id })
-  } catch {
-    /* already finished */
-  }
   const name = (item.filename || '').split(/[\\/]/).pop()
-  const request = requestContext(sentByUrl.get(url) ?? sentByUrl.get(item.url))
+  await ext.downloads.pause(item.id).catch(() => {})
+  let taken = false
   try {
-    await send('/download', {
-      url,
-      fileName: name || undefined,
-      size: item.fileSize > 0 ? item.fileSize : undefined,
-      ...request,
-      referrer: item.referrer || request.referrer
-    })
+    if (/^blob:/i.test(url)) {
+      taken = await takeBlob(url, name, item.referrer)
+    } else {
+      const request = requestContext(sentByUrl.get(url) ?? sentByUrl.get(item.url))
+      const res = await send('/download', {
+        url,
+        fileName: name || undefined,
+        size: item.fileSize > 0 ? item.fileSize : undefined,
+        ...request,
+        referrer: item.referrer || request.referrer,
+        verify: true
+      })
+      taken = res?.ok !== false
+    }
   } catch {
-    // App went away between ping and send — give the download back to the browser
-    bypass.add(url)
-    ext.downloads.download({ url })
+    taken = false // app went away
   }
+  if (taken) {
+    await ext.downloads.cancel(item.id).catch(() => {})
+    await ext.downloads.erase({ id: item.id }).catch(() => {})
+  } else {
+    bypass.add(url)
+    await ext.downloads.resume(item.id).catch(() => {})
+    giveBack(item.id)
+  }
+}
+
+/**
+ * A blob: download exists only in the page that made it: ask that page (its content script
+ * reads the file and sends it to the app in pieces, like WhatsApp media).
+ */
+async function takeBlob(url, fileName, referrer) {
+  const origin = new URL(url.slice(5)).origin
+  const tabs = (await ext.tabs.query({})).filter((t) => t.url?.startsWith(origin))
+  tabs.sort((a, b) => (b.url === referrer) - (a.url === referrer) || b.active - a.active)
+  for (const tab of tabs) {
+    const res = await ext.tabs.sendMessage(tab.id, { type: 'upload-blob', url, fileName }, { frameId: 0 }).catch(() => null)
+    if (res?.ok) return true
+  }
+  return false
 }
 
 // Chrome/Edge/Brave ask extensions for the file name before showing "Save as" (when the user

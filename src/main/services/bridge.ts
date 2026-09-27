@@ -31,7 +31,12 @@ export class BrowserBridge extends EventEmitter {
 
   constructor(
     private getSettings: () => Settings,
-    private version: string
+    private version: string,
+    /**
+     * Whether the app itself can fetch a download the browser started (single-use links,
+     * sessions it can't repeat…). When it can't, the extension lets the browser keep it.
+     */
+    private canFetch: (req: ExternalAddRequest) => Promise<boolean> = async () => true
   ) {
     super()
   }
@@ -89,7 +94,7 @@ export class BrowserBridge extends EventEmitter {
       return this.reply(res, 200, {
         app: 'Downly',
         version: this.version,
-        intercept: { extensions: b.interceptExtensions, minSizeKB: b.minSizeKB, skipDomains: b.skipDomains }
+        intercept: { all: b.takeAll, extensions: b.interceptExtensions, minSizeKB: b.minSizeKB, skipDomains: b.skipDomains }
       })
     }
     if (req.method !== 'POST') return this.reply(res, 404)
@@ -119,6 +124,10 @@ export class BrowserBridge extends EventEmitter {
         media: url.pathname === '/media',
         mode: body.mode === 'audio' || body.mode === 'video' ? body.mode : undefined,
         quick: body.quick === true
+      }
+      // The extension holds the browser's copy until we say we can fetch the file ourselves
+      if (body.verify === true && !(await this.canFetch(request).catch(() => false))) {
+        return this.reply(res, 200, { ok: false, reason: 'unreachable' })
       }
       this.emit('add', request)
       return this.reply(res, 200, { ok: true })
