@@ -183,20 +183,62 @@ const MIME_EXT = {
   'audio/mpeg': 'mp3'
 }
 
-/** Downloads the page started with a form POST: the app can't repeat those, the browser keeps them */
-const postedUrls = new Set()
+/**
+ * Pages that get a file by submitting a form (e.g. "download selected" on cloud drives builds a
+ * zip): remember what was submitted, so the app can submit the same form. Forms we can't
+ * rebuild (file uploads) stay with the browser.
+ */
+const postedForms = new Map()
 ext.webRequest.onBeforeRequest.addListener(
   (details) => {
     if (details.method === 'GET') return
-    postedUrls.add(details.url)
-    if (postedUrls.size > 200) postedUrls.delete(postedUrls.values().next().value)
+    postedForms.set(details.url, { body: details.requestBody ?? null, contentType: '' })
+    if (postedForms.size > 100) postedForms.delete(postedForms.keys().next().value)
   },
-  { urls: ['<all_urls>'], types: ['main_frame', 'sub_frame'] }
+  { urls: ['<all_urls>'], types: ['main_frame', 'sub_frame'] },
+  ['requestBody']
 )
+ext.webRequest.onSendHeaders.addListener(
+  (details) => {
+    const form = postedForms.get(details.url)
+    const type = details.requestHeaders?.find((h) => h.name.toLowerCase() === 'content-type')?.value
+    if (form && type) form.contentType = type
+  },
+  { urls: ['<all_urls>'], types: ['main_frame', 'sub_frame'] },
+  ['requestHeaders']
+)
+
+/** The submitted form as text the app can send again, or null when it can't be rebuilt */
+function formFor(url) {
+  const form = postedForms.get(url)
+  if (!form?.body || form.body.error) return null
+  const { formData, raw } = form.body
+  if (formData) {
+    const fields = Object.entries(formData).flatMap(([name, values]) => values.map((v) => [name, String(v)]))
+    if (/multipart\/form-data/i.test(form.contentType)) {
+      const boundary = `----DownlyForm${crypto.randomUUID().replace(/-/g, '')}`
+      const body =
+        fields.map(([name, value]) => `--${boundary}\r\nContent-Disposition: form-data; name="${name}"\r\n\r\n${value}\r\n`).join('') + `--${boundary}--\r\n`
+      return { body, contentType: `multipart/form-data; boundary=${boundary}` }
+    }
+    return { body: new URLSearchParams(fields).toString(), contentType: 'application/x-www-form-urlencoded' }
+  }
+  // Raw bodies (JSON and the like); a part without bytes is an uploaded file we don't have
+  if (raw?.length && raw.every((part) => part.bytes)) {
+    const bytes = raw.map((part) => new Uint8Array(part.bytes))
+    const joined = new Uint8Array(bytes.reduce((n, b) => n + b.length, 0))
+    let at = 0
+    for (const b of bytes) joined.set(b, (at += b.length) - b.length)
+    return { body: new TextDecoder().decode(joined), contentType: form.contentType || 'application/octet-stream' }
+  }
+  return null
+}
 
 function shouldTake(item, cfg) {
   const url = item.finalUrl || item.url
-  if (bypass.has(url) || postedUrls.has(url) || postedUrls.has(item.url)) return false
+  if (bypass.has(url)) return false
+  // A form we can't submit again stays in the browser
+  if ((postedForms.has(url) || postedForms.has(item.url)) && !(formFor(url) ?? formFor(item.url))) return false
   // Files the page built itself (MEGA decrypts in the page, exports, generated zips)
   if (/^blob:/i.test(url)) return cfg.intercept.all !== false
   if (!/^https?:/i.test(url)) return false
@@ -230,12 +272,15 @@ async function takeOver(item) {
       taken = await takeBlob(url, name, item.referrer)
     } else {
       const request = requestContext(sentByUrl.get(url) ?? sentByUrl.get(item.url))
+      // The form is sent to the address it was submitted to (the file may come from a redirect)
+      const posted = postedForms.has(item.url) ? item.url : postedForms.has(url) ? url : null
       const res = await send('/download', {
-        url,
+        url: posted ?? url,
         fileName: name || undefined,
         size: item.fileSize > 0 ? item.fileSize : undefined,
         ...request,
         referrer: item.referrer || request.referrer,
+        form: posted ? formFor(posted) : undefined,
         verify: true
       })
       taken = res?.ok !== false

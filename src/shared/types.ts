@@ -50,10 +50,18 @@ export interface TrackMeta {
   durationMs?: number
 }
 
+/** A download the page started by submitting a form (e.g. a zip of several cloud files) */
+export interface FormPost {
+  body: string
+  contentType: string
+}
+
 export interface DownloadItem {
   id: string
   kind: DownloadKind
   url: string
+  /** Set when the file comes back from a form: the download repeats it (one connection, no resume) */
+  post?: FormPost
   pageUrl?: string
   referrer?: string
   headers?: Record<string, string>
@@ -87,6 +95,7 @@ export interface DownloadItem {
 export interface NewDownloadRequest {
   url: string
   kind: DownloadKind
+  post?: FormPost
   fileName?: string
   directory?: string
   headers?: Record<string, string>
@@ -306,4 +315,6 @@ export interface ExternalAddRequest extends RequestContext {
    */
   tracks?: TrackMeta[]
   collection?: string
+  /** The form the page submitted to get this file */
+  form?: FormPost
 }

@@ -6,7 +6,7 @@ import { translate } from '@shared/i18n'
 import { parseSpotifyUrl } from '@shared/util'
 import { SUPPORT_PROMPT_AFTER } from '@shared/support'
 import { DownloadManager } from './engine/DownloadManager'
-import { buildHeaders, createFetcher, probe } from './engine/http'
+import { buildHeaders, createFetcher, discard, httpRequest, probe } from './engine/http'
 import { analyze, type YtdlpEnv } from './engine/ytdlp'
 import { BrowserBridge } from './services/bridge'
 import { Binaries } from './services/binaries'
@@ -219,9 +219,22 @@ function buildTray(): void {
 async function canFetchFromBrowser(req: ExternalAddRequest): Promise<boolean> {
   const s = settings.get()
   const headers = buildHeaders(req.userAgent || s.userAgent, req.headers, req.cookies, req.referrer)
+  const wantedPage = /\.html?$/i.test(req.fileName ?? '')
   try {
+    if (req.form) {
+      // Submit the same form and look only at the answer's headers
+      const res = await httpRequest(req.url, {
+        headers: { ...headers, 'content-type': req.form.contentType },
+        method: 'POST',
+        body: req.form.body,
+        timeoutMs: 15_000,
+        proxyFor: proxyResolver
+      })
+      discard(res.body)
+      const mime = String(res.headers['content-type'] ?? '').split(';')[0].trim()
+      return res.statusCode < 400 && (mime !== 'text/html' || wantedPage)
+    }
     const meta = await probe(req.url, { headers, timeoutMs: 10_000, proxyFor: proxyResolver })
-    const wantedPage = /\.html?$/i.test(req.fileName ?? '')
     return meta.mime !== 'text/html' || wantedPage
   } catch {
     return false
@@ -269,6 +282,25 @@ function handleExternal(req: ExternalAddRequest): void {
   }
   // Quick mode: one click on a video starts it with the default quality. Spotify links and
   // playlist pages still need the dialog to pick tracks/items.
+  // A form download can't be previewed (the dialog would re-request it without the form): start it
+  if (req.form) {
+    void manager
+      .add([
+        {
+          url: req.url,
+          kind: 'http',
+          post: req.form,
+          fileName: req.fileName,
+          size: req.size,
+          referrer: req.referrer,
+          pageUrl: req.pageUrl,
+          cookies: req.cookies,
+          headers: { ...req.headers, ...(req.userAgent ? { 'user-agent': req.userAgent } : {}) }
+        }
+      ])
+      .then((added) => notify(t('notify.quickAdded'), added[0]?.fileName ?? req.url, showWindow))
+    return
+  }
   const needsDialog = parseSpotifyUrl(req.url) || /[?&]list=|\/playlist\b/.test(req.url)
   if (req.quick && req.media && !needsDialog) {
     void manager

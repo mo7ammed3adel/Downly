@@ -1,6 +1,6 @@
 import { open, rename, rm, stat, type FileHandle } from 'node:fs/promises'
 import type { DownloadItem, Segment } from '@shared/types'
-import { discard, HttpError, httpGet, probe, type ProbeInfo, type RequestOptions } from './http'
+import { discard, HttpError, httpGet, httpRequest, probe, type ProbeInfo, type RequestOptions } from './http'
 import type { SpeedLimiter } from './SpeedLimiter'
 import { AbortError } from './errors'
 
@@ -70,6 +70,11 @@ export class HttpDownload {
     }
   }
 
+  /** Downloads that repeat the form the page submitted */
+  private get isForm(): boolean {
+    return this.ctx.request.method === 'POST'
+  }
+
   private async closeFile(): Promise<void> {
     await this.file?.close().catch(() => {})
     this.file = undefined
@@ -79,7 +84,13 @@ export class HttpDownload {
     const item = this.item
     const partExists = await stat(partPath(item)).then(() => true, () => false)
     const fresh = item.segments.length === 0 || !item.resumable || !partExists
-    if (fresh) {
+    if (fresh && this.isForm) {
+      // The server builds the file for the form (a zip of several files…): no size up front,
+      // no ranges, so one connection that starts over if it breaks
+      item.resumable = false
+      item.segments = this.initialSegments()
+      item.downloaded = 0
+    } else if (fresh) {
       const meta = await probe(item.url, { ...this.ctx.request, signal: this.signal })
       await this.ctx.onMeta(meta)
       item.size = meta.size
@@ -184,7 +195,9 @@ export class HttpDownload {
   private async fetchRange(seg: Segment): Promise<void> {
     const pos = seg.start + seg.downloaded
     const range = this.item.resumable ? `bytes=${pos}-${seg.end}` : undefined
-    const res = await httpGet(this.item.url, { ...this.ctx.request, signal: this.signal }, range)
+    const res = this.isForm
+      ? await httpRequest(this.item.url, { ...this.ctx.request, signal: this.signal })
+      : await httpGet(this.item.url, { ...this.ctx.request, signal: this.signal }, range)
     if (res.statusCode >= 400) {
       discard(res.body)
       throw new HttpError(res.statusCode, `HTTP ${res.statusCode}`)

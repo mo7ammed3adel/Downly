@@ -5,7 +5,7 @@ import { mkdir, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { pipeline } from 'node:stream/promises'
-import type { ExternalAddRequest, Settings, TrackMeta } from '@shared/types'
+import type { ExternalAddRequest, FormPost, Settings, TrackMeta } from '@shared/types'
 import { isHttpUrl } from '@shared/util'
 import { BRIDGE_PORT_COUNT } from '@shared/defaults'
 
@@ -121,6 +121,7 @@ export class BrowserBridge extends EventEmitter {
         headers: forwardHeaders(body.headers),
         tracks: tracksFrom(body.tracks),
         collection: str(body.collection),
+        form: formFrom(body.form),
         media: url.pathname === '/media',
         mode: body.mode === 'audio' || body.mode === 'video' ? body.mode : undefined,
         quick: body.quick === true
@@ -220,6 +221,15 @@ function tracksFrom(v: unknown): TrackMeta[] | undefined {
     ]
   })
   return tracks.length ? tracks : undefined
+}
+
+/** The form a page submitted for a download: text body (≤ 1 MB) and its content type */
+function formFrom(v: unknown): FormPost | undefined {
+  if (!v || typeof v !== 'object') return undefined
+  const { body, contentType } = v as Record<string, unknown>
+  if (typeof body !== 'string' || body.length > 1024 * 1024) return undefined
+  if (typeof contentType !== 'string' || !/^[\w.+-]+\/[\w.+-]+(;[^\r\n]*)?$/.test(contentType)) return undefined
+  return { body, contentType }
 }
 
 const str = (v: unknown) => (typeof v === 'string' && v ? v : undefined)

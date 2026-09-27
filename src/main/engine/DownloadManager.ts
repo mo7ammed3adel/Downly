@@ -92,6 +92,7 @@ export class DownloadManager extends EventEmitter {
         id: randomUUID(),
         kind: req.kind,
         url: req.url,
+        post: req.post,
         pageUrl: req.pageUrl,
         referrer: req.referrer,
         headers: req.headers,
@@ -371,9 +372,13 @@ export class DownloadManager extends EventEmitter {
       maxRetries: s.maxRetries,
       limiter: this.limiter,
       request: {
-        headers: buildHeaders(s.userAgent, item.headers, item.cookies, item.referrer),
+        headers: {
+          ...buildHeaders(s.userAgent, item.headers, item.cookies, item.referrer),
+          ...(item.post ? { 'content-type': item.post.contentType } : {})
+        },
         timeoutMs: s.timeoutSec * 1000,
-        proxyFor: this.deps.proxyFor
+        proxyFor: this.deps.proxyFor,
+        ...(item.post ? { method: 'POST', body: item.post.body } : {})
       },
       onMeta: async (meta) => {
         if (this.autoNamed.has(item.id) && meta.fileName) {
