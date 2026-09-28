@@ -1153,6 +1153,8 @@ input[type='checkbox'] {
   list-style: none;
   counter-reset: step;
   display: grid;
+  /* A long folder path must not widen the column past the dialog (it's cut with …) */
+  grid-template-columns: minmax(0, 1fr);
   gap: 16px;
 }
 /* Flex items lose the list marker, so the numbers are drawn as circles */
@@ -1241,6 +1243,22 @@ input[type='checkbox'] {
   background: var(--surface-2);
   border-bottom: 1px solid var(--border);
   font-family: ui-monospace, Consolas, monospace;
+  font-size: 11px;
+}
+.shot-url-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+}
+.shot-key {
+  padding: 2px 7px;
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font);
   font-size: 11px;
 }
 .shot-dialog-title {

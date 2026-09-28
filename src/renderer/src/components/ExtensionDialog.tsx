@@ -1,16 +1,44 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Check, Copy, ExternalLink, FolderOpen, Puzzle } from 'lucide-react'
-import type { BrowserInfo } from '@shared/types'
+import { Check, Copy, FolderOpen, Puzzle, UserRound } from 'lucide-react'
+import type { BrowserInfo, BrowserProfile, ExtensionSetup } from '@shared/types'
 import { useStore } from '../store'
-import { BROWSER_LOGOS, ExtensionsPageShot, FilePickerShot, FirefoxAddShot, FirefoxDebuggingShot } from './BrowserShots'
+import { AddressBarShot, BROWSER_LOGOS, ExtensionsPageShot, FilePickerShot, FirefoxAddShot, FirefoxDebuggingShot } from './BrowserShots'
 import { Modal, closeDialog } from './ui'
 
-type Step = { kind: 'pick' } | { kind: 'guide'; browser: BrowserInfo; folder: string; oneClick: boolean }
+type Step =
+  | { kind: 'pick' }
+  | { kind: 'profile'; browser: BrowserInfo }
+  | { kind: 'guide'; browser: BrowserInfo; setup: ExtensionSetup }
+
+/** A value with a Copy button (the extensions address, the extension folder) */
+function CopyField(props: { value: string; onOpenFolder?: () => void }) {
+  const { t } = useTranslation()
+  const [copied, setCopied] = useState(false)
+  const copy = async () => {
+    await window.api.copy(props.value)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1500)
+  }
+  return (
+    <div className="path-box">
+      <code dir="ltr">{props.value}</code>
+      <button className="btn" onClick={copy}>
+        {copied ? <Check size={14} /> : <Copy size={14} />} {copied ? t('support.copied') : t('support.copy')}
+      </button>
+      {props.onOpenFolder && (
+        <button className="btn" onClick={props.onOpenFolder}>
+          <FolderOpen size={14} />
+        </button>
+      )}
+    </div>
+  )
+}
 
 /**
  * Walks the user through adding the Downly extension to a browser:
- * pick a browser → we open its extensions page and copy the folder path →
+ * pick a browser (and profile) → it opens there → from its store page, or by pasting the
+ * extensions address (browsers don't let other programs open it) and loading the folder →
  * the dialog turns green by itself once the extension says hello to the app.
  */
 export function ExtensionDialog() {
@@ -19,7 +47,6 @@ export function ExtensionDialog() {
   const [browsers, setBrowsers] = useState<BrowserInfo[] | null>(null)
   const [step, setStep] = useState<Step>({ kind: 'pick' })
   const [connected, setConnected] = useState(false)
-  const [copied, setCopied] = useState(false)
   const openedAt = useRef(Date.now())
 
   useEffect(() => {
@@ -36,16 +63,12 @@ export function ExtensionDialog() {
     return () => clearInterval(timer)
   }, [])
 
-  const choose = async (browser: BrowserInfo) => {
-    const res = await window.api.setupExtension(browser.id)
-    setStep({ kind: 'guide', browser, ...res })
+  const start = async (browser: BrowserInfo, profile?: BrowserProfile) => {
+    const setup = await window.api.setupExtension(browser.id, profile?.dir)
+    setStep({ kind: 'guide', browser, setup })
   }
-
-  const copyFolder = async (folder: string) => {
-    await window.api.copy(folder)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 1500)
-  }
+  // Several profiles: the extension belongs to one of them, so ask which
+  const choose = (browser: BrowserInfo) => (browser.profiles.length > 1 ? setStep({ kind: 'profile', browser }) : start(browser, browser.profiles[0]))
 
   return (
     <Modal
@@ -55,7 +78,7 @@ export function ExtensionDialog() {
       onClose={closeDialog}
       footer={
         <>
-          {step.kind === 'guide' && !connected && (
+          {step.kind !== 'pick' && !connected && (
             <button className="btn" onClick={() => setStep({ kind: 'pick' })}>
               {t('ext.otherBrowser')}
             </button>
@@ -96,13 +119,37 @@ export function ExtensionDialog() {
         </>
       )}
 
-      {step.kind === 'guide' && step.browser.kind === 'chromium' && (
+      {step.kind === 'profile' && (
+        <>
+          <p className="hint" style={{ marginTop: 0, fontSize: 13.5 }}>
+            {t('ext.profileTitle', { browser: step.browser.name })}
+          </p>
+          <div className="browser-grid">
+            {step.browser.profiles.map((p) => (
+              <button key={p.dir} className="browser-card" onClick={() => start(step.browser, p)}>
+                <UserRound size={22} />
+                {p.name}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+
+      {step.kind === 'guide' && step.browser.kind === 'chromium' && step.setup.store && (
+        <ol className="steps">
+          <li>
+            <strong>{t('ext.storeAdd', { browser: step.browser.name })}</strong>
+          </li>
+        </ol>
+      )}
+
+      {step.kind === 'guide' && step.browser.kind === 'chromium' && !step.setup.store && (
         <ol className="steps">
           <li>
             <strong>{t('ext.step1', { browser: step.browser.name })}</strong>
-            <button className="btn ghost" onClick={() => window.api.openExtensionsPage(step.browser.id)}>
-              <ExternalLink size={14} /> {t('ext.openAgain')}
-            </button>
+            <span className="hint">{t('ext.step1Hint')}</span>
+            <CopyField value={step.browser.extensionsUrl} />
+            <AddressBarShot browser={step.browser.id} url={step.browser.extensionsUrl} />
           </li>
           <li>
             <strong>{t('ext.step2')}</strong>
@@ -116,15 +163,7 @@ export function ExtensionDialog() {
           <li>
             <strong>{t('ext.step4')}</strong>
             <span className="hint">{t(platform === 'darwin' ? 'ext.step4HintMac' : platform === 'linux' ? 'ext.step4HintLinux' : 'ext.step4Hint')}</span>
-            <div className="path-box">
-              <code dir="ltr">{step.folder}</code>
-              <button className="btn" onClick={() => copyFolder(step.folder)}>
-                {copied ? <Check size={14} /> : <Copy size={14} />} {copied ? t('support.copied') : t('support.copy')}
-              </button>
-              <button className="btn" onClick={() => window.api.showExtensionFolder(step.folder)}>
-                <FolderOpen size={14} />
-              </button>
-            </div>
+            <CopyField value={step.setup.folder} onOpenFolder={() => window.api.showExtensionFolder(step.setup.folder)} />
             <FilePickerShot platform={platform} />
           </li>
         </ol>
@@ -132,7 +171,7 @@ export function ExtensionDialog() {
 
       {step.kind === 'guide' && step.browser.kind === 'firefox' && (
         <ol className="steps">
-          {step.oneClick ? (
+          {step.setup.oneClick ? (
             <li>
               <strong>{t('ext.firefoxAdd')}</strong>
               <FirefoxAddShot />
@@ -145,12 +184,7 @@ export function ExtensionDialog() {
               </li>
               <li>
                 <strong>{t('ext.firefoxTemp2')}</strong>
-                <div className="path-box">
-                  <code dir="ltr">{step.folder}</code>
-                  <button className="btn" onClick={() => window.api.showExtensionFolder(step.folder)}>
-                    <FolderOpen size={14} />
-                  </button>
-                </div>
+                <CopyField value={step.setup.folder} onOpenFolder={() => window.api.showExtensionFolder(step.setup.folder)} />
                 <FilePickerShot platform={platform} file="manifest.json" />
                 <span className="hint">{t('ext.firefoxTempNote')}</span>
               </li>

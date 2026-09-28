@@ -23,5 +23,15 @@ export const SOCIAL = {
   telegram: 'https://t.me/mohamed3abuzaid'
 }
 
+/**
+ * The extension's store pages. Once filled in, the setup opens the store page (one "Add" click,
+ * automatic updates) instead of the developer-mode steps. Chrome's store also serves Brave,
+ * Opera and Vivaldi; Edge uses its own store when set, else Chrome's.
+ */
+export const EXTENSION_STORES = {
+  chrome: '',
+  edge: ''
+}
+
 /** Show the "support us" dialog once, after this many finished downloads */
 export const SUPPORT_PROMPT_AFTER = 20

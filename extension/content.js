@@ -149,6 +149,13 @@
     main.addEventListener('pointerdown', (e) => {
       e.stopPropagation()
       if (e.button !== 0) return
+      // WhatsApp may close its viewer on the press itself and take the media (and this button)
+      // away before the release: send right away there, without dragging
+      if (isWhatsApp) {
+        e.preventDefault()
+        feedback(main, send('video'))
+        return
+      }
       const area = box ? box() : wrap.parentElement.getBoundingClientRect()
       const r = wrap.getBoundingClientRect()
       drag = { sx: e.clientX, sy: e.clientY, ox: r.left - area.left, oy: r.top - area.top, area, moved: false }
@@ -196,6 +203,9 @@
     wrap.remove()
   }
 
+  /** Steps of a download written to the app's log, so a failure on a site we can't test shows where it stopped */
+  const trace = (text) => ext.runtime.sendMessage({ type: 'log', text: `[${host}] ${text}` }).catch(() => {})
+
   const sendMedia = (url, mode, preferStream = false) => ext.runtime.sendMessage({ type: 'media', url, mode, preferStream })
 
   /** Sites yt-dlp reads from the page URL; anywhere else the stream the player loads works better */
@@ -235,15 +245,20 @@
     let blob
     try {
       blob = await (await pageFetch(src)).blob()
-    } catch {
+    } catch (err) {
+      trace(`reading ${src.slice(0, 60)} failed: ${err}`)
       return null
     }
     if (!blob.size) return null
+    trace(`read ${blob.size} bytes (${blob.type})`)
     const id = crypto.randomUUID()
     for (let offset = 0; offset < blob.size; offset += CHUNK) {
       const data = await base64(blob.slice(offset, offset + CHUNK))
       const res = await ext.runtime.sendMessage({ type: 'upload:chunk', id, offset, data })
-      if (!res?.ok) return { ok: false }
+      if (!res?.ok) {
+        trace(`sending piece at ${offset} failed: ${JSON.stringify(res)}`)
+        return { ok: false }
+      }
     }
     return ext.runtime.sendMessage({ type: 'upload:done', id, fileName: fileName || fileNameFor(media, blob), pageUrl: location.href })
   }
@@ -319,7 +334,12 @@
   async function download(media, mode) {
     const src = media.currentSrc || media.src || ''
     const post = postUrlFor(media)
-    if (src.startsWith('blob:')) return (await sendBlob(media, src)) ?? sendMedia(post, mode, !knownSite())
+    trace(`${media.tagName} ${mode} src=${src.slice(0, 80)}`)
+    if (src.startsWith('blob:')) {
+      const sent = await sendBlob(media, src)
+      trace(sent ? `page file sent: ${JSON.stringify(sent).slice(0, 120)}` : 'page file unreadable, trying the page link')
+      return sent ?? sendMedia(post, mode, !knownSite())
+    }
     if (media.tagName === 'IMG') return sendFile(src)
     // A plain file goes straight to the fast engine: on normal sites, and on story pages where
     // the file is exactly the story on screen. Feeds/streams need the post URL (yt-dlp).

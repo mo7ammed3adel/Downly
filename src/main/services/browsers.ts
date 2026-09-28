@@ -1,8 +1,10 @@
 import { app, shell } from 'electron'
 import { spawn } from 'node:child_process'
 import { copyFile, mkdir, readFile, readdir, rm, stat } from 'node:fs/promises'
+import { homedir } from 'node:os'
 import { basename, dirname, join, relative } from 'node:path'
-import type { BrowserId, BrowserInfo } from '@shared/types'
+import type { BrowserId, BrowserInfo, BrowserProfile, ExtensionSetup } from '@shared/types'
+import { EXTENSION_STORES } from '@shared/support'
 
 /**
  * Finds installed browsers and helps put the Downly extension into them.
@@ -60,13 +62,52 @@ const CANDIDATES: Record<BrowserId, { name: string; kind: BrowserInfo['kind']; w
 
 const exists = (p: string) => stat(p).then(() => true, () => false)
 
+/** Where each Chromium browser keeps its profiles ("Local State" lists them) */
+const USER_DATA: Partial<Record<BrowserId, { win: string; mac: string; linux: string }>> = {
+  chrome: { win: 'Google/Chrome/User Data', mac: 'Google/Chrome', linux: 'google-chrome' },
+  edge: { win: 'Microsoft/Edge/User Data', mac: 'Microsoft Edge', linux: 'microsoft-edge' },
+  brave: { win: 'BraveSoftware/Brave-Browser/User Data', mac: 'BraveSoftware/Brave-Browser', linux: 'BraveSoftware/Brave-Browser' },
+  vivaldi: { win: 'Vivaldi/User Data', mac: 'Vivaldi', linux: 'vivaldi' }
+}
+
+function userDataDir(id: BrowserId): string | null {
+  const dirs = USER_DATA[id]
+  if (!dirs) return null
+  if (process.platform === 'win32') return join(env('LOCALAPPDATA'), dirs.win)
+  if (process.platform === 'darwin') return join(homedir(), 'Library/Application Support', dirs.mac)
+  return join(homedir(), '.config', dirs.linux)
+}
+
+/** A browser's profiles by their display names, the one used last first */
+async function readProfiles(id: BrowserId): Promise<BrowserProfile[]> {
+  const dir = userDataDir(id)
+  if (!dir) return []
+  try {
+    const state = JSON.parse(await readFile(join(dir, 'Local State'), 'utf8'))
+    const cache: Record<string, { name?: string }> = state.profile?.info_cache ?? {}
+    const last: string | undefined = state.profile?.last_used
+    return Object.entries(cache)
+      .map(([folder, info]) => ({ dir: folder, name: info.name || folder }))
+      .sort((a, b) => Number(b.dir === last) - Number(a.dir === last))
+  } catch {
+    return []
+  }
+}
+
 export async function detectBrowsers(): Promise<BrowserInfo[]> {
   const key = process.platform === 'win32' ? 'win' : process.platform === 'darwin' ? 'mac' : 'linux'
   const found: BrowserInfo[] = []
   for (const [id, c] of Object.entries(CANDIDATES) as [BrowserId, (typeof CANDIDATES)[BrowserId]][]) {
     for (const path of c[key]) {
       if (path && (await exists(path))) {
-        found.push({ id, name: c.name, kind: c.kind, path })
+        found.push({
+          id,
+          name: c.name,
+          kind: c.kind,
+          path,
+          profiles: c.kind === 'chromium' ? await readProfiles(id) : [],
+          extensionsUrl: c.kind === 'firefox' ? 'about:addons' : `${id}://extensions`
+        })
         break
       }
     }
@@ -137,26 +178,28 @@ async function firefoxPackage(): Promise<string | null> {
   return (await exists(xpi)) ? xpi : null
 }
 
-export interface SetupResult {
-  folder: string
-  /** true when Firefox got a signed package it can install with one click */
-  oneClick: boolean
+/** The store page that installs the extension in this browser, if one is set */
+function storePage(browser: BrowserInfo): string {
+  if (browser.kind !== 'chromium') return ''
+  return (browser.id === 'edge' && EXTENSION_STORES.edge) || EXTENSION_STORES.chrome
 }
 
-export async function setupExtension(browser: BrowserInfo): Promise<SetupResult> {
+/**
+ * Opens the browser (in the chosen profile) where the extension gets added. Browsers refuse
+ * to open their own pages (chrome://extensions…) from outside, so for the developer-mode route
+ * the window opens empty and the user pastes the address, which the app copies.
+ */
+export async function setupExtension(browser: BrowserInfo, profileDir?: string): Promise<ExtensionSetup> {
   const folder = await prepareExtensionFolder()
+  const profile = profileDir && browser.profiles.some((p) => p.dir === profileDir) ? [`--profile-directory=${profileDir}`] : []
   if (browser.kind === 'firefox') {
     const xpi = await firefoxPackage()
     launch(browser.path, [xpi ?? 'about:debugging#/runtime/this-firefox'])
-    return { folder, oneClick: !!xpi }
+    return { folder, oneClick: !!xpi, store: false }
   }
-  launch(browser.path, [`${browser.id === 'chrome' ? 'chrome' : browser.id}://extensions/`])
-  return { folder, oneClick: false }
-}
-
-export function openExtensionsPage(browser: BrowserInfo): void {
-  if (browser.kind === 'firefox') launch(browser.path, ['about:addons'])
-  else launch(browser.path, [`${browser.id}://extensions/`])
+  const store = storePage(browser)
+  launch(browser.path, store ? [...profile, store] : [...profile, '--new-window'])
+  return { folder, oneClick: false, store: !!store }
 }
 
 export function showFolder(folder: string): void {

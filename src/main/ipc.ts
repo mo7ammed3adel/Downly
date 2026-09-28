@@ -16,7 +16,7 @@ import { recentLog } from './services/log'
 import { buildReport, saveReport } from './services/report'
 import { SOCIAL } from '@shared/support'
 import type { BrowserBridge } from './services/bridge'
-import { detectBrowsers, openExtensionsPage, setupExtension, showFolder } from './services/browsers'
+import { detectBrowsers, setupExtension, showFolder } from './services/browsers'
 
 interface Deps {
   manager: DownloadManager
@@ -111,16 +111,13 @@ export function registerIpc(d: Deps): void {
   // Browser extension setup wizard
   const findBrowser = async (id: string) => (await detectBrowsers()).find((b) => b.id === id)
   ipcMain.handle('browsers:list', () => detectBrowsers())
-  ipcMain.handle('extension:setup', async (_e, id: string) => {
+  ipcMain.handle('extension:setup', async (_e, id: string, profileDir?: string) => {
     const browser = await findBrowser(id)
     if (!browser) throw new Error('Browser not found')
-    const result = await setupExtension(browser)
-    clipboard.writeText(result.folder)
+    const result = await setupExtension(browser, profileDir)
+    // First thing the user needs: the extensions page address (or, in Firefox's temporary route, the folder)
+    if (!result.store && !result.oneClick) clipboard.writeText(browser.kind === 'chromium' ? browser.extensionsUrl : result.folder)
     return result
-  })
-  ipcMain.handle('extension:openPage', async (_e, id: string) => {
-    const browser = await findBrowser(id)
-    if (browser) openExtensionsPage(browser)
   })
   ipcMain.handle('extension:showFolder', (_e, folder: string) => showFolder(folder))
   ipcMain.handle('extension:lastSeen', () => d.bridge.lastSeen)

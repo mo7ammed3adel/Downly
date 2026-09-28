@@ -133,6 +133,11 @@ export class BrowserBridge extends EventEmitter {
       this.emit('add', request)
       return this.reply(res, 200, { ok: true })
     }
+    if (url.pathname === '/log') {
+      // What the extension did on a page, for problem reports
+      console.log(`[extension] ${String(body.text ?? '').slice(0, 500)}`)
+      return this.reply(res, 200, { ok: true })
+    }
     if (url.pathname === '/links') {
       const urls = Array.isArray(body.urls) ? body.urls.map(String).filter(isHttpUrl).slice(0, 5000) : []
       this.emit('batch', { urls, pageUrl: str(body.pageUrl) })

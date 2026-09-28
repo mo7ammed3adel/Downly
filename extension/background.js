@@ -614,6 +614,10 @@ ext.runtime.onMessage.addListener((msg, sender, reply) => {
         return uploadChunk(msg.id, msg.offset, msg.data)
       case 'upload:done':
         return api('/upload/done', { id: msg.id, fileName: msg.fileName, pageUrl: msg.pageUrl })
+      case 'log':
+        // A content script's step, into the app's log (see trace in content.js)
+        await api('/log', { text: String(msg.text).slice(0, 500) }).catch(() => {})
+        return { ok: true }
       case 'tracks':
         // Songs read off a music site: the app downloads the matching audio for each
         await api('/media', { url: msg.pageUrl || sender.tab?.url, tracks: msg.tracks, collection: msg.collection })

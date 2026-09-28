@@ -4,6 +4,7 @@ import type {
   BrowserInfo,
   ComponentsState,
   DownloadItem,
+  ExtensionSetup,
   ExternalAddRequest,
   NewDownloadRequest,
   ProbeRequest,
@@ -39,8 +40,8 @@ export interface Api {
   copy(text: string): Promise<void>
   readClipboard(): Promise<string>
   listBrowsers(): Promise<BrowserInfo[]>
-  setupExtension(id: BrowserId): Promise<{ folder: string; oneClick: boolean }>
-  openExtensionsPage(id: BrowserId): Promise<void>
+  /** Opens the browser (in that profile) where the extension gets added */
+  setupExtension(id: BrowserId, profileDir?: string): Promise<ExtensionSetup>
   showExtensionFolder(folder: string): Promise<void>
   /** ms timestamp of the extension's last contact with the app, 0 if never */
   extensionLastSeen(): Promise<number>

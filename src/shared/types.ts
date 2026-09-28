@@ -274,11 +274,30 @@ export interface Subscription {
 
 export type BrowserId = 'chrome' | 'edge' | 'brave' | 'opera' | 'vivaldi' | 'firefox'
 
+export interface BrowserProfile {
+  /** Folder name the browser uses (--profile-directory), e.g. "Default", "Profile 1" */
+  dir: string
+  name: string
+}
+
 export interface BrowserInfo {
   id: BrowserId
   name: string
   kind: 'chromium' | 'firefox'
   path: string
+  /** Chromium profiles, most recently used first (empty when there's just one or unknown) */
+  profiles: BrowserProfile[]
+  /** The browser's extensions page, e.g. brave://extensions (it can't be opened from outside) */
+  extensionsUrl: string
+}
+
+/** What the setup did: which way the extension gets installed in that browser */
+export interface ExtensionSetup {
+  folder: string
+  /** Firefox got the Mozilla-signed package: one "Add" click */
+  oneClick: boolean
+  /** A store page was opened: one "Add"/"Get" click, updates come from the store */
+  store: boolean
 }
 
 /**

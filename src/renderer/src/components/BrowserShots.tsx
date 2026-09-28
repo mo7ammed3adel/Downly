@@ -133,6 +133,30 @@ export function ExtensionsPageShot({ browser, devMode }: { browser: BrowserId; d
   )
 }
 
+/** A new browser window: paste the extensions address (1) and press Enter */
+export function AddressBarShot({ browser, url }: { browser: BrowserId; url: string }) {
+  return (
+    <div className="shot" dir="ltr" aria-hidden="true">
+      <div className="shot-tabs">
+        <span className="shot-tab">
+          <img src={BROWSER_LOGOS[browser]} alt="" />
+          New Tab
+        </span>
+      </div>
+      <div className="shot-url shot-url-row">
+        <Target n={1}>
+          <span className="shot-address">{url}</span>
+        </Target>
+        <span className="shot-key">Ctrl+V</span>
+        <span className="shot-key">Enter ↵</span>
+      </div>
+      <div className="shot-page">
+        <Cards />
+      </div>
+    </div>
+  )
+}
+
 /** Firefox's "Add Downly?" prompt that opens with the signed package */
 export function FirefoxAddShot() {
   return (
