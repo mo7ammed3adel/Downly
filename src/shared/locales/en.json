@@ -349,5 +349,12 @@
     "forbidden": "The site refused the download. Try it from the browser extension, which sends the site the same details your browser used.",
     "rateLimited": "The site is limiting requests right now. Wait a few minutes and try again.",
     "needsForm": "This link only works from the page that made it (it's built from a form, like OneDrive/Drive \"download selected\" zips). Download it again from the page in your browser, with Downly's extension up to date."
+  },
+  "extOld": {
+    "title": "Your browser extension is out of date",
+    "intro": "Downly was updated, but your browser is still running the old copy of its extension, so some downloads won't work (WhatsApp, cloud drive zips…). One of these fixes it:",
+    "restart": "Close your browser completely and open it again",
+    "reload": "Or reload the extension",
+    "reloadHint": "Open the extensions page (chrome://extensions, brave://extensions, edge://extensions…) and click the ↻ reload button on Downly."
   }
 }

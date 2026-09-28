@@ -101,3 +101,27 @@ describe('BrowserBridge songs', () => {
     bridge.stop()
   })
 })
+
+describe('BrowserBridge outdated extension', () => {
+  const hit = (port: number, headers: Record<string, string>) =>
+    fetch(`http://127.0.0.1:${port}/log`, { method: 'POST', headers: { 'x-downly': '1', 'content-type': 'application/json', ...headers }, body: '{"text":"x"}' })
+
+  it('flags an extension older than the app, or one that sends no version', async () => {
+    for (const [headers, expected] of [
+      [{}, 'old'],
+      [{ 'x-downly-ext': '1.0.7' }, '1.0.7'],
+      [{ 'x-downly-ext': '1.0.9' }, null]
+    ] as const) {
+      const port = BASE + 40
+      const bridge = new BrowserBridge(settingsOn(port), '1.0.9')
+      bridge.apply()
+      await waitForPort(bridge)
+      let flagged: string | null = null
+      bridge.on('extension-outdated', (v: string) => (flagged = v))
+      await hit(port, headers)
+      expect(flagged).toBe(expected)
+      bridge.stop()
+      await new Promise((r) => setTimeout(r, 50))
+    }
+  })
+})

@@ -416,6 +416,10 @@ app.whenReady().then(async () => {
     if (scheduler.afterDone()) void quit()
   })
   bridge.on('add', handleExternal)
+  bridge.on('extension-outdated', () => {
+    bringToFront()
+    sendToUi('extension:outdated', null)
+  })
   bridge.on('file', ({ path, fileName, pageUrl }: { path: string; fileName: string; pageUrl?: string }) => {
     manager.importFile(path, fileName, pageUrl).catch((err) => notify(t('notify.failed'), `${fileName}
 ${err}`))

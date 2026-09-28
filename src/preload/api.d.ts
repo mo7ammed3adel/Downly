@@ -65,6 +65,8 @@ export interface Api {
   onSettingsChanged(cb: (s: Settings) => void): Unsubscribe
   onSupportPrompt(cb: () => void): Unsubscribe
   onComponentsChanged(cb: (c: ComponentsState) => void): Unsubscribe
+  /** The browser runs an older copy of the extension than the app ships */
+  onExtensionOutdated(cb: () => void): Unsubscribe
   onExternalAdd(cb: (req: ExternalAddRequest) => void): Unsubscribe
   onExternalBatch(cb: (urls: string[]) => void): Unsubscribe
 }

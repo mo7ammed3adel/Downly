@@ -121,3 +121,10 @@ export function expandBatchPattern(pattern: string, limit = 5000): string[] {
 export function isHttpUrl(text: string): boolean {
   return /^https?:\/\/[^\s]+$/i.test(text.trim())
 }
+
+/** "1.0.10" > "1.0.9" */
+export function isNewer(candidate: string, current: string): boolean {
+  const [a, b] = [candidate, current].map((v) => v.replace(/^v/, '').split('.').map(Number))
+  for (let i = 0; i < 3; i++) if ((a[i] || 0) !== (b[i] || 0)) return (a[i] || 0) > (b[i] || 0)
+  return false
+}

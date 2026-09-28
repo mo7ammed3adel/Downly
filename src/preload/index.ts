@@ -54,6 +54,7 @@ const api: Api = {
   onSupportPrompt: on('support:prompt'),
   onComponentsChanged: on('components:changed'),
   onExternalAdd: on('external:add'),
+  onExtensionOutdated: on('extension:outdated'),
   onExternalBatch: on('external:batch')
 }
 

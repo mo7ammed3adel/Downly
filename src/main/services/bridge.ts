@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { pipeline } from 'node:stream/promises'
 import type { ExternalAddRequest, FormPost, Settings, TrackMeta } from '@shared/types'
-import { isHttpUrl } from '@shared/util'
+import { isHttpUrl, isNewer } from '@shared/util'
 import { BRIDGE_PORT_COUNT } from '@shared/defaults'
 
 const EXTENSION_ORIGIN = /^(chrome-extension|moz-extension|extension|safari-web-extension):\/\//
@@ -77,7 +77,7 @@ export class BrowserBridge extends EventEmitter {
     const extOrigin = EXTENSION_ORIGIN.test(origin)
     if (extOrigin) {
       res.setHeader('access-control-allow-origin', origin)
-      res.setHeader('access-control-allow-headers', 'content-type, x-downly')
+      res.setHeader('access-control-allow-headers', 'content-type, x-downly, x-downly-ext')
       res.setHeader('access-control-allow-methods', 'GET, POST, OPTIONS')
     }
     if (req.method === 'OPTIONS') return this.reply(res, extOrigin ? 204 : 403)
@@ -87,6 +87,7 @@ export class BrowserBridge extends EventEmitter {
     console.log(`[bridge] ${req.method} ${req.url} origin=${origin || '-'} ${trusted ? 'ok' : 'REJECTED'}`)
     if (!trusted) return this.reply(res, 403, { error: 'forbidden' })
     this.lastSeen = Date.now()
+    this.checkExtensionVersion(req)
 
     const url = new URL(req.url ?? '/', 'http://127.0.0.1')
     if (req.method === 'GET' && url.pathname === '/ping') {
@@ -178,6 +179,20 @@ export class BrowserBridge extends EventEmitter {
       await rm(uploadPath(id), { force: true })
       this.reply(res, 500, { error: 'write failed' })
     }
+  }
+
+  /**
+   * Browsers keep running an extension's old code until reloaded or restarted, even after the
+   * app replaced its files. Extensions older than 1.0.9 send no version at all.
+   */
+  private warnedOutdated = false
+  private checkExtensionVersion(req: IncomingMessage): void {
+    if (this.warnedOutdated || req.method !== 'POST') return
+    const sent = req.headers['x-downly-ext']
+    const version = typeof sent === 'string' ? sent : ''
+    if (version && !isNewer(this.version, version)) return
+    this.warnedOutdated = true
+    this.emit('extension-outdated', version || 'old')
   }
 
   private reply(res: ServerResponse, status: number, json?: unknown): void {

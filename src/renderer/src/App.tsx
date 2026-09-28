@@ -15,6 +15,7 @@ import { IdmDialog } from './components/IdmDialog'
 import { UpdateBanner } from './components/UpdateBanner'
 import { ReportDialog } from './components/ReportDialog'
 import { SubscriptionsDialog } from './components/SubscriptionsDialog'
+import { ExtensionOutdatedDialog } from './components/ExtensionOutdatedDialog'
 import { DeleteDialog, RefreshDialog } from './components/SmallDialogs'
 import type { ThemeMode } from '@shared/types'
 
@@ -48,6 +49,7 @@ export default function App() {
       window.api.onSupportPrompt(() => useStore.getState().openDialog({ type: 'support' })),
       window.api.onComponentsChanged((components) => useStore.getState().set({ components: { ...components } })),
       window.api.onExternalAdd((initial) => useStore.getState().openDialog({ type: 'add', initial })),
+      window.api.onExtensionOutdated(() => useStore.getState().openDialog({ type: 'extensionOutdated' })),
       window.api.onExternalBatch((urls) => useStore.getState().openDialog({ type: 'add', urls }))
     ]
     return () => offs.forEach((off) => off())
@@ -132,6 +134,7 @@ export default function App() {
       {dialog?.type === 'idm' && <IdmDialog />}
       {dialog?.type === 'report' && <ReportDialog />}
       {dialog?.type === 'subscriptions' && <SubscriptionsDialog />}
+      {dialog?.type === 'extensionOutdated' && <ExtensionOutdatedDialog />}
       {dialog?.type === 'delete' && <DeleteDialog ids={dialog.ids} />}
       {dialog?.type === 'refresh' && <RefreshDialog id={dialog.id} />}
     </div>

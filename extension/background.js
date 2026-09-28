@@ -3,6 +3,8 @@ const ext = globalThis.browser ?? globalThis.chrome
 // Chrome's service worker loads the shared strings here; Firefox lists i18n.js in the manifest
 if (typeof globalThis.SG_I18N === 'undefined' && typeof importScripts === 'function') importScripts('i18n.js')
 const DEFAULT_PORT = 58732
+/** Sent with every request: the app tells the user when the browser runs an outdated copy */
+const HEADERS = { 'x-downly': '1', 'x-downly-ext': ext.runtime.getManifest().version }
 /** The app moves to the next port when another program holds one; same range as the app */
 const PORTS = Array.from({ length: 10 }, (_, i) => DEFAULT_PORT + i)
 const MEDIA_EXT = /\.(m3u8|mpd|mp4|webm|mkv|mov|flv|m4a|mp3|ogg|opus|aac|wav|flac)(\?|$)/i
@@ -24,7 +26,7 @@ async function settings() {
 /** Asks one port whether Downly is listening there (another program may hold it) */
 async function hello(port) {
   try {
-    const res = await fetch(`http://127.0.0.1:${port}/ping`, { headers: { 'x-downly': '1' }, signal: AbortSignal.timeout(1500) })
+    const res = await fetch(`http://127.0.0.1:${port}/ping`, { headers: HEADERS, signal: AbortSignal.timeout(1500) })
     const info = res.ok ? await res.json() : null
     return info?.app === 'Downly' ? info : null
   } catch {
@@ -100,7 +102,7 @@ function giveBack(id) {
 function request(path, body) {
   return fetch(`http://127.0.0.1:${appPort}${path}`, {
     method: body ? 'POST' : 'GET',
-    headers: body ? { 'content-type': 'application/json', 'x-downly': '1' } : { 'x-downly': '1' },
+    headers: body ? { 'content-type': 'application/json', ...HEADERS } : HEADERS,
     body: body ? JSON.stringify(body) : undefined,
     signal: AbortSignal.timeout(3000)
   })
@@ -129,7 +131,7 @@ async function uploadChunk(id, offset, data) {
   const bytes = Uint8Array.from(atob(data), (c) => c.charCodeAt(0))
   const res = await fetch(`http://127.0.0.1:${appPort}/upload?id=${encodeURIComponent(id)}&offset=${offset}`, {
     method: 'POST',
-    headers: { 'content-type': 'application/octet-stream', 'x-downly': '1' },
+    headers: { 'content-type': 'application/octet-stream', ...HEADERS },
     body: bytes,
     signal: AbortSignal.timeout(60_000)
   })

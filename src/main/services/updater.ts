@@ -13,12 +13,8 @@ export const DOWNLOAD_PAGE = 'https://downly-app.vercel.app/#download'
 const DOWNLOAD_ATTEMPTS = 4
 const RETRY_DELAY_MS = 3000
 
-/** "1.0.10" > "1.0.9" */
-export function isNewer(candidate: string, current: string): boolean {
-  const [a, b] = [candidate, current].map((v) => v.replace(/^v/, '').split('.').map(Number))
-  for (let i = 0; i < 3; i++) if ((a[i] || 0) !== (b[i] || 0)) return (a[i] || 0) > (b[i] || 0)
-  return false
-}
+import { isNewer } from '@shared/util'
+export { isNewer }
 
 /**
  * The installer that replaces this copy in place, or null where the app can't update itself:
