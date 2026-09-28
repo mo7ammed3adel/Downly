@@ -78,12 +78,34 @@ interface RawInfo {
   ie_key?: string
 }
 
-export function analyze(
+/**
+ * The browser's cookies can make things worse: with a signed-in Instagram cookie yt-dlp switches
+ * to an API that answers public reels with an empty page. So when yt-dlp fails with the cookies,
+ * the link is tried once more without them before the first error is reported.
+ */
+export async function analyze(
   url: string,
   env: YtdlpEnv,
   signal?: AbortSignal,
   ctx: RequestContext = {},
   extra: string[] = []
+): Promise<MediaInfo | PlaylistInfo> {
+  try {
+    return await analyzeOnce(url, env, signal, ctx, extra)
+  } catch (err) {
+    if (!ctx.cookies || signal?.aborted) throw err
+    return analyzeOnce(url, env, signal, { ...ctx, cookies: undefined }, extra).catch(() => {
+      throw err
+    })
+  }
+}
+
+function analyzeOnce(
+  url: string,
+  env: YtdlpEnv,
+  signal: AbortSignal | undefined,
+  ctx: RequestContext,
+  extra: string[]
 ): Promise<MediaInfo | PlaylistInfo> {
   const args = [...baseArgs(env), ...requestArgs(ctx), '-J', '--flat-playlist', ...extra, url]
   return new Promise((resolve, reject) => {
@@ -334,14 +356,21 @@ export class YtdlpDownload {
     // yt-dlp fails the whole video when a subtitle can't be fetched, and YouTube often refuses its
     // auto-translated captions (HTTP 429). The video matters more: drop the automatic subtitles,
     // then all subtitles, rather than the download.
+    // Same for the browser's cookies (see analyze): without them is worth one more try.
     const attempts: SubtitleSource[] = item.media?.subtitles ? ['all', 'written', 'none'] : ['all']
-    for (const [i, subs] of attempts.entries()) {
+    let job = item
+    let firstError: unknown
+    for (let i = 0; i < attempts.length; i++) {
       try {
-        await run(buildDownloadArgs(item, this.env, this.opts.rateLimitKBps, pathFile, subs))
+        await run(buildDownloadArgs(job, this.env, this.opts.rateLimitKBps, pathFile, attempts[i]))
         break
       } catch (err) {
-        const last = i === attempts.length - 1
-        if (last || this.stopped || !/subtitle/i.test(String(err))) throw err
+        if (this.stopped) throw err
+        if (/subtitle/i.test(String(err)) && i < attempts.length - 1) continue
+        if (!job.cookies) throw firstError ?? err
+        firstError = err
+        job = { ...item, cookies: undefined }
+        i--
       }
     }
 
