@@ -111,6 +111,13 @@ export function AddDialog({ initial, urls }: { initial?: ExternalAddRequest; url
   }
 
   useEffect(() => {
+    // A file the page got by submitting a form (cloud drive zips): asking the link without the
+    // form would only be refused, so show what the browser already told us
+    if (initial?.form) {
+      setResult({ kind: 'http', url: initial.url, fileName: initial.fileName || 'download', size: initial.size ?? -1, resumable: false })
+      setPhase('done')
+      return
+    }
     if (text.trim()) void analyze(text)
     return () => void window.api.cancelProbe()
   }, [])
@@ -140,6 +147,8 @@ export function AddDialog({ initial, urls }: { initial?: ExternalAddRequest; url
       reqs.push({
         url: result.url,
         kind: 'http',
+        // Only while it's still the link the form was sent to
+        post: initial?.form && result.url === initial.url ? initial.form : undefined,
         fileName: fileName || result.fileName,
         size: result.size,
         directory: dir,

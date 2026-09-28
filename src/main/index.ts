@@ -282,25 +282,6 @@ function handleExternal(req: ExternalAddRequest): void {
   }
   // Quick mode: one click on a video starts it with the default quality. Spotify links and
   // playlist pages still need the dialog to pick tracks/items.
-  // A form download can't be previewed (the dialog would re-request it without the form): start it
-  if (req.form) {
-    void manager
-      .add([
-        {
-          url: req.url,
-          kind: 'http',
-          post: req.form,
-          fileName: req.fileName,
-          size: req.size,
-          referrer: req.referrer,
-          pageUrl: req.pageUrl,
-          cookies: req.cookies,
-          headers: { ...req.headers, ...(req.userAgent ? { 'user-agent': req.userAgent } : {}) }
-        }
-      ])
-      .then((added) => notify(t('notify.quickAdded'), added[0]?.fileName ?? req.url, showWindow))
-    return
-  }
   const needsDialog = parseSpotifyUrl(req.url) || /[?&]list=|\/playlist\b/.test(req.url)
   if (req.quick && req.media && !needsDialog) {
     void manager
@@ -326,6 +307,7 @@ function handleExternal(req: ExternalAddRequest): void {
   const add: NewDownloadRequest = {
     url: req.url,
     kind: 'http',
+    post: req.form,
     fileName: req.fileName,
     size: req.size,
     referrer: req.referrer,
