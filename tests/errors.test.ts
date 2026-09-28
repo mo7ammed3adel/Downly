@@ -8,6 +8,7 @@ describe('explainError', () => {
     expect(explainError('[youtube] x: Private video')).toBe('errors.private')
     expect(explainError('Unsupported URL: https://example.com')).toBe('errors.unsupported')
     expect(explainError('HTTP Error 403: Forbidden')).toBe('errors.forbidden')
+    expect(explainError('HTTP 405')).toBe('errors.needsForm')
     expect(explainError('HTTP Error 429: Too Many Requests')).toBe('errors.rateLimited')
   })
   it('leaves unknown errors alone', () => {

@@ -347,6 +347,7 @@
     "unsupported": "Downly doesn't know this site. Open the page in your browser, play the video, and use the extension's Download button.",
     "geo": "This video isn't available in your country.",
     "forbidden": "The site refused the download. Try it from the browser extension, which sends the site the same details your browser used.",
-    "rateLimited": "The site is limiting requests right now. Wait a few minutes and try again."
+    "rateLimited": "The site is limiting requests right now. Wait a few minutes and try again.",
+    "needsForm": "This link only works from the page that made it (it's built from a form, like OneDrive/Drive \"download selected\" zips). Download it again from the page in your browser, with Downly's extension up to date."
   }
 }

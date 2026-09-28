@@ -9,6 +9,7 @@ const KNOWN: [RegExp, string][] = [
   [/video unavailable|has been removed|no longer available|HTTP Error 404|\b404\b/i, 'errors.gone'],
   [/unsupported url/i, 'errors.unsupported'],
   [/not available in your country|geo.?restrict/i, 'errors.geo'],
+  [/HTTP (Error )?405|method not allowed/i, 'errors.needsForm'],
   [/HTTP Error 403|\b403\b|forbidden/i, 'errors.forbidden'],
   [/HTTP Error 429|too many requests/i, 'errors.rateLimited']
 ]
