@@ -1,7 +1,7 @@
 {
   "name": "downly",
   "productName": "Downly",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Fast download manager with browser integration, video/audio grabbing and playlists",
   "main": "./out/main/index.js",
   "author": {
