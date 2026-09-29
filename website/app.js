@@ -101,6 +101,12 @@ const AR = {
   a4: 'ده بيظهر لأي برنامج جديد لحد ما ياخد سمعة. دوس “More info” وبعدين “Run anyway”.',
   q5: 'أقدر أحمّل أي حاجة؟',
   a5: 'من فضلك حمّل بس المحتوى اللي من حقك تحمّله، واحترم شروط كل موقع وحقوق النشر.',
+  q0: 'يعني إيه Downly؟',
+  a0: 'Downly برنامج تحميل مجاني للويندوز والماك ولينكس. بيخلي التحميل أسرع لحد 32 مرة لأنه بيقسم الملف على كذا اتصال في نفس الوقت، وبيحمّل فيديوهات وصوت من يوتيوب وأكتر من 1000 موقع تاني، وقوايم تشغيل كاملة وأغاني سبوتيفاي.',
+  q8: 'هل Downly بديل مجاني لـ IDM (إنترنت داونلود مانجر)؟',
+  a8: 'أيوه. زي IDM بيسرّع التحميل بأكتر من اتصال، وبياخد التحميلات من كروم وإيدج وفايرفوكس، وبيحط زرار تحميل على الفيديوهات. بس على عكس IDM، مفيهوش فترة تجريبية ولا نسخة مدفوعة، وكمان بيشتغل على الماك ولينكس.',
+  q9: 'الإضافة بتشتغل على أنهي متصفحات؟',
+  a9: 'كروم وإيدج وبريف وأوبرا وفيفالدي وفايرفوكس. ولو عندك ويندوز 10 أو 11 تقدر كمان تنزّل البرنامج من Microsoft Store.',
   'footer.privacy': 'الخصوصية',
   copied: 'اتنسخ ✓',
   'dl.win': 'تحميل للويندوز',
@@ -168,16 +174,18 @@ const store = {
   }
 }
 
-// ?lang=ar in the URL wins (shareable links), then the saved choice, then the browser language
+// English lives at / and Arabic at /ar (built by scripts/build-site.mjs), so search engines index both.
+// ?lang= in the URL wins (old shared links), then the saved choice; Arabic browsers landing on / go to /ar.
+const lang = document.documentElement.lang === 'ar' ? 'ar' : 'en'
 const urlLang = new URLSearchParams(location.search).get('lang')
-let lang = ['ar', 'en'].includes(urlLang) ? urlLang : store.get('lang') || (navigator.language.startsWith('ar') ? 'ar' : 'en')
+const wanted = ['ar', 'en'].includes(urlLang) ? urlLang : store.get('lang') || (navigator.language.startsWith('ar') ? 'ar' : null)
+if (wanted && wanted !== lang) location.replace((wanted === 'ar' ? '/ar' : '/') + location.hash)
 const t = (k) => (lang === 'ar' ? AR[k] : EN[k]) ?? EN[k] ?? k
 
 function applyLang() {
   document.documentElement.lang = lang
   document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr'
   for (const el of document.querySelectorAll('[data-i18n]')) el.textContent = t(el.dataset.i18n)
-  document.getElementById('lang').textContent = lang === 'ar' ? 'English' : 'عربي'
   applyOs()
   applyStats()
 }
@@ -276,11 +284,7 @@ document.getElementById('guideClose').addEventListener('click', () => guide.clos
 // Click on the backdrop closes it
 guide.addEventListener('click', (e) => e.target === guide && guide.close())
 
-document.getElementById('lang').addEventListener('click', () => {
-  lang = lang === 'ar' ? 'en' : 'ar'
-  store.set('lang', lang)
-  applyLang()
-})
+document.getElementById('lang').addEventListener('click', () => store.set('lang', lang === 'ar' ? 'en' : 'ar'))
 
 // ---------------------------------------------------------------- support + links
 function toast(text) {

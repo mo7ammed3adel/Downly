@@ -1,0 +1,26 @@
+# Downly
+
+> Downly is a free download manager for Windows, macOS and Linux. It speeds up downloads up to 32× by splitting each file across parallel connections, and downloads videos and audio from YouTube and 1000+ other sites, whole playlists and Spotify songs. No ads, no account, no paid version. A free alternative to IDM (Internet Download Manager).
+
+## Key facts
+
+- Price: free, every feature, no limits. Optional donations only.
+- Platforms: Windows 10/11, Windows 7/8/8.1 (32-bit and 64-bit builds), macOS (Apple Silicon and Intel), Linux (AppImage and .deb).
+- Speed: multi-connection downloads (up to 32 parts), pause and resume, even after a restart or dropped connection.
+- Video: 144p to 8K, MP4, MKV or WebM, with subtitles and cover art. Works with YouTube, Instagram, Facebook, TikTok, X, Vimeo, Reddit, Twitch and 1000+ sites.
+- Audio: save any video as MP3, M4A, FLAC or Opus with title, artist and cover.
+- Playlists: pick videos from a playlist and download them all at once.
+- Spotify: tracks, albums and playlists saved with the right name, artist and album art (the audio is matched on YouTube).
+- Scheduler: start downloads at night and shut down the PC when done.
+- Browser extension for Chrome, Edge, Brave, Opera, Vivaldi and Firefox: sends browser downloads to Downly, adds a Download button on videos, right-click "Download with Downly", shortcuts Alt+Shift+D (video) and Alt+Shift+A (audio).
+- Languages: 13, including Arabic and English; light and dark mode.
+- Privacy: no data collection, no ads, no analytics. The extension only talks to the app on the user's own computer.
+
+## Links
+
+- [Website (English)](https://downly-app.vercel.app/)
+- [Website (Arabic)](https://downly-app.vercel.app/ar)
+- [Download the latest version](https://github.com/mo7ammed3adel/downly-releases/releases/latest)
+- [Microsoft Store (Windows 10/11)](https://apps.microsoft.com/detail/9N3LXLPF25K4)
+- [Edge extension](https://microsoftedge.microsoft.com/addons/detail/edoonifkeddgpamlhadfbagimigcaena)
+- [Privacy policy](https://downly-app.vercel.app/privacy)

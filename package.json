@@ -22,7 +22,8 @@
     "dist:store": "node scripts/dist.mjs store",
     "dist:mac": "node scripts/dist.mjs mac",
     "dist:linux": "node scripts/dist.mjs linux",
-    "extension:zip": "node scripts/pack-extension.mjs"
+    "extension:zip": "node scripts/pack-extension.mjs",
+    "site": "node scripts/build-site.mjs"
   },
   "dependencies": {
     "ffmpeg-static": "^5.2.0"
