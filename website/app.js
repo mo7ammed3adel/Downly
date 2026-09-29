@@ -12,9 +12,11 @@ const SITE = {
     whatsapp: 'https://wa.me/201014025928',
     telegram: 'https://t.me/mohamed3abuzaid'
   },
+  // Windows 10/11 app on the Microsoft Store
+  msStore: 'https://apps.microsoft.com/detail/9N3LXLPF25K4',
   // Store pages — fill in once the extension is published
   chrome: '',
-  edge: '',
+  edge: 'https://microsoftedge.microsoft.com/addons/detail/edoonifkeddgpamlhadfbagimigcaena',
   // Signed by Mozilla in the release pipeline (swap for the addons.mozilla.org page once listed)
   firefox: 'https://github.com/mo7ammed3adel/downly-releases/releases/latest/download/Downly-firefox.xpi'
 }
@@ -43,6 +45,7 @@ const AR = {
   'hero.lead': 'ملفات، فيديوهات يوتيوب والسوشيال ميديا، أغاني، قوايم تشغيل كاملة وأغاني سبوتيفاي — في برنامج واحد هادي، وتحميل أسرع لحد 32 مرة بأكتر من اتصال.',
   'hero.download': 'تحميل للويندوز',
   'hero.extension': 'إضافة المتصفح',
+  'hero.msStore': 'Microsoft Store',
   'meta.free': 'مجاني، من غير إعلانات',
   'mock.done': 'تم',
   'mock.search': 'الصق رابط…',
@@ -199,6 +202,10 @@ function applyOs() {
   document.getElementById('mainDownloadIcon').setAttribute('href', { mac: '#i-apple', linux: '#i-linux' }[os] ?? '#i-windows')
   for (const a of document.querySelectorAll('.os-link')) a.href = FILES[a.dataset.os]
   for (const a of document.querySelectorAll('.download-link')) a.href = FILES[os]
+  // The Store build only runs on Windows 10/11
+  const msStore = document.getElementById('msStoreLink')
+  msStore.href = SITE.msStore
+  msStore.hidden = os !== 'win' || !SITE.msStore
 }
 
 // ---------------------------------------------------------------- live release numbers

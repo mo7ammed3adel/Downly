@@ -149,7 +149,8 @@ h3 {
   color: var(--ash);
   font-size: 14px;
 }
-.stat[hidden] {
+.stat[hidden],
+.btn[hidden] {
   display: none;
 }
 .stat b {
