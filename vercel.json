@@ -5,6 +5,9 @@
   "buildCommand": "node scripts/build-site.mjs",
   "outputDirectory": "website",
   "cleanUrls": true,
+  "rewrites": [
+    { "source": "/google7ec1d0d7f4200888.html", "destination": "/google-site-verification.txt" }
+  ],
   "headers": [
     {
       "source": "/(.*)",
