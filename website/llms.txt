@@ -22,7 +22,7 @@
 - [Website (English)](https://downly-app.vercel.app/)
 - [Website (Arabic)](https://downly-app.vercel.app/ar)
 - [Download the latest version](https://github.com/mo7ammed3adel/downly-releases/releases/latest)
-- [Android app (APK)](https://github.com/mo7ammed3adel/downly-releases/releases/download/android-v1.1.0/Downly-android-arm64.apk)
+- [Android app (APK)](https://github.com/mo7ammed3adel/downly-releases/releases/download/android-v1.2.0/Downly-android-arm64.apk)
 - [Microsoft Store (Windows 10/11)](https://apps.microsoft.com/detail/9N3LXLPF25K4)
 - [Edge extension](https://microsoftedge.microsoft.com/addons/detail/edoonifkeddgpamlhadfbagimigcaena)
 - [Privacy policy](https://downly-app.vercel.app/privacy)

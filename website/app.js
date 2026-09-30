@@ -21,7 +21,7 @@ const SITE = {
   firefox: 'https://github.com/mo7ammed3adel/downly-releases/releases/latest/download/Downly-firefox.xpi',
   // The Android app has its own releases (android-vX.Y.Z) so desktop "latest" links keep working;
   // bump this tag when a new APK is published
-  androidTag: 'android-v1.1.0'
+  androidTag: 'android-v1.2.0'
 }
 
 const latest = `https://github.com/${SITE.releasesRepo}/releases/latest/download`
