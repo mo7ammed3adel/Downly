@@ -8,13 +8,13 @@ EN: Send downloads, videos and playlists from your browser to the Downly app for
 AR: ابعت التحميلات والفيديوهات وقوائم التشغيل من المتصفح لبرنامج Downly لتحميل أسرع وقابل للاستئناف.
 
 ## Full description (EN)
+<!-- No site or brand names here: the Chrome Web Store rejected a version that listed them as keyword spam -->
 Downly connects your browser to the Downly desktop download manager.
 
 • Takes over your browser downloads and speeds them up with multiple connections
 • Pause and resume downloads, even after restarting your PC
-• A Download button on videos on any site (Reels, Stories, embedded players…), which you can drag anywhere or hide
-• WhatsApp Web: download photos and videos from chats and statuses
-• Music sites (Spotify, Anghami, Deezer, Apple Music…): a Download button for the song that's playing
+• A Download button on videos, which you can drag anywhere or hide
+• A Download button for the song that's playing on music sites
 • Save video or audio only (MP3, M4A…) in the quality you choose
 • Download whole playlists
 • Right-click any link → Download with Downly
@@ -29,9 +29,8 @@ Downly بيربط المتصفح ببرنامج Downly لإدارة التحمي
 
 • بيستلم تحميلات المتصفح ويسرّعها بأكتر من اتصال
 • إيقاف واستئناف التحميل حتى بعد ما تقفل الجهاز
-• زرار تحميل على الفيديوهات في أي موقع (ريلز، استوري، مشغلات جوه المواقع…)، تقدر تحركه أو تخفيه
-• واتساب ويب: تحميل الصور والفيديوهات من الشات والحالات
-• مواقع الأغاني (سبوتيفاي، أنغامي، ديزر، Apple Music…): زرار لتحميل الأغنية اللي شغالة
+• زرار تحميل على الفيديوهات، تقدر تحركه أو تخفيه
+• زرار لتحميل الأغنية اللي شغالة في مواقع الأغاني
 • تحميل فيديو أو صوت بس (MP3، M4A…) بالجودة اللي تختارها
 • تحميل قوائم تشغيل كاملة
 • كليك يمين على أي رابط ← تحميل بواسطة Downly
