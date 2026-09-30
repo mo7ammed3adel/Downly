@@ -21,7 +21,7 @@ const SITE = {
   firefox: 'https://github.com/mo7ammed3adel/downly-releases/releases/latest/download/Downly-firefox.xpi',
   // The Android app has its own releases (android-vX.Y.Z) so desktop "latest" links keep working;
   // bump this tag when a new APK is published
-  androidTag: 'android-v1.0.0'
+  androidTag: 'android-v1.1.0'
 }
 
 const latest = `https://github.com/${SITE.releasesRepo}/releases/latest/download`
@@ -126,7 +126,7 @@ const AR = {
   ga3d: 'بعد كده اعمل Share لأي لينك فيديو واختار Downly، أو افتح التطبيق والصق اللينك.',
   gaOld: 'موبايلك قديم وبيقولك إن التطبيق مش متوافق؟ نزّل نسخة الـ 32 بت.',
   q10: 'فيه تطبيق للأندرويد؟',
-  a10: 'أيوه. Downly للأندرويد بيحمّل فيديوهات وأغاني من يوتيوب وأكتر من 1000 موقع، وفيه متصفح بزرار تحميل، وخزنة بالبصمة للفيديوهات الخاصة، ومشغّل. نزّله من هنا كملف APK، لأن جوجل بلاي مش بيسمح بتطبيقات تحميل يوتيوب.',
+  a10: 'أيوه. Downly للأندرويد بيحمّل فيديوهات وأغاني من يوتيوب وأكتر من 1000 موقع، وفيه متصفح بزرار تحميل، وحفظ حالات الواتساب، ومشغّل أغاني بيكمّل في الخلفية، وخزنة بالبصمة للفيديوهات الخاصة. نزّله من هنا كملف APK، لأن جوجل بلاي مش بيسمح بتطبيقات تحميل يوتيوب.',
   'dl.win7': 'تحميل لويندوز 7 / 8',
   'dl.win7x86': 'تحميل لويندوز 7 / 8 (32 بت)',
   soon: 'قريبًا على المتجر',
