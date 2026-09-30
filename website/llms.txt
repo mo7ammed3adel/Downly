@@ -5,7 +5,8 @@
 ## Key facts
 
 - Price: free, every feature, no limits. Optional donations only.
-- Platforms: Windows 10/11, Windows 7/8/8.1 (32-bit and 64-bit builds), macOS (Apple Silicon and Intel), Linux (AppImage and .deb).
+- Platforms: Windows 10/11, Windows 7/8/8.1 (32-bit and 64-bit builds), macOS (Apple Silicon and Intel), Linux (AppImage and .deb), Android (APK from the website; Google Play doesn't allow YouTube downloaders).
+- Android app: built-in browser with a Download button, Share → Downly from any app, a PIN/fingerprint vault for private videos, and a player.
 - Speed: multi-connection downloads (up to 32 parts), pause and resume, even after a restart or dropped connection.
 - Video: 144p to 8K, MP4, MKV or WebM, with subtitles and cover art. Works with YouTube, Instagram, Facebook, TikTok, X, Vimeo, Reddit, Twitch and 1000+ sites.
 - Audio: save any video as MP3, M4A, FLAC or Opus with title, artist and cover.
@@ -21,6 +22,7 @@
 - [Website (English)](https://downly-app.vercel.app/)
 - [Website (Arabic)](https://downly-app.vercel.app/ar)
 - [Download the latest version](https://github.com/mo7ammed3adel/downly-releases/releases/latest)
+- [Android app (APK)](https://github.com/mo7ammed3adel/downly-releases/releases/download/android-v1.0.0/Downly-android-arm64.apk)
 - [Microsoft Store (Windows 10/11)](https://apps.microsoft.com/detail/9N3LXLPF25K4)
 - [Edge extension](https://microsoftedge.microsoft.com/addons/detail/edoonifkeddgpamlhadfbagimigcaena)
 - [Privacy policy](https://downly-app.vercel.app/privacy)

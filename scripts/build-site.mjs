@@ -37,12 +37,12 @@ function englishStrings(html) {
 const HEAD = {
   en: {
     description:
-      'Downly is a free download manager for Windows, macOS and Linux: up to 32× faster multi-connection downloads, YouTube and social media videos, MP3 audio, playlists and Spotify songs. No ads, no limits.'
+      'Downly is a free download manager for Windows, macOS, Linux and Android: up to 32× faster multi-connection downloads, YouTube and social media videos, MP3 audio, playlists and Spotify songs. No ads, no limits.'
   },
   ar: {
     title: 'Downly — برنامج تحميل مجاني للفيديوهات والأغاني والملفات | بديل IDM',
     description:
-      'Downly برنامج تحميل مجاني للويندوز والماك ولينكس: تحميل أسرع لحد 32 مرة، فيديوهات يوتيوب والسوشيال ميديا، صوت MP3، قوايم تشغيل كاملة وأغاني سبوتيفاي. من غير إعلانات ولا حدود.',
+      'Downly برنامج تحميل مجاني للويندوز والماك ولينكس والأندرويد: تحميل أسرع لحد 32 مرة، فيديوهات يوتيوب والسوشيال ميديا، صوت MP3، قوايم تشغيل كاملة وأغاني سبوتيفاي. من غير إعلانات ولا حدود.',
     ogTitle: 'Downly — برنامج تحميل مجاني',
     ogDescription: 'تحميل أسرع، فيديوهات، أغاني وقوايم تشغيل. مجاني ومن غير إعلانات.'
   }
@@ -77,7 +77,7 @@ function schema(lang, strings) {
         description: HEAD[lang].description,
         applicationCategory: 'UtilitiesApplication',
         applicationSubCategory: 'Download manager',
-        operatingSystem: 'Windows 11, Windows 10, Windows 8, Windows 7, macOS, Linux',
+        operatingSystem: 'Windows 11, Windows 10, Windows 8, Windows 7, macOS, Linux, Android',
         downloadUrl: RELEASES,
         installUrl: 'https://apps.microsoft.com/detail/9N3LXLPF25K4',
         image: `${ORIGIN}/assets/icon.png`,

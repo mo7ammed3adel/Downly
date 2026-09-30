@@ -18,7 +18,10 @@ const SITE = {
   chrome: '',
   edge: 'https://microsoftedge.microsoft.com/addons/detail/edoonifkeddgpamlhadfbagimigcaena',
   // Signed by Mozilla in the release pipeline (swap for the addons.mozilla.org page once listed)
-  firefox: 'https://github.com/mo7ammed3adel/downly-releases/releases/latest/download/Downly-firefox.xpi'
+  firefox: 'https://github.com/mo7ammed3adel/downly-releases/releases/latest/download/Downly-firefox.xpi',
+  // The Android app has its own releases (android-vX.Y.Z) so desktop "latest" links keep working;
+  // bump this tag when a new APK is published
+  androidTag: 'android-v1.0.0'
 }
 
 const latest = `https://github.com/${SITE.releasesRepo}/releases/latest/download`
@@ -29,7 +32,9 @@ const FILES = {
   mac: `${latest}/Downly-mac-arm64.dmg`,
   macIntel: `${latest}/Downly-mac-x64.dmg`,
   linux: `${latest}/Downly-linux.AppImage`,
-  linuxDeb: `${latest}/Downly-linux.deb`
+  linuxDeb: `${latest}/Downly-linux.deb`,
+  android: `https://github.com/${SITE.releasesRepo}/releases/download/${SITE.androidTag}/Downly-android-arm64.apk`,
+  androidArm32: `https://github.com/${SITE.releasesRepo}/releases/download/${SITE.androidTag}/Downly-android-arm32.apk`
 }
 
 // ---------------------------------------------------------------- translations
@@ -112,6 +117,16 @@ const AR = {
   'dl.win': 'تحميل للويندوز',
   'dl.mac': 'تحميل للماك',
   'dl.linux': 'تحميل للينكس',
+  'dl.android': 'تحميل للأندرويد',
+  ga1: 'افتح الملف اللي نزل',
+  ga1d: 'دوس على Downly-android-arm64.apk من إشعار التحميل أو من فولدر Downloads.',
+  ga2: 'اسمح للمتصفح يسطّب التطبيقات',
+  ga2d: 'الأندرويد هيسألك مرة واحدة بس: دوس Settings، وفعّل «Allow from this source»، وارجع.',
+  ga3: 'دوس «Install» وخلاص',
+  ga3d: 'بعد كده اعمل Share لأي لينك فيديو واختار Downly، أو افتح التطبيق والصق اللينك.',
+  gaOld: 'موبايلك قديم وبيقولك إن التطبيق مش متوافق؟ نزّل نسخة الـ 32 بت.',
+  q10: 'فيه تطبيق للأندرويد؟',
+  a10: 'أيوه. Downly للأندرويد بيحمّل فيديوهات وأغاني من يوتيوب وأكتر من 1000 موقع، وفيه متصفح بزرار تحميل، وخزنة بالبصمة للفيديوهات الخاصة، ومشغّل. نزّله من هنا كملف APK، لأن جوجل بلاي مش بيسمح بتطبيقات تحميل يوتيوب.',
   'dl.win7': 'تحميل لويندوز 7 / 8',
   'dl.win7x86': 'تحميل لويندوز 7 / 8 (32 بت)',
   soon: 'قريبًا على المتجر',
@@ -148,6 +163,7 @@ const EN_EXTRA = {
   'dl.win': 'Download for Windows',
   'dl.mac': 'Download for macOS',
   'dl.linux': 'Download for Linux',
+  'dl.android': 'Download for Android',
   'dl.win7': 'Download for Windows 7 / 8',
   'dl.win7x86': 'Download for Windows 7 / 8 (32-bit)',
   soon: 'Coming soon to the store'
@@ -193,6 +209,7 @@ function applyLang() {
 // ---------------------------------------------------------------- download button
 function detectOs() {
   const ua = navigator.userAgent
+  if (/Android/i.test(ua)) return 'android'
   // Windows 7 / 8 / 8.1 report NT 6.x; they need the Electron 22 build (32-bit PCs lack Win64/WOW64)
   const legacy = /Windows NT 6\.[0-3]/.exec(ua)
   if (legacy) return /Win64|WOW64|x64/i.test(ua) ? 'win7' : 'win7x86'
@@ -207,7 +224,7 @@ function applyOs() {
   const main = document.getElementById('mainDownload')
   main.href = FILES[os]
   document.getElementById('mainDownloadText').textContent = t(`dl.${os}`)
-  document.getElementById('mainDownloadIcon').setAttribute('href', { mac: '#i-apple', linux: '#i-linux' }[os] ?? '#i-windows')
+  document.getElementById('mainDownloadIcon').setAttribute('href', { mac: '#i-apple', linux: '#i-linux', android: '#i-android' }[os] ?? '#i-windows')
   for (const a of document.querySelectorAll('.os-link')) a.href = FILES[a.dataset.os]
   for (const a of document.querySelectorAll('.download-link')) a.href = FILES[os]
   // The Store build only runs on Windows 10/11
@@ -228,12 +245,15 @@ async function loadStats() {
   const res = await fetch(`https://api.github.com/repos/${SITE.releasesRepo}/releases?per_page=100`)
   if (!res.ok) return cached
   const releases = await res.json()
-  const latest = releases.find((r) => !r.draft && !r.prerelease)
+  const published = releases.filter((r) => !r.draft && !r.prerelease)
+  const latest = published.find((r) => !r.tag_name.startsWith('android-'))
+  const android = published.find((r) => r.tag_name.startsWith('android-'))
   const fresh = {
     at: Date.now(),
     downloads: releases.flatMap((r) => r.assets).reduce((n, a) => n + (INSTALLERS.has(a.name) ? a.download_count : 0), 0),
     version: latest?.tag_name,
-    sizes: Object.fromEntries((latest?.assets ?? []).map((a) => [a.name, a.size]))
+    androidVersion: android?.tag_name.replace('android-', ''),
+    sizes: Object.fromEntries([...(latest?.assets ?? []), ...(android?.assets ?? [])].map((a) => [a.name, a.size]))
   }
   store.set('stats', JSON.stringify(fresh))
   return fresh
@@ -246,7 +266,8 @@ function applyStats() {
     document.getElementById('dlCount').textContent = num.format(stats.downloads)
     document.getElementById('dlStat').hidden = false
   }
-  if (stats.version) for (const el of document.querySelectorAll('.version')) el.textContent = stats.version
+  const version = os === 'android' ? stats.androidVersion : stats.version
+  if (version) for (const el of document.querySelectorAll('.version')) el.textContent = version
   const size = stats.sizes[FILES[os].split('/').pop()]
   // Latin digits like the rest of the version line
   document.getElementById('dlSize').textContent = size ? ` · ${Math.round(size / 1048576)} MB` : ''
@@ -264,7 +285,7 @@ loadStats()
 // ---------------------------------------------------------------- install guide
 // Opens next to every download (the download itself still starts) and from the FAQ
 const guide = document.getElementById('guide')
-const GUIDE_TAB = { win: 'win', win7: 'win', win7x86: 'win', mac: 'mac', macIntel: 'mac', linux: 'linux', linuxDeb: 'linux' }
+const GUIDE_TAB = { win: 'win', win7: 'win', win7x86: 'win', mac: 'mac', macIntel: 'mac', linux: 'linux', linuxDeb: 'linux', android: 'android', androidArm32: 'android' }
 
 function showGuideTab(tab) {
   for (const b of guide.querySelectorAll('[data-tab]')) b.setAttribute('aria-selected', b.dataset.tab === tab)
