@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'engine.dart';
+import 'errors.dart';
 import 'file_downloader.dart';
 import 'library.dart';
 import 'models.dart';
@@ -220,7 +221,21 @@ class Downloads extends ChangeNotifier {
     _pump();
   }
 
-  void _fail(DownloadTask t, String message) {
+  Future<void> _fail(DownloadTask t, String message) async {
+    // An outdated engine is the usual cause of YouTube 403s: update it and try once more
+    if (t.kind != TaskKind.file && !t.retried && classify(message) == ErrorKind.outdated) {
+      t.retried = true;
+      t.phase = 'updatingEngine';
+      _changed();
+      await Engine.refresh();
+      if (t.status == TaskStatus.running) {
+        t.status = TaskStatus.queued;
+        t.phase = null;
+        _changed(save: true);
+        _pump();
+        return;
+      }
+    }
     t.status = TaskStatus.failed;
     t.error = message;
     t.speed = 0;

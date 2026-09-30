@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
 import '../core/cookies.dart';
 import '../core/downloads.dart';
 import '../core/engine.dart';
+import '../core/errors.dart';
 import '../core/i18n.dart';
 import '../core/library.dart';
 import '../core/models.dart';
@@ -12,6 +14,7 @@ import '../core/settings.dart';
 import '../core/vault.dart';
 import '../core/ytdlp_args.dart';
 import 'home_tab.dart' show MediaThumb;
+import 'shell.dart';
 import 'theme.dart';
 
 /// A media file the browser saw a page load (mp4, m3u8, mp3…)
@@ -77,6 +80,8 @@ class _DownloadSheetState extends State<DownloadSheet> {
   MediaInfo? info;
   String? error;
   String? cookies;
+  bool updatingEngine = false;
+  bool engineRetried = false;
   bool audio = false;
   int? height;
   bool private = false;
@@ -121,7 +126,17 @@ class _DownloadSheetState extends State<DownloadSheet> {
           ..addAll(List.generate(result.entries.length, (i) => i));
       });
     } catch (e) {
-      if (mounted) setState(() => error = e.toString().replaceFirst(RegExp(r'^PlatformException\(engine, '), '').replaceFirst(RegExp(r', null, null\)$'), ''));
+      final message = e is PlatformException ? (e.message ?? '$e') : '$e';
+      // YouTube and friends change often: update the engine once and try again by itself
+      if (!engineRetried && classify(message) == ErrorKind.outdated) {
+        engineRetried = true;
+        if (mounted) setState(() => updatingEngine = true);
+        await Engine.refresh();
+        if (!mounted) return;
+        setState(() => updatingEngine = false);
+        return _load();
+      }
+      if (mounted) setState(() => error = message);
     }
   }
 
@@ -142,7 +157,7 @@ class _DownloadSheetState extends State<DownloadSheet> {
     final kind = audio ? TaskKind.audio : TaskKind.video;
     final dir = private ? vault.dir : await Library.folderFor(audio ? MediaType.audio : MediaType.video);
     final args = await _args(dir);
-    final quality = audio ? settings.audioFormat.toUpperCase() : (height != null && height! > 0 ? qualityLabel(height!) : null);
+    final quality = audio ? settings.audioFormat.toUpperCase() : (height != null && height! > 0 ? i.label(height!) : null);
 
     if (i.isPlaylist) {
       for (final index in selected.toList()..sort((a, b) => b - a)) {
@@ -205,7 +220,7 @@ class _DownloadSheetState extends State<DownloadSheet> {
         child: Column(children: [
           const CircularProgressIndicator(),
           const SizedBox(height: 18),
-          Text(context.tr('loadingInfo')),
+          Text(context.tr(updatingEngine ? 'updatingEngine' : 'loadingInfo')),
           const SizedBox(height: 6),
           Text(widget.url, maxLines: 1, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
         ]),
@@ -213,15 +228,35 @@ class _DownloadSheetState extends State<DownloadSheet> {
 
   Widget _error(BuildContext context) {
     final theme = Theme.of(context);
+    final kind = classify(error!);
+    final site = siteName(widget.url);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 24),
       child: Column(children: [
-        const Icon(Icons.error_outline_rounded, size: 48, color: Brand.red),
+        Icon(kind == ErrorKind.login ? Icons.lock_person_rounded : Icons.error_outline_rounded, size: 48, color: kind == ErrorKind.login ? Brand.violet : Brand.red),
         const SizedBox(height: 12),
-        Text(context.tr('error'), style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+        Text(context.tr('err_${kind.name}_t', args: {'site': site}), textAlign: TextAlign.center, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
         const SizedBox(height: 6),
-        Text(error!, textAlign: TextAlign.center, maxLines: 4, overflow: TextOverflow.ellipsis, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+        Text(
+          kind == ErrorKind.other ? error! : context.tr('err_${kind.name}', args: {'site': site}),
+          textAlign: TextAlign.center,
+          maxLines: 4,
+          overflow: TextOverflow.ellipsis,
+          style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant, height: 1.45),
+        ),
         const SizedBox(height: 18),
+        if (kind == ErrorKind.login) ...[
+          FilledButton.icon(
+            style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52), backgroundColor: Brand.violet),
+            onPressed: () {
+              Navigator.pop(context);
+              Shell.globalKey.currentState?.openLogin(loginUrlFor(widget.url), resume: widget.url);
+            },
+            icon: const Icon(Icons.login_rounded),
+            label: Text(context.tr('loginTo', args: {'site': site})),
+          ),
+          const SizedBox(height: 10),
+        ],
         Row(children: [
           Expanded(child: OutlinedButton.icon(onPressed: _load, icon: const Icon(Icons.refresh_rounded), label: Text(context.tr('retry')))),
           const SizedBox(width: 10),
@@ -330,7 +365,7 @@ class _DownloadSheetState extends State<DownloadSheet> {
       for (final h in heights)
         _OptionChip(
           selected: height == h,
-          title: h == 0 ? context.tr('bestQuality') : qualityLabel(h),
+          title: h == 0 ? context.tr('bestQuality') : i.label(h),
           subtitle: i.isPlaylist ? null : formatBytes(i.videoSizes[h]),
           badge: h >= 1080 ? 'HD' : null,
           onTap: () => setState(() => height = h),

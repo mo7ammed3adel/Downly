@@ -64,6 +64,11 @@ class BrowserTabState extends State<BrowserTab> {
 
   bool get _onStartPage => !_started;
 
+  /// A link that failed because the site wanted a login; offered again once the user logs in
+  String? _resume;
+
+  void resumeAfterLogin(String url) => setState(() => _resume = url);
+
   void load(String input) {
     final value = input.trim();
     if (value.isEmpty) return;
@@ -149,6 +154,22 @@ class BrowserTabState extends State<BrowserTab> {
       bottom: false,
       child: Column(children: [
         _bar(context, settings),
+        if (_resume != null)
+          MaterialBanner(
+            leading: const Icon(Icons.login_rounded, color: Brand.violet),
+            content: Text(context.tr('loginThenContinue')),
+            actions: [
+              TextButton(onPressed: () => setState(() => _resume = null), child: Text(context.tr('cancel'))),
+              FilledButton(
+                onPressed: () {
+                  final url = _resume!;
+                  setState(() => _resume = null);
+                  showDownloadSheet(context, url);
+                },
+                child: Text(context.tr('continueDownload')),
+              ),
+            ],
+          ),
         if (_progress < 1 && !_onStartPage) LinearProgressIndicator(value: _progress, minHeight: 2),
         Expanded(
           child: Stack(children: [

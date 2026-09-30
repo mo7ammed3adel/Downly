@@ -20,6 +20,18 @@ class MainActivity : AudioServiceFragmentActivity() {
         statuses = StatusBridge(this, messenger)
         pendingShare = sharedText(intent)
         appChannel = MethodChannel(messenger, "downly/app").apply {
+            // The engine outlives the activity (background music), so after Back + Share the Dart
+            // side is already running and never asks for the initial share again: push it
+            pendingShare?.let { text ->
+                invokeMethod("shared", text, object : MethodChannel.Result {
+                    override fun success(result: Any?) {
+                        pendingShare = null
+                    }
+
+                    override fun error(code: String, message: String?, details: Any?) {}
+                    override fun notImplemented() {} // cold start: Dart reads it with initialShare
+                })
+            }
             setMethodCallHandler { call, result ->
                 when (call.method) {
                     // The link the app was opened with (Share → Downly), once
@@ -44,6 +56,29 @@ class MainActivity : AudioServiceFragmentActivity() {
                                 else -> -1L
                             }
                         )
+                    }
+                    "appInfo" -> {
+                        val info = packageManager.getPackageInfo(packageName, 0)
+                        result.success(mapOf("version" to info.versionName, "abi" to Build.SUPPORTED_ABIS.firstOrNull()))
+                    }
+                    // Hands a downloaded update to Android's installer; false = the user must first
+                    // allow Downly to install apps (the settings screen is opened)
+                    "installApk" -> {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !packageManager.canRequestPackageInstalls()) {
+                            startActivity(
+                                Intent(android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, android.net.Uri.parse("package:$packageName"))
+                            )
+                            result.success(false)
+                        } else {
+                            val file = java.io.File(call.argument<String>("path")!!)
+                            val uri = androidx.core.content.FileProvider.getUriForFile(this@MainActivity, "$packageName.files", file)
+                            startActivity(
+                                Intent(Intent.ACTION_VIEW)
+                                    .setDataAndType(uri, "application/vnd.android.package-archive")
+                                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
+                            )
+                            result.success(true)
+                        }
                     }
                     "pip" -> {
                         val ok = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && try {

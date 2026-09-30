@@ -5,7 +5,9 @@ import 'package:url_launcher/url_launcher.dart';
 import '../core/engine.dart';
 import '../core/i18n.dart';
 import '../core/settings.dart';
+import '../core/updater.dart';
 import '../core/vault.dart';
+import 'shell.dart';
 import 'theme.dart';
 import 'vault_page.dart';
 
@@ -18,7 +20,9 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   String? version;
+  String? appVersion;
   bool updating = false;
+  bool checking = false;
 
   @override
   void initState() {
@@ -26,6 +30,9 @@ class _SettingsPageState extends State<SettingsPage> {
     Engine.init().then((v) {
       if (mounted) setState(() => version = v);
     }).catchError((_) {});
+    Updater.currentVersion().then((v) {
+      if (mounted) setState(() => appVersion = v);
+    });
   }
 
   Future<void> _update() async {
@@ -156,6 +163,29 @@ class _SettingsPageState extends State<SettingsPage> {
           onChanged: (v) => vault.biometricEnabled = v,
         ),
         _header(context, context.tr('about')),
+        ListTile(
+          leading: const Icon(Icons.system_update_rounded),
+          title: Text(context.tr('appVersion')),
+          subtitle: Text(appVersion ?? '…'),
+          trailing: checking
+              ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2))
+              : FilledButton.tonal(
+                  onPressed: () async {
+                    setState(() => checking = true);
+                    final messenger = ScaffoldMessenger.of(context);
+                    final latest = context.tr('upToDate');
+                    final update = await Updater.check(force: true);
+                    if (!context.mounted) return;
+                    setState(() => checking = false);
+                    if (update != null) {
+                      showUpdateDialog(context, update);
+                    } else {
+                      messenger.showSnackBar(SnackBar(content: Text(latest)));
+                    }
+                  },
+                  child: Text(context.tr('checkUpdates')),
+                ),
+        ),
         ListTile(
           leading: const Icon(Icons.public_rounded),
           title: Text(context.tr('website')),

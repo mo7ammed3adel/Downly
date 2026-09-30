@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../core/downloads.dart';
+import '../core/errors.dart';
 import '../core/i18n.dart';
 import '../core/models.dart';
 import '../core/vault.dart';
@@ -104,7 +105,9 @@ class TaskCard extends StatelessWidget {
       case TaskStatus.paused:
         return [context.tr('paused'), if (t.total != null) '${formatBytes(t.downloaded)} / ${formatBytes(t.total)}'].join(' · ');
       case TaskStatus.failed:
-        return t.error ?? context.tr('failed');
+        final kind = classify(t.error ?? '');
+        final site = siteName(t.url);
+        return kind == ErrorKind.other ? (t.error ?? context.tr('failed')) : context.tr('err_${kind.name}_t', args: {'site': site});
       case TaskStatus.done:
         return [if (t.quality != null) t.quality!, formatBytes(t.total), if (t.site != null) t.site!].where((s) => s.isNotEmpty).join(' · ');
       case TaskStatus.running:

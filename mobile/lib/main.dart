@@ -35,7 +35,7 @@ Future<void> main() async {
     ),
   );
   // Unpack yt-dlp in the background right away, so the first link opens fast
-  Engine.init().catchError((_) => null);
+  Engine.init().then((_) => Engine.autoUpdate()).catchError((_) {});
 
   runApp(MultiProvider(
     providers: [
@@ -71,7 +71,7 @@ class DownlyApp extends StatelessWidget {
       supportedLocales: const [Locale('ar'), Locale('en')],
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
       // Rebuild everything when the language changes (strings read without listening)
-      home: KeyedSubtree(key: ValueKey(lang), child: const Shell()),
+      home: KeyedSubtree(key: ValueKey(lang), child: Shell(key: Shell.globalKey)),
     );
   }
 }

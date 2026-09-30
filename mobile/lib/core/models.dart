@@ -8,6 +8,7 @@ class MediaInfo {
     this.duration,
     this.site,
     this.heights = const [],
+    this.labels = const {},
     this.videoSizes = const {},
     this.audioSize,
     this.entries = const [],
@@ -23,6 +24,11 @@ class MediaInfo {
 
   /// Available video heights, highest first
   final List<int> heights;
+
+  /// Quality name per height from the shorter side, so a vertical 1080×1920 reel is "1080p", not "2K"
+  final Map<int, String> labels;
+
+  String label(int height) => labels[height] ?? qualityLabel(height);
 
   /// Estimated file size per height (video + best audio), when known
   final Map<int, int> videoSizes;
@@ -53,10 +59,13 @@ class MediaInfo {
 
     final sizes = <int, int>{};
     final heights = <int>{};
+    final labels = <int, String>{};
     for (final f in formats) {
       final h = (f['height'] as num?)?.toInt();
       if (h == null || h < 100 || f['vcodec'] == 'none') continue;
       heights.add(h);
+      final w = (f['width'] as num?)?.toInt();
+      labels[h] = qualityLabel(w != null && w < h ? w : h);
       final s = size(f);
       if (s == null) continue;
       final withAudio = f['acodec'] == 'none' ? s + (bestAudio ?? 0) : s;
@@ -91,6 +100,7 @@ class MediaInfo {
       duration: (j['duration'] as num?) != null ? Duration(seconds: (j['duration'] as num).round()) : null,
       site: (j['extractor_key'] ?? j['extractor']) as String?,
       heights: heights.toList()..sort((a, b) => b - a),
+      labels: labels,
       videoSizes: sizes,
       audioSize: bestAudio ?? (audioOnly ? size(j) : null),
       entries: entries,
@@ -164,6 +174,9 @@ class DownloadTask {
 
   // live only
   double speed = 0;
+
+  /// Already retried once after updating the engine
+  bool retried = false;
   int? eta;
   String? phase;
 

@@ -136,6 +136,40 @@ const _strings = <String, Map<String, String>>{
   'downloadsSection': {'en': 'Downloads', 'ar': 'التحميل'},
   'speed': {'en': 'Playback speed', 'ar': 'سرعة التشغيل'},
   'error': {'en': 'Something went wrong', 'ar': 'حصلت مشكلة'},
+  'updatingEngine': {'en': 'Updating the download engine…', 'ar': 'بنحدّث محرك التحميل…'},
+  // friendly errors: err_<kind>_t is the title, err_<kind> the explanation
+  'err_login_t': {'en': '{site} wants you to log in', 'ar': '{site} عاوزك تسجّل دخول'},
+  'err_login': {
+    'en': 'This one is private, or {site} only shows it to logged-in people. Log in once in Downly’s browser and it will download.',
+    'ar': 'الفيديو ده خاص، أو {site} مش بيعرضه غير للي عامل تسجيل دخول. سجّل دخول مرة واحدة في متصفح Downly وهيتحمّل.'
+  },
+  'loginTo': {'en': 'Log in to {site}', 'ar': 'سجّل دخول {site}'},
+  'loginThenContinue': {'en': 'Log in, then tap Continue to download your link.', 'ar': 'سجّل دخولك، وبعدين دوس «كمّل» عشان تحمّل اللينك.'},
+  'continueDownload': {'en': 'Continue', 'ar': 'كمّل'},
+  'err_outdated_t': {'en': "{site} didn't allow the download", 'ar': '{site} رفض التحميل'},
+  'err_outdated': {
+    'en': 'We updated the download engine and tried again. Wait a few minutes and try once more.',
+    'ar': 'حدّثنا محرك التحميل وجرّبنا تاني. استنى كام دقيقة وحاول مرة كمان.'
+  },
+  'err_unsupported_t': {'en': 'No video or audio here', 'ar': 'مفيش فيديو أو صوت هنا'},
+  'err_unsupported': {
+    'en': "This link isn't a video or song we can download. If it's a file, download it as a file.",
+    'ar': 'اللينك ده مش لفيديو أو أغنية نقدر نحمّلها. لو ملف، حمّله كملف.'
+  },
+  'err_network_t': {'en': 'No connection', 'ar': 'مفيش اتصال'},
+  'err_network': {'en': 'Check your internet and try again.', 'ar': 'اتأكد من النت وحاول تاني.'},
+  'err_unavailable_t': {'en': 'Not available', 'ar': 'مش متاح'},
+  'err_unavailable': {'en': 'This video was removed or is not available in your country.', 'ar': 'الفيديو ده اتمسح أو مش متاح في بلدك.'},
+  'err_other_t': {'en': 'Something went wrong', 'ar': 'حصلت مشكلة'},
+  // updates
+  'updateTitle': {'en': 'Downly {v} is here', 'ar': 'نزل Downly {v}'},
+  'updateNow': {'en': 'Update', 'ar': 'حدّث'},
+  'install': {'en': 'Install', 'ar': 'سطّب'},
+  'later': {'en': 'Later', 'ar': 'بعدين'},
+  'updateInstalling': {'en': 'Opening the installer…', 'ar': 'بنفتح شاشة التسطيب…'},
+  'appVersion': {'en': 'App version', 'ar': 'نسخة التطبيق'},
+  'checkUpdates': {'en': 'Check for updates', 'ar': 'دوّر على تحديث'},
+  'upToDate': {'en': "You're on the latest version", 'ar': 'إنت على آخر نسخة'},
   // tools on home
   'tools': {'en': 'Tools', 'ar': 'أدوات'},
   'musicPlayer': {'en': 'Music player', 'ar': 'مشغّل الأغاني'},

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'models.dart';
 
@@ -16,11 +17,35 @@ class Engine {
   static Future<String?>? _ready;
 
   /// Unpacks Python/yt-dlp on first launch (a few seconds), instant afterwards
-  static Future<String?> init() => _ready ??= _channel.invokeMethod<String>('init');
+  static Future<String?> init() => _ready ??= _channel.invokeMethod<String>('init').then((v) => v?.replaceFirst('yt-dlp ', ''));
 
   static Future<({String status, String? version})> update() async {
     final r = Map<String, dynamic>.from(await _channel.invokeMethod('update'));
-    return (status: r['status'] as String, version: r['version'] as String?);
+    (await SharedPreferences.getInstance()).setInt('engineUpdatedAt', DateTime.now().millisecondsSinceEpoch);
+    return (status: r['status'] as String, version: (r['version'] as String?)?.replaceFirst('yt-dlp ', ''));
+  }
+
+  static Future<bool>? _updating;
+
+  /// Updates yt-dlp now (one update at a time); false when offline
+  static Future<bool> refresh() => _updating ??= () async {
+        try {
+          await init();
+          await update();
+          return true;
+        } catch (_) {
+          return false;
+        } finally {
+          _updating = null;
+        }
+      }();
+
+  /// The yt-dlp inside the APK is months old by the time people install it, and YouTube changes
+  /// often: update on first launch, then every two days
+  static Future<void> autoUpdate() async {
+    final last = (await SharedPreferences.getInstance()).getInt('engineUpdatedAt') ?? 0;
+    if (DateTime.now().millisecondsSinceEpoch - last < const Duration(days: 2).inMilliseconds) return;
+    await refresh();
   }
 
   static Future<MediaInfo> info(String url, {String? cookies}) async {
