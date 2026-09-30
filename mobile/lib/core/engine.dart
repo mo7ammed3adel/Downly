@@ -74,5 +74,7 @@ class Engine {
 
   static Future<void> secure(bool on) => _app.invokeMethod('secure', {'on': on});
 
+  static Future<int?> clipStamp() => _app.invokeMethod<int>('clipStamp');
+
   static Future<bool> pip() async => (await _app.invokeMethod<bool>('pip')) ?? false;
 }

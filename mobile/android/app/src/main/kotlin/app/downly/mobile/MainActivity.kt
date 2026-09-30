@@ -3,19 +3,21 @@ package app.downly.mobile
 import android.content.Intent
 import android.os.Build
 import android.view.WindowManager
-import io.flutter.embedding.android.FlutterFragmentActivity
+import com.ryanheise.audioservice.AudioServiceFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
-// FlutterFragmentActivity: needed by local_auth for the fingerprint prompt
-class MainActivity : FlutterFragmentActivity() {
+// A FlutterFragmentActivity (local_auth's fingerprint prompt) that also hosts the background music engine
+class MainActivity : AudioServiceFragmentActivity() {
     private var appChannel: MethodChannel? = null
     private var pendingShare: String? = null
+    private var statuses: StatusBridge? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         val messenger = flutterEngine.dartExecutor.binaryMessenger
         EngineBridge(applicationContext, messenger)
+        statuses = StatusBridge(this, messenger)
         pendingShare = sharedText(intent)
         appChannel = MethodChannel(messenger, "downly/app").apply {
             setMethodCallHandler { call, result ->
@@ -31,6 +33,18 @@ class MainActivity : FlutterFragmentActivity() {
                         else window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
                         result.success(null)
                     }
+                    // When the clipboard last changed, without reading it (reading shows Android's
+                    // "pasted from your clipboard" toast); -1 when unknown, null when empty
+                    "clipStamp" -> {
+                        val description = getSystemService(android.content.ClipboardManager::class.java)?.primaryClipDescription
+                        result.success(
+                            when {
+                                description == null -> null
+                                Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> description.timestamp
+                                else -> -1L
+                            }
+                        )
+                    }
                     "pip" -> {
                         val ok = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && try {
                             enterPictureInPictureMode(android.app.PictureInPictureParams.Builder().build())
@@ -43,6 +57,11 @@ class MainActivity : FlutterFragmentActivity() {
                 }
             }
         }
+    }
+
+    @Deprecated("Needed for the folder picker of the WhatsApp statuses")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (statuses?.onResult(requestCode, resultCode, data) != true) super.onActivityResult(requestCode, resultCode, data)
     }
 
     override fun onNewIntent(intent: Intent) {

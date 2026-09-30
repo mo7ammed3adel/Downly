@@ -6,6 +6,7 @@ import 'package:share_plus/share_plus.dart';
 import '../core/engine.dart';
 import '../core/i18n.dart';
 import '../core/library.dart';
+import '../core/music.dart';
 import 'theme.dart';
 
 /// Video and music player for downloaded files: swipe for volume/brightness, double-tap to seek,
@@ -38,6 +39,7 @@ class _PlayerPageState extends State<PlayerPage> {
     super.initState();
     current = widget.index;
     if (widget.secure) Engine.secure(true);
+    music.pause();
     player.open(Playlist([for (final p in widget.paths) Media(Uri.file(p).toString())], index: widget.index));
     player.stream.playlist.listen((p) {
       if (mounted) setState(() => current = p.index);

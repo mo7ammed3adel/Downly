@@ -1,7 +1,9 @@
 package app.downly.mobile
 
 import android.content.Context
+import android.media.MediaMetadataRetriever
 import android.media.MediaScannerConnection
+import android.provider.MediaStore
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
@@ -136,11 +138,54 @@ class EngineBridge(private val context: Context, messenger: BinaryMessenger) : M
                 DownloadService.stop(context)
                 result.success(null)
             }
+            "songs" -> background(result) { songs() }
+            "artwork" -> background(result) { artwork(call.argument<String>("path")!!) }
             "notifyDone" -> {
                 DownloadService.finished(context, call.argument<String>("title") ?: "Downly", call.argument<String>("text") ?: "")
                 result.success(null)
             }
             else -> result.notImplemented()
+        }
+    }
+
+    /** Every song on the phone (30 seconds or longer, so ringtones and voice notes are skipped) */
+    private fun songs(): List<Map<String, Any?>> {
+        val columns = arrayOf(
+            MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media.ARTIST, MediaStore.Audio.Media.ALBUM,
+            MediaStore.Audio.Media.DURATION, MediaStore.Audio.Media.DATA, MediaStore.Audio.Media.DATE_ADDED,
+        )
+        val songs = mutableListOf<Map<String, Any?>>()
+        context.contentResolver.query(
+            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, columns,
+            "${MediaStore.Audio.Media.DURATION} >= 30000", null, "${MediaStore.Audio.Media.DATE_ADDED} DESC",
+        )?.use { c ->
+            while (c.moveToNext()) {
+                val path = c.getString(4) ?: continue
+                if (!File(path).exists()) continue
+                songs += mapOf(
+                    "title" to c.getString(0), "artist" to c.getString(1)?.takeUnless { it == "<unknown>" },
+                    "album" to c.getString(2), "duration" to c.getLong(3), "path" to path, "added" to c.getLong(5),
+                )
+            }
+        }
+        return songs
+    }
+
+    /** The cover embedded in a song (yt-dlp embeds it), cached as a JPEG */
+    private fun artwork(path: String): String? {
+        val dir = File(context.cacheDir, "artwork").apply { mkdirs() }
+        val out = File(dir, "${path.hashCode()}.jpg")
+        if (out.exists()) return out.absolutePath.takeIf { out.length() > 0 }
+        val retriever = MediaMetadataRetriever()
+        return try {
+            retriever.setDataSource(path)
+            val picture = retriever.embeddedPicture
+            out.writeBytes(picture ?: ByteArray(0)) // an empty file remembers "no cover"
+            if (picture != null) out.absolutePath else null
+        } catch (e: Exception) {
+            null
+        } finally {
+            retriever.release()
         }
     }
 

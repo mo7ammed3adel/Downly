@@ -11,6 +11,7 @@ const _strings = <String, Map<String, String>>{
   'browser': {'en': 'Browser', 'ar': 'المتصفح'},
   'downloads': {'en': 'Downloads', 'ar': 'التحميلات'},
   'library': {'en': 'Library', 'ar': 'المكتبة'},
+  'musicTab': {'en': 'Music', 'ar': 'أغاني'},
   'settings': {'en': 'Settings', 'ar': 'الإعدادات'},
   // home
   'pasteHint': {'en': 'Paste a link or search YouTube', 'ar': 'الصق لينك أو دوّر في يوتيوب'},
@@ -135,6 +136,57 @@ const _strings = <String, Map<String, String>>{
   'downloadsSection': {'en': 'Downloads', 'ar': 'التحميل'},
   'speed': {'en': 'Playback speed', 'ar': 'سرعة التشغيل'},
   'error': {'en': 'Something went wrong', 'ar': 'حصلت مشكلة'},
+  // tools on home
+  'tools': {'en': 'Tools', 'ar': 'أدوات'},
+  'musicPlayer': {'en': 'Music player', 'ar': 'مشغّل الأغاني'},
+  'musicPlayerHint': {'en': 'Keeps playing with the screen off', 'ar': 'بيشتغل والشاشة مقفولة'},
+  'statusSaver': {'en': 'WhatsApp statuses', 'ar': 'حالات واتساب'},
+  'statusSaverHint': {'en': 'Save photos and videos', 'ar': 'احفظ الصور والفيديوهات'},
+  // music
+  'songs': {'en': 'Songs', 'ar': 'الأغاني'},
+  'allSongs': {'en': 'All', 'ar': 'الكل'},
+  'fromDownly': {'en': 'Downloaded', 'ar': 'اللي نزّلتها'},
+  'shuffleAll': {'en': 'Shuffle', 'ar': 'عشوائي'},
+  'playAll': {'en': 'Play all', 'ar': 'شغّل الكل'},
+  'searchSongs': {'en': 'Search songs', 'ar': 'دوّر على أغنية'},
+  'noSongs': {'en': 'No songs yet', 'ar': 'مفيش أغاني لسه'},
+  'noSongsHint': {
+    'en': 'Download a song as audio (MP3) and it shows up here.',
+    'ar': 'حمّل أي أغنية كصوت (MP3) وهتظهر هنا.'
+  },
+  'allowMusic': {'en': 'Show all the songs on this phone', 'ar': 'اعرض كل الأغاني اللي على الموبايل'},
+  'allow': {'en': 'Allow', 'ar': 'اسمح'},
+  'nowPlaying': {'en': 'Now playing', 'ar': 'شغّال دلوقتي'},
+  'queue': {'en': 'Up next', 'ar': 'اللي جاي'},
+  'sleepTimer': {'en': 'Sleep timer', 'ar': 'مؤقت النوم'},
+  'sleepOff': {'en': 'Off', 'ar': 'مقفول'},
+  'sleepIn': {'en': 'Stops in {m} min', 'ar': 'هيقف بعد {m} دقيقة'},
+  'minutes': {'en': '{m} minutes', 'ar': '{m} دقيقة'},
+  'hour': {'en': '1 hour', 'ar': 'ساعة'},
+  'unknownArtist': {'en': 'Unknown artist', 'ar': 'فنان مش معروف'},
+  // statuses
+  'photos': {'en': 'Photos', 'ar': 'صور'},
+  'whatsapp': {'en': 'WhatsApp', 'ar': 'واتساب'},
+  'business': {'en': 'Business', 'ar': 'بيزنس'},
+  'statusAccessTitle': {'en': 'Allow Downly to see statuses', 'ar': 'اسمح لـ Downly يشوف الحالات'},
+  'statusAccessBody': {
+    'en': 'Android shows a folder screen once. Just tap "Use this folder", then "Allow".',
+    'ar': 'الأندرويد هيفتحلك شاشة فولدر مرة واحدة بس. دوس «Use this folder» وبعدين «Allow».'
+  },
+  'wrongFolder': {
+    'en': "That wasn't the statuses folder. Tap Allow again and don't change folders.",
+    'ar': 'ده مش فولدر الحالات. دوس اسمح تاني ومتغيّرش الفولدر.'
+  },
+  'noStatuses': {'en': 'No statuses yet', 'ar': 'مفيش حالات'},
+  'noStatusesHint': {
+    'en': 'Open WhatsApp and watch some statuses, then come back here.',
+    'ar': 'افتح واتساب واتفرج على شوية حالات، وارجع هنا.'
+  },
+  'save': {'en': 'Save', 'ar': 'حفظ'},
+  'saved': {'en': 'Saved', 'ar': 'اتحفظ'},
+  'savedTo': {'en': 'Saved in Download/Downly/Statuses', 'ar': 'اتحفظ في Download/Downly/Statuses'},
+  'saveN': {'en': 'Save {n}', 'ar': 'احفظ {n}'},
+  'repost': {'en': 'Repost', 'ar': 'انشرها'},
 };
 
 /// The whole app is rebuilt when the language changes (see app.dart), so reading without

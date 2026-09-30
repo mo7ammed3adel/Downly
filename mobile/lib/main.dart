@@ -1,3 +1,4 @@
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -8,7 +9,9 @@ import 'package:provider/provider.dart';
 import 'core/downloads.dart';
 import 'core/engine.dart';
 import 'core/library.dart';
+import 'core/music.dart';
 import 'core/settings.dart';
+import 'core/statuses.dart';
 import 'core/vault.dart';
 import 'ui/shell.dart';
 import 'ui/theme.dart';
@@ -22,6 +25,15 @@ Future<void> main() async {
   final vault = await Vault.load();
   final library = Library();
   final downloads = await Downloads.load(settings, vault, library);
+  music = await AudioService.init(
+    builder: MusicHandler.new,
+    config: const AudioServiceConfig(
+      androidNotificationChannelId: 'app.downly.mobile.music',
+      androidNotificationChannelName: 'Music',
+      androidNotificationIcon: 'drawable/ic_stat_music',
+      androidNotificationOngoing: true,
+    ),
+  );
   // Unpack yt-dlp in the background right away, so the first link opens fast
   Engine.init().catchError((_) => null);
 
@@ -31,6 +43,8 @@ Future<void> main() async {
       ChangeNotifierProvider.value(value: vault),
       ChangeNotifierProvider.value(value: library),
       ChangeNotifierProvider.value(value: downloads),
+      ChangeNotifierProvider(create: (_) => MusicLibrary()),
+      ChangeNotifierProvider(create: (_) => Statuses()),
     ],
     child: const DownlyApp(),
   ));

@@ -6,6 +6,7 @@ import '../core/downloads.dart';
 import '../core/engine.dart';
 import '../core/i18n.dart';
 import '../core/models.dart';
+import '../core/music.dart';
 import '../core/settings.dart';
 import '../core/vault.dart';
 import 'browser_tab.dart';
@@ -13,6 +14,7 @@ import 'download_sheet.dart';
 import 'downloads_tab.dart';
 import 'home_tab.dart';
 import 'library_tab.dart';
+import 'music_ui.dart';
 import 'player_page.dart';
 
 class Shell extends StatefulWidget {
@@ -53,7 +55,11 @@ class ShellState extends State<Shell> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) _checkClipboard();
   }
 
-  void go(int index) => setState(() => tab = index);
+  void go(int index) {
+    // The song list (and its permission prompt) loads the first time the Music tab opens
+    if (index == 3) context.read<MusicLibrary>().ensureLoaded();
+    setState(() => tab = index);
+  }
 
   void openInBrowser(String url) {
     go(1);
@@ -69,6 +75,10 @@ class ShellState extends State<Shell> with WidgetsBindingObserver {
   Future<void> _checkClipboard() async {
     final settings = context.read<Settings>();
     if (!settings.watchClipboard || !mounted) return;
+    // Only read the clipboard when something new was copied
+    final stamp = await Engine.clipStamp();
+    if (stamp == null || (stamp != -1 && stamp == settings.lastClipStamp)) return;
+    if (stamp != -1) settings.lastClipStamp = stamp;
     final data = await Clipboard.getData(Clipboard.kTextPlain);
     final url = extractUrl(data?.text);
     if (url == null || url == settings.lastClipboard || !mounted) return;
@@ -88,6 +98,8 @@ class ShellState extends State<Shell> with WidgetsBindingObserver {
 
   void _finished(DownloadTask task) {
     if (!mounted || task.private || task.path == null) return;
+    final songs = context.read<MusicLibrary>();
+    if (task.kind == TaskKind.audio && songs.loaded) songs.refresh();
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(
@@ -114,9 +126,12 @@ class ShellState extends State<Shell> with WidgetsBindingObserver {
           const HomeTab(),
           BrowserTab(key: browserKey),
           const DownloadsTab(),
+          const MusicTab(),
           const LibraryTab(),
         ]),
-        bottomNavigationBar: NavigationBar(
+        bottomNavigationBar: Column(mainAxisSize: MainAxisSize.min, children: [
+          const MiniPlayer(),
+          NavigationBar(
           selectedIndex: tab,
           onDestinationSelected: go,
           destinations: [
@@ -127,9 +142,11 @@ class ShellState extends State<Shell> with WidgetsBindingObserver {
               selectedIcon: Badge(isLabelVisible: running > 0, label: Text('$running'), child: const Icon(Icons.download_rounded)),
               label: context.tr('downloads'),
             ),
+            NavigationDestination(icon: const Icon(Icons.music_note_outlined), selectedIcon: const Icon(Icons.music_note_rounded), label: context.tr('musicTab')),
             NavigationDestination(icon: const Icon(Icons.video_library_outlined), selectedIcon: const Icon(Icons.video_library_rounded), label: context.tr('library')),
           ],
-        ),
+          ),
+        ]),
       ),
     );
   }

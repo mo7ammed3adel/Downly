@@ -41,6 +41,9 @@ class Settings extends ChangeNotifier {
   bool get desktopMode => _prefs.getBool('desktopMode') ?? false;
   set desktopMode(bool v) => _set('desktopMode', v);
 
+  int get lastClipStamp => _prefs.getInt('lastClipStamp') ?? 0;
+  set lastClipStamp(int v) => _prefs.setInt('lastClipStamp', v);
+
   String? get lastClipboard => _prefs.getString('lastClipboard');
   set lastClipboard(String? v) => v == null ? _prefs.remove('lastClipboard') : _prefs.setString('lastClipboard', v);
 

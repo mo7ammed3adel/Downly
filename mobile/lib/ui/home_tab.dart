@@ -9,6 +9,7 @@ import '../core/i18n.dart';
 import '../core/models.dart';
 import 'download_sheet.dart';
 import 'player_page.dart';
+import 'status_page.dart';
 import 'settings_page.dart';
 import 'shell.dart';
 import 'theme.dart';
@@ -98,6 +99,7 @@ class _HomeTabState extends State<HomeTab> {
             ),
           ),
           SliverToBoxAdapter(child: _hero(context)),
+          SliverToBoxAdapter(child: _tools(context)),
           SliverToBoxAdapter(child: _sectionTitle(context, context.tr('quickSites'))),
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -175,6 +177,31 @@ class _HomeTabState extends State<HomeTab> {
     );
   }
 
+  Widget _tools(BuildContext context) => Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+        child: Row(children: [
+          Expanded(
+            child: _ToolCard(
+              icon: const FaIcon(FontAwesomeIcons.whatsapp, color: Color(0xFF25D366)),
+              color: const Color(0xFF25D366),
+              title: context.tr('statusSaver'),
+              subtitle: context.tr('statusSaverHint'),
+              onTap: () => StatusPage.open(context),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: _ToolCard(
+              icon: const Icon(Icons.headphones_rounded, color: Brand.violet),
+              color: Brand.violet,
+              title: context.tr('musicPlayer'),
+              subtitle: context.tr('musicPlayerHint'),
+              onTap: () => Shell.of(context).go(3),
+            ),
+          ),
+        ]),
+      );
+
   Widget _sectionTitle(BuildContext context, String text, {Widget? action}) => Padding(
         padding: const EdgeInsets.fromLTRB(20, 20, 12, 12),
         child: Row(children: [
@@ -204,6 +231,40 @@ class _HomeTabState extends State<HomeTab> {
                 Text(context.tr('tipShare'), style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant, height: 1.4)),
               ]),
             ),
+          ]),
+        ),
+      ),
+    );
+  }
+}
+
+class _ToolCard extends StatelessWidget {
+  const _ToolCard({required this.icon, required this.color, required this.title, required this.subtitle, required this.onTap});
+
+  final Widget icon;
+  final Color color;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Material(
+      color: color.withValues(alpha: 0.10),
+      borderRadius: BorderRadius.circular(18),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(18), border: Border.all(color: color.withValues(alpha: 0.3))),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            icon,
+            const SizedBox(height: 10),
+            Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
+            const SizedBox(height: 2),
+            Text(subtitle, maxLines: 2, overflow: TextOverflow.ellipsis, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
           ]),
         ),
       ),

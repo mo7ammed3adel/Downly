@@ -7,6 +7,7 @@ import '../core/engine.dart';
 import '../core/i18n.dart';
 import '../core/library.dart';
 import '../core/models.dart';
+import '../core/music.dart';
 import '../core/vault.dart';
 import 'home_tab.dart' show MediaThumb;
 import 'player_page.dart';
@@ -156,7 +157,8 @@ class _MediaList extends StatelessWidget {
                   ),
                   title: Text(item.title, maxLines: 1, overflow: TextOverflow.ellipsis),
                   subtitle: Text(formatBytes(item.size)),
-                  onTap: isFile ? () => itemMenu(context, item, thumbs[item.path]) : () => play(i),
+                  // Songs go to the music player (keeps playing in the background)
+                  onTap: isFile ? () => itemMenu(context, item, thumbs[item.path]) : () => music.playSongs(items.map((s) => Song.fromFile(s.path)).toList(), i),
                   trailing: IconButton(icon: const Icon(Icons.more_vert_rounded), onPressed: () => itemMenu(context, item, thumbs[item.path])),
                 );
               },

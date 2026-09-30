@@ -39,7 +39,7 @@ foreach ($apk in Get-ChildItem "$WorkDir\build\app\outputs\flutter-apk\*.apk") {
     $abi = if ($apk.Name -match 'app-(.+)-release\.apk') { $Matches[1] } elseif ($apk.Name -match 'debug') { 'debug' } else { 'universal' }
     Copy-Item $apk.FullName (Join-Path $dist "Downly-$version-$abi.apk") -Force
 }
-Get-ChildItem $dist | Select-Object Name, @{ n = 'MB'; e = { [math]::Round($_.Length / 1MB, 1) } } | Format-Table -AutoSize
+Get-ChildItem $dist | ForEach-Object { '{0,-36} {1,6:N1} MB' -f $_.Name, ($_.Length / 1MB) }
 
 if ($Install) {
     $deviceAbi = (adb shell getprop ro.product.cpu.abi).Trim()
