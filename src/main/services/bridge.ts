@@ -77,7 +77,7 @@ export class BrowserBridge extends EventEmitter {
     const extOrigin = EXTENSION_ORIGIN.test(origin)
     if (extOrigin) {
       res.setHeader('access-control-allow-origin', origin)
-      res.setHeader('access-control-allow-headers', 'content-type, x-downly, x-downly-ext')
+      res.setHeader('access-control-allow-headers', 'content-type, x-downly, x-downly-ext, x-downly-store')
       res.setHeader('access-control-allow-methods', 'GET, POST, OPTIONS')
     }
     if (req.method === 'OPTIONS') return this.reply(res, extOrigin ? 204 : 403)
@@ -183,11 +183,12 @@ export class BrowserBridge extends EventEmitter {
 
   /**
    * Browsers keep running an extension's old code until reloaded or restarted, even after the
-   * app replaced its files. Extensions older than 1.0.9 send no version at all.
+   * app replaced its files. Extensions older than 1.0.9 send no version at all. Store installs
+   * update themselves, so they never need the reload.
    */
   private warnedOutdated = false
   private checkExtensionVersion(req: IncomingMessage): void {
-    if (this.warnedOutdated || req.method !== 'POST') return
+    if (this.warnedOutdated || req.method !== 'POST' || req.headers['x-downly-store'] === '1') return
     const sent = req.headers['x-downly-ext']
     const version = typeof sent === 'string' ? sent : ''
     if (version && !isNewer(this.version, version)) return

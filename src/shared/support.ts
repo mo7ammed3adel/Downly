@@ -29,8 +29,8 @@ export const SOCIAL = {
  * Opera and Vivaldi; Edge uses its own store when set, else Chrome's.
  */
 export const EXTENSION_STORES = {
-  chrome: '',
-  edge: ''
+  chrome: 'https://chromewebstore.google.com/detail/nhdiifgldddcnngejhefibdohpejllnl',
+  edge: 'https://microsoftedge.microsoft.com/addons/detail/edoonifkeddgpamlhadfbagimigcaena'
 }
 
 /** Show the "support us" dialog once, after this many finished downloads */

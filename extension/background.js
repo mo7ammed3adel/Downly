@@ -3,8 +3,12 @@ const ext = globalThis.browser ?? globalThis.chrome
 // Chrome's service worker loads the shared strings here; Firefox lists i18n.js in the manifest
 if (typeof globalThis.SG_I18N === 'undefined' && typeof importScripts === 'function') importScripts('i18n.js')
 const DEFAULT_PORT = 58732
-/** Sent with every request: the app tells the user when the browser runs an outdated copy */
-const HEADERS = { 'x-downly': '1', 'x-downly-ext': ext.runtime.getManifest().version }
+/**
+ * Sent with every request: the app tells the user when the browser runs an outdated copy.
+ * Store installs (the store adds update_url) update themselves, so the app doesn't nag those.
+ */
+const MANIFEST = ext.runtime.getManifest()
+const HEADERS = { 'x-downly': '1', 'x-downly-ext': MANIFEST.version, ...(MANIFEST.update_url && { 'x-downly-store': '1' }) }
 /** The app moves to the next port when another program holds one; same range as the app */
 const PORTS = Array.from({ length: 10 }, (_, i) => DEFAULT_PORT + i)
 const MEDIA_EXT = /\.(m3u8|mpd|mp4|webm|mkv|mov|flv|m4a|mp3|ogg|opus|aac|wav|flac)(\?|$)/i

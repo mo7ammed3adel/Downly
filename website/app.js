@@ -15,7 +15,7 @@ const SITE = {
   // Windows 10/11 app on the Microsoft Store
   msStore: 'https://apps.microsoft.com/detail/9N3LXLPF25K4',
   // Store pages — fill in once the extension is published
-  chrome: '',
+  chrome: 'https://chromewebstore.google.com/detail/nhdiifgldddcnngejhefibdohpejllnl',
   edge: 'https://microsoftedge.microsoft.com/addons/detail/edoonifkeddgpamlhadfbagimigcaena',
   // Signed by Mozilla in the release pipeline (swap for the addons.mozilla.org page once listed)
   firefox: 'https://github.com/mo7ammed3adel/downly-releases/releases/latest/download/Downly-firefox.xpi',
